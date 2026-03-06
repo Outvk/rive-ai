@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function saveGeneration(prompt: string, result: string, type: 'text' | 'image' | 'summary') {
+export async function saveGeneration(prompt: string, result: string, type: 'text' | 'image' | 'summary' | 'speech') {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -43,16 +43,39 @@ export async function saveConversation(
 
     const { error } = await supabase
         .from('chat_conversations')
-        .upsert({
-            id: conversationId,
-            user_id: user.id,
-            title,
-            messages,
-            updated_at: new Date().toISOString(),
-        }, { onConflict: 'id' })
+        .upsert(
+            {
+                id: conversationId,
+                user_id: user.id,
+                title,
+                messages,
+                updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+        )
 
     if (error) {
         console.error("Failed to save conversation:", error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/text')
+    return { success: true }
+}
+
+export async function deleteConversation(conversationId: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'Unauthorized' }
+
+    const { error } = await supabase
+        .from('chat_conversations')
+        .delete()
+        .eq('id', conversationId)
+
+    if (error) {
+        console.error('Failed to delete conversation:', error)
         return { error: error.message }
     }
 

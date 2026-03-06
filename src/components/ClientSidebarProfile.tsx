@@ -6,18 +6,24 @@ import { logoutAction } from '@/app/dashboard/actions'
 export function ClientSidebarProfile({
     email,
     fullName,
+    avatarUrl
 }: {
     email: string,
     fullName: string,
+    avatarUrl?: string
 }) {
     return (
         <div className="p-4 border-t border-white/5 bg-black/20">
             {/* User Info */}
             <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 border border-white/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm font-medium text-zinc-300">
-                        {email.charAt(0).toUpperCase()}
-                    </span>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {avatarUrl ? (
+                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-sm font-medium text-zinc-300">
+                            {email.charAt(0).toUpperCase()}
+                        </span>
+                    )}
                 </div>
                 <div className="flex flex-col overflow-hidden">
                     <span className="text-sm font-medium text-zinc-200 truncate">
