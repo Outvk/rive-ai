@@ -41,3 +41,20 @@ export async function checkAndDeductCredits(toolName: string, amount: number = 1
     revalidatePath('/dashboard', 'layout')
     return { success: true }
 }
+
+export async function deleteTransactions(ids: string[]) {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .in('id', ids)
+
+    if (error) {
+        console.error("DELETE TRANSACTIONS ERROR:", error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/credits')
+    return { success: true }
+}

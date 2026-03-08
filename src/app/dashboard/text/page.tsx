@@ -1,13 +1,20 @@
 import { TextIcon } from '@radix-ui/react-icons'
-import { TextGeneratorForm } from '@/components/TextGeneratorForm'
 import { createClient } from '@/utils/supabase/server'
+import type { UIMessage } from '@ai-sdk/react'
+import TextGeneratorForm from '@/components/TextGeneratorDynamic'
 
 export const metadata = {
     title: 'Text Generator - Rive AI',
     description: 'Generate high quality text using AI.',
 }
 
-export default async function TextGeneratorPage() {
+export default async function TextGeneratorPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ cid?: string }>
+}) {
+    const { cid } = await searchParams
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -19,21 +26,38 @@ export default async function TextGeneratorPage() {
 
     const credits = profile?.credits ?? 0
 
-    return (
-        <div className="max-w-4xl mx-auto space-y-6 fade-in h-full flex flex-col">
-            <div>
-                <h1 className="text-2xl font-semibold text-zinc-100 mb-1 flex items-center gap-2">
-                    <TextIcon className="w-6 h-6 text-indigo-400" />
-                    Text Generator
-                </h1>
-                <p className="text-sm text-zinc-400">Generate articles, summarize content, or brainstorm ideas instantly.</p>
-            </div>
+    let conversationId: string | undefined
+    let initialMessages: UIMessage[] = []
 
-            <div className="flex-1 min-h-0 relative">
+    if (cid && cid !== 'new' && user?.id) {
+        const { data: conv, error } = await supabase
+            .from('chat_conversations')
+            .select('id, messages')
+            .eq('id', cid)
+            .eq('user_id', user.id)
+            .maybeSingle()
+
+        if (error) {
+            console.error('Failed to fetch conversation:', error)
+        }
+
+        if (conv?.id) {
+            conversationId = conv.id
+            initialMessages = conv.messages && Array.isArray(conv.messages) ? conv.messages : []
+        }
+    }
+
+    return (
+        <div className="fade-in w-[calc(100%+80px)] max-w-none -m-10 h-[calc(100vh-4rem)] overflow-hidden">
+            <div className="h-full relative">
                 {/* Glow effect specific to this tool */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
-                <TextGeneratorForm initialCredits={credits} />
+                <TextGeneratorForm
+                    initialCredits={credits}
+                    conversationId={conversationId}
+                    initialChatMessages={initialMessages}
+                />
             </div>
         </div>
     )
