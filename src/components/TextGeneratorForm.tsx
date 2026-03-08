@@ -4,13 +4,14 @@ import { useChat, type UIMessage } from '@ai-sdk/react'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { PaperPlaneIcon, UpdateIcon, CopyIcon, CheckIcon, MagicWandIcon } from '@radix-ui/react-icons'
-import { saveGeneration, saveConversation } from '@/app/dashboard/text/actions'
+import { saveGeneration, saveConversation, deleteConversation } from '@/app/dashboard/text/actions'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 
 import { useSidebar } from './SidebarContext'
 import RuixenMoonChat from './ui/RuixenMoonChat'
+import { createClient } from '@/utils/supabase/client'
 
 
 export function TextGeneratorForm({
@@ -31,6 +32,33 @@ export function TextGeneratorForm({
     const [input, setInput] = useState('')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [convId, setConvId] = useState<string>(() => propConversationId ?? crypto.randomUUID())
+    const [history, setHistory] = useState<any[]>([])
+
+    const fetchHistory = async () => {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data, error } = await supabase
+            .from('chat_conversations')
+            .select('id, title, updated_at')
+            .eq('user_id', user.id)
+            .order('updated_at', { ascending: false })
+            .limit(50)
+
+        if (!error && data) {
+            // Format titles to 3 words max
+            const formatted = data.map(c => ({
+                ...c,
+                displayTitle: c.title.split(' ').slice(0, 3).join(' ') + (c.title.split(' ').length > 3 ? '...' : '')
+            }))
+            setHistory(formatted)
+        }
+    }
+
+    useEffect(() => {
+        fetchHistory()
+    }, [])
 
     useEffect(() => {
         if (propConversationId && propConversationId !== convId) {
@@ -59,26 +87,49 @@ export function TextGeneratorForm({
                 toast.error('Failed to generate text.')
             }
         },
-        onFinish: async (message: any) => {
-            setCurrentCredits(prev => Math.max(0, prev - 10))
-            router.refresh()
+        onFinish: async (event: any) => {
+            const isNew = !propConversationId;
+            // In newer AI SDK versions, event might be { message, messages, ... }
+            const finalMessage = event.message || event;
+            const messageContent = getMessageContent(finalMessage) ||
+                (event.messages && event.messages.length > 0 ? getMessageContent(event.messages[event.messages.length - 1]) : '');
 
-            const userMessages = messages.filter(m => m.role === 'user');
+            console.log("FINAL CONTENT:", messageContent);
+            toast.info(`Generated ${messageContent.length} chars`)
+
+            setCurrentCredits(prev => Math.max(0, prev - 10))
+
+            // Deduplicate: filter out the final message if it's already in the messages array
+            const baseHistory = (messages || []).filter(m => m.id !== finalMessage.id);
+            const updatedHistory = [...baseHistory, {
+                role: 'assistant' as const,
+                content: messageContent,
+                id: finalMessage.id || Date.now().toString()
+            }]
+
+            const userMessages = messages.filter((m: any) => m.role === 'user');
             const promptMsg = userMessages[userMessages.length - 1];
+
             if (promptMsg) {
                 setIsSaving(true)
                 const promptContent = getMessageContent(promptMsg)
-                const messageContent = getMessageContent(message)
                 if (messageContent) {
                     await saveGeneration(promptContent, messageContent, 'text')
                 }
+                const title = promptContent.substring(0, 40) || 'New Conversation'
+                await saveConversation(convId, title, updatedHistory)
                 setIsSaving(false)
             }
+            if (isNew) {
+                // Update URL without full refresh to preserve state if possible
+                window.history.replaceState(null, '', `/dashboard/text?cid=${convId}`);
+            }
 
-            const updated = [...messages, message]
-            const firstUser = updated.find((m: any) => m.role === 'user')
-            const title = getMessageContent(firstUser ?? message).slice(0, 100) || 'New Conversation'
-            await saveConversation(convId, title, updated)
+            // Small delay to ensure DB consistency before server refresh
+            setTimeout(() => {
+                router.refresh()
+                fetchHistory()
+            }, 800)
         },
     } as any)
 
@@ -190,6 +241,24 @@ export function TextGeneratorForm({
         }
     }
 
+    const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation()
+        const res = await deleteConversation(id)
+        if (res.success) {
+            toast.success('Conversation deleted')
+            setHistory(prev => prev.filter(c => c.id !== id))
+            if (convId === id) {
+                router.push('/dashboard/text')
+            }
+        } else {
+            toast.error('Failed to delete conversation')
+        }
+    }
+
+    const handleSelectConversation = (id: string) => {
+        router.push(`/dashboard/text?cid=${id}`)
+    }
+
     // Conditionally render the new design for V2
     if (sidebarVersion === 'v2') {
         return (
@@ -203,6 +272,10 @@ export function TextGeneratorForm({
                 onQuickAction={handleQuickAction}
                 onFileSelect={setSelectedFile}
                 selectedFile={selectedFile}
+                history={history}
+                onDeleteConversation={handleDeleteConversation}
+                onSelectConversation={handleSelectConversation}
+                currentConversationId={convId}
             />
         )
     }

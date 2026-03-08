@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { SidebarProvider } from '@/components/SidebarContext'
 import { DynamicSidebar } from '@/components/DynamicSidebar'
-import { LowCreditBanner } from '@/components/LowCreditBanner'
+import { LowCreditToast } from '@/components/LowCreditToast'
 import { TopNavbar } from '@/components/TopNavbar'
 
 export default async function DashboardLayout({
@@ -76,7 +76,7 @@ export default async function DashboardLayout({
 
     return (
         <SidebarProvider>
-            <div className="flex h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-purple-500/30">
+            <div className="flex h-screen bg-background text-foreground font-sans selection:bg-purple-500/30">
 
                 <DynamicSidebar
                     email={user.email || ''}
@@ -98,11 +98,11 @@ export default async function DashboardLayout({
                     />
 
                     {/* Subtle Background Glows */}
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
-                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -z-10 opacity-50 dark:opacity-100"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none -z-10 opacity-50 dark:opacity-100"></div>
 
                     <div className="p-10 z-10 w-full max-w-6xl mx-auto flex-1">
-                        <LowCreditBanner credits={credits} />
+                        <LowCreditToast credits={credits} />
                         {children}
                     </div>
                 </main>

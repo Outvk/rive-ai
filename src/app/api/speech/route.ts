@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps`, {
             method: 'POST',
             headers: {
                 'xi-api-key': process.env.ELEVENLABS_API_KEY!,
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
             },
             body: JSON.stringify({
                 text,
-                model_id: 'eleven_turbo_v2_5',
+                model_id: 'eleven_multilingual_v2', // or eleven_turbo_v2_5 if supported by the endpoint
                 language_code: language,
                 voice_settings: {
                     stability: 0.5,
@@ -118,10 +118,74 @@ export async function POST(req: Request) {
             })
         }
 
-        const arrayBuffer = await response.arrayBuffer()
-        const base64 = Buffer.from(arrayBuffer).toString('base64')
+        const data = await response.json()
 
-        return new Response(JSON.stringify({ audio: base64 }), {
+        // Helper to process character-level timestamps into word-level
+        const processAlignment = (alignment: any, fullText: string) => {
+            if (!alignment) return { words: [] };
+
+            // Check for potential different property names in ElevenLabs response
+            const charStartTimes = alignment.char_start_times_ms ||
+                alignment.character_start_times_seconds?.map((s: number) => s * 1000);
+            const charDurations = alignment.char_durations_ms ||
+                (alignment.character_end_times_seconds &&
+                    alignment.character_start_times_seconds &&
+                    alignment.character_end_times_seconds.map((e: number, i: number) =>
+                        (e - alignment.character_start_times_seconds[i]) * 1000));
+            const characters = alignment.characters;
+
+            if (!charStartTimes || !characters) {
+                return { words: [] };
+            }
+
+            const words: { word: string; start_time: number; end_time: number }[] = [];
+            let currentWord = "";
+            let wordStartTime = 0;
+
+            for (let i = 0; i < characters.length; i++) {
+                const char = characters[i];
+                const startTime = charStartTimes[i] / 1000; // Convert to seconds
+
+                // Punctuation characters that usually shouldn't start a word or should be included in previous word
+                const isWhitespace = char === " " || char === "\n" || char === "\t" || char === "\r";
+
+                if (isWhitespace) {
+                    if (currentWord.length > 0) {
+                        words.push({
+                            word: currentWord,
+                            start_time: wordStartTime,
+                            end_time: startTime // End right at the start of the whitespace
+                        });
+                        currentWord = "";
+                    }
+                } else {
+                    if (currentWord.length === 0) {
+                        wordStartTime = startTime;
+                    }
+                    currentWord += char;
+                }
+            }
+
+            // Push the last word if it exists
+            if (currentWord.length > 0) {
+                const lastIdx = characters.length - 1;
+                const lastCharEndTime = charDurations ? (charStartTimes[lastIdx] + charDurations[lastIdx]) / 1000 : charStartTimes[lastIdx] / 1000 + 0.1;
+                words.push({
+                    word: currentWord,
+                    start_time: wordStartTime,
+                    end_time: lastCharEndTime
+                });
+            }
+
+            return { words };
+        };
+
+        const processedAlignment = processAlignment(data.alignment || data.normalized_alignment, text);
+
+        return new Response(JSON.stringify({
+            audio: data.audio_base64,
+            alignment: processedAlignment
+        }), {
             headers: { 'Content-Type': 'application/json' },
         })
     } catch (err) {

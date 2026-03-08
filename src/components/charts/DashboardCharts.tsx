@@ -73,13 +73,13 @@ export function DashboardCharts({ analytics }: Props) {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-zinc-950/90 border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
-                    <p className="text-zinc-400 text-xs font-semibold mb-2">{label}</p>
+                <div className="bg-white/90 dark:bg-zinc-950/90 border border-zinc-200 dark:border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
+                    <p className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold mb-2">{label}</p>
                     {payload.map((entry: any, index: number) => (
                         <div key={index} className="flex items-center gap-2 mb-1">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill || COLORS[entry.name.toLowerCase() as keyof typeof COLORS] }} />
-                            <span className="text-sm text-zinc-200 capitalize w-16">{entry.name}</span>
-                            <span className="text-sm font-bold text-white">{entry.value}</span>
+                            <span className="text-sm text-zinc-600 dark:text-zinc-200 capitalize w-16">{entry.name}</span>
+                            <span className="text-sm font-bold text-zinc-900 dark:text-white">{entry.value}</span>
                         </div>
                     ))}
                 </div>
@@ -99,10 +99,10 @@ export function DashboardCharts({ analytics }: Props) {
             content: (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* 1. Area Chart */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
+                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <ActivityLogIcon className="w-5 h-5 text-indigo-400" />
-                            <h3 className="text-sm font-semibold text-zinc-200">Usage Over Time (Area)</h3>
+                            <ActivityLogIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Usage Over Time (Area)</h3>
                         </div>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
@@ -129,10 +129,10 @@ export function DashboardCharts({ analytics }: Props) {
                     </div>
 
                     {/* 2. Advanced Stacked Bar */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
+                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <LayersIcon className="w-5 h-5 text-amber-400" />
-                            <h3 className="text-sm font-semibold text-zinc-200">Requests Breakdown</h3>
+                            <LayersIcon className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Requests Breakdown</h3>
                         </div>
                         <div className="flex-1 w-full min-h-0">
                             <ChartContainer config={chartConfig} className="w-full h-full">
@@ -200,10 +200,10 @@ export function DashboardCharts({ analytics }: Props) {
             content: (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* 4. Pie Chart */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
+                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <PieChartIcon className="w-5 h-5 text-red-400" />
-                            <h3 className="text-sm font-semibold text-zinc-200">Tools Distribution</h3>
+                            <PieChartIcon className="w-5 h-5 text-red-500 dark:text-red-400" />
+                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Tools Distribution</h3>
                         </div>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
@@ -231,10 +231,10 @@ export function DashboardCharts({ analytics }: Props) {
                     </div>
 
                     {/* 5. Radar Chart */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
+                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <TargetIcon className="w-5 h-5 text-indigo-400" />
-                            <h3 className="text-sm font-semibold text-zinc-200">Activity Dimensions</h3>
+                            <TargetIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Activity Dimensions</h3>
                         </div>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
@@ -257,10 +257,10 @@ export function DashboardCharts({ analytics }: Props) {
             content: (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* 3. Line Chart */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
+                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <ActivityLogIcon className="w-5 h-5 text-emerald-400" />
-                            <h3 className="text-sm font-semibold text-zinc-200">Credits Usage (Line)</h3>
+                            <ActivityLogIcon className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Credits Usage (Line)</h3>
                         </div>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
@@ -276,10 +276,10 @@ export function DashboardCharts({ analytics }: Props) {
                     </div>
 
                     {/* Standard Bar for context */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
+                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
                         <div className="flex items-center gap-2 mb-4">
-                            <BarChartIcon className="w-5 h-5 text-purple-400" />
-                            <h3 className="text-sm font-semibold text-zinc-200">Daily Requests (Bar)</h3>
+                            <BarChartIcon className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Daily Requests (Bar)</h3>
                         </div>
                         <div className="flex-1 w-full min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
@@ -300,42 +300,408 @@ export function DashboardCharts({ analytics }: Props) {
     ]
 
     return (
-        <div className="mt-8 space-y-10">
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-zinc-900/40 border border-indigo-500/20 rounded-2xl p-6 backdrop-blur-xl">
-                    <div className="flex items-center gap-2 text-indigo-400 mb-2">
-                        <TextIcon className="w-4 h-4" />
-                        <h4 className="text-xs font-semibold uppercase tracking-wider">Total Texts</h4>
-                    </div>
-                    <p className="text-3xl font-bold text-white">{totals.text}</p>
-                </div>
-                <div className="bg-zinc-900/40 border border-purple-500/20 rounded-2xl p-6 backdrop-blur-xl">
-                    <div className="flex items-center gap-2 text-purple-400 mb-2">
-                        <ImageIcon className="w-4 h-4" />
-                        <h4 className="text-xs font-semibold uppercase tracking-wider">Total Images</h4>
-                    </div>
-                    <p className="text-3xl font-bold text-white">{totals.image}</p>
-                </div>
-                <div className="bg-zinc-900/40 border border-amber-500/20 rounded-2xl p-6 backdrop-blur-xl">
-                    <div className="flex items-center gap-2 text-amber-400 mb-2">
-                        <SpeakerLoudIcon className="w-4 h-4" />
-                        <h4 className="text-xs font-semibold uppercase tracking-wider">Total Audio</h4>
-                    </div>
-                    <p className="text-3xl font-bold text-white">{totals.audio}</p>
-                </div>
-                <div className="bg-zinc-900/40 border border-red-500/20 rounded-2xl p-6 backdrop-blur-xl">
-                    <div className="flex items-center gap-2 text-red-400 mb-2">
-                        <VideoIcon className="w-4 h-4" />
-                        <h4 className="text-xs font-semibold uppercase tracking-wider">Total Videos</h4>
-                    </div>
-                    <p className="text-3xl font-bold text-white">{totals.video}</p>
-                </div>
+        <div className="mt-8 space-y-12">
+            {/* Quick Stats Grid - 3D Redesign */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 justify-items-center">
+                <StatCard
+                    title="Total Texts"
+                    value={totals.text}
+                    icon={<TextIcon className="w-5 h-5" />}
+                    color="#818cf8"
+                    label="CHARACTERS"
+                    subValue={`${Math.round(totals.text * 0.1)} CREDITS`}
+                />
+                <StatCard
+                    title="Total Images"
+                    value={totals.image}
+                    icon={<ImageIcon className="w-5 h-5" />}
+                    color="#c084fc"
+                    label="GENERATIONS"
+                    subValue={`${totals.image * 10} CREDITS`}
+                />
+                <StatCard
+                    title="Total Audio"
+                    value={totals.audio}
+                    icon={<SpeakerLoudIcon className="w-5 h-5" />}
+                    color="#fbbf24"
+                    label="SECONDS"
+                    subValue={`${totals.audio * 5} CREDITS`}
+                />
+                <StatCard
+                    title="Total Videos"
+                    value={totals.video}
+                    icon={<VideoIcon className="w-5 h-5" />}
+                    color="#f87171"
+                    label="CLIPS"
+                    subValue={`${totals.video * 20} CREDITS`}
+                />
             </div>
 
-            <div className="pt-4 border-t border-white/5">
+            <div className="pt-8 border-t border-white/5">
                 <AnimatedTabs tabs={tabs} />
             </div>
+        </div>
+    )
+}
+
+function StatCard({ title, value, icon, color, label, subValue }: { title: string, value: number, icon: React.ReactNode, color: string, label: string, subValue: string }) {
+    return (
+        <div className="parent-container">
+            <div className="parent">
+                <div className="a tl"></div>
+                <div className="a t"></div>
+                <div className="a tr"></div>
+                <div className="a l"></div>
+                <div className="a c"></div>
+                <div className="a r"></div>
+                <div className="a bl"></div>
+                <div className="a b"></div>
+                <div className="a br"></div>
+                <div className="card">
+                    <svg height="300" width="300" className="outer bb">
+                        <path
+                            className="bak"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                        <path
+                            className="bak20"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                        <path
+                            className="blur patt"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                        <path
+                            className="patt"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                    </svg>
+                    <svg height="300" width="300" style={{ "--z": -1 } as any} className="outer bb1">
+                        <path
+                            className="patt"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                    </svg>
+                    <svg height="300" width="300" style={{ "--z": 0 } as any} className="outer bb1">
+                        <path
+                            className="patt"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                    </svg>
+                    <svg height="300" width="300" style={{ "--z": 1 } as any} className="outer bb1">
+                        <path
+                            className="patt"
+                            pathLength="360"
+                            d="M0 110V70A70 70 135 0170 0H230A70 70 45 01300 70L300 110A40 40 135 01260 150H40A40 40 0 000 190V230A70 70 45 0070 300H230A70 70 135 00300 230V190"
+                        ></path>
+                    </svg>
+                    <div className="inner-blur-thing" style={{ background: color + '22' }}></div>
+                    <div className="inner">
+                        <div className="inner-bg" style={{ background: `conic-gradient(from 45deg, ${color} 5%, #fff0 10% 40%, ${color} 45% 55%, #fff0 60% 90%, ${color} 95%)` }}></div>
+                    </div>
+                    <div style={{ "--z": -3 } as any} className="inner-border"></div>
+                    <div style={{ "--z": 0 } as any} className="inner-border"></div>
+                    <div style={{ "--z": 3 } as any} className="inner-border"></div>
+                    <div style={{ "--z": -2 } as any} className="percent top">{value}</div>
+                    <div style={{ "--z": -2 } as any} className="percent">{value}</div>
+                    <div style={{ "--z": 0 } as any} className="percent">{value}</div>
+                    <div style={{ "--z": 2 } as any} className="percent">{value}</div>
+                    <div className="percent bak" style={{ color: color }}>{value}</div>
+                    <div className="txt charging" style={{ color: color }}>
+                        {icon}
+                        {title.toUpperCase()}
+                    </div>
+                    <div className="txt health">
+                        {label}
+                    </div>
+                    <div className="txt cycles">
+                        {subValue}
+                    </div>
+                    <div className="bar-hb"></div>
+                    <div style={{ "--z": 0 } as any} className="bar">
+                        <div className="bar-slider" style={{ background: `linear-gradient(90deg, ${color}00, ${color}70, ${color}00), linear-gradient(90deg, ${color}00, ${color}9a, ${color}00)` }}></div>
+                    </div>
+                    <div className="bar bak"><div className="bar-slider" style={{ background: color }}></div></div>
+                </div>
+            </div>
+            <style jsx>{`
+                .parent-container {
+                    scale: 0.7;
+                    margin: -40px;
+                }
+                .parent {
+                    width: 240px;
+                    height: 240px;
+                    perspective: 3000px;
+                    position: relative;
+                }
+
+                .card:hover {
+                    transform: rotateX(5deg) rotateY(10deg);
+                }
+
+                .card:hover div.bar.bak {
+                    opacity: 0.7;
+                }
+
+                .a:hover ~ .card,
+                .card:hover {
+                    .outer .patt {
+                        stroke-dasharray: 0 90 280 999;
+                        stroke-dashoffset: 10;
+                    }
+                }
+
+                .a {
+                    position: absolute;
+                    width: 100px;
+                    height: 100px;
+                    z-index: 10;
+                    transform: translateZ(600px);
+                }
+
+                .a:hover ~ .card .bar.bak {
+                    opacity: 1;
+                }
+
+                .tl { top: -30px; left: -30px; }
+                .tl:hover ~ .card { transform: rotateX(-20deg) rotateY(20deg); }
+
+                .t { top: -30px; left: 70px; }
+                .t:hover ~ .card { transform: rotateX(-20deg); }
+
+                .tr { top: -30px; left: 170px; }
+                .tr:hover ~ .card { transform: rotateX(-20deg) rotateY(-20deg); }
+
+                .l { top: 70px; left: -30px; }
+                .l:hover ~ .card { transform: rotateY(20deg); }
+
+                .c { top: 70px; left: 70px; }
+
+                .r { top: 70px; left: 170px; }
+                .r:hover ~ .card { transform: rotateY(-20deg); }
+
+                .bl { top: 170px; left: -30px; }
+                .bl:hover ~ .card { transform: rotateX(20deg) rotateY(20deg); }
+
+                .b { top: 170px; left: 70px; }
+                .b:hover ~ .card { transform: rotateX(20deg); }
+
+                .br { top: 170px; left: 170px; }
+                .br:hover ~ .card { transform: rotateX(20deg) rotateY(-20deg); }
+
+                .card {
+                    position: relative;
+                    width: 240px;
+                    height: 240px;
+                    transform-style: preserve-3d;
+                    transition: 0.7s;
+                }
+
+                .outer {
+                    position: absolute;
+                    top: calc(50% - 150px);
+                    left: calc(50% - 150px);
+                    overflow: visible;
+                    transition: 1s;
+                    transform: scale(1.05) translateZ(-50px);
+                    transform-origin: 170px;
+                    pointer-events: none;
+                }
+
+                .outer.bb {
+                    transform: scale(1.0535) translateZ(-55px);
+                }
+
+                .outer.bb1 {
+                    transform: scale(1.0535) translateZ(calc(-55px + 5px * var(--z)));
+                }
+
+                .outer.bb1 path {
+                    stroke-width: calc(6px - 3px * var(--z) * var(--z));
+                }
+
+                .outer path {
+                    stroke: #fff;
+                    fill: none;
+                    stroke-width: 6;
+                    stroke-linecap: round;
+                    stroke-dasharray: 0 0 280 999;
+                    transition: 1s;
+                }
+
+                .outer path.blur {
+                    filter: blur(8px);
+                    opacity: 0.4;
+                }
+
+                .outer path.bak {
+                    stroke: #ffffff09;
+                    stroke-dasharray: 0 0 360 0;
+                }
+
+                .outer path.bak20 {
+                    stroke: #ffffff09;
+                    stroke-dasharray: 20 50;
+                    stroke-dashoffset: 0;
+                    animation: stronk 40s linear infinite;
+                }
+
+                @keyframes stronk {
+                    from { stroke-dashoffset: 360; }
+                }
+
+                .inner {
+                    position: absolute;
+                    inset: 1px;
+                    border-radius: 29px;
+                    background: #212121;
+                    overflow: hidden;
+                    transform-style: preserve-3d;
+                    perspective: 100px;
+                }
+
+                .inner .inner-bg {
+                    position: absolute;
+                    inset: -1000%;
+                    filter: blur(40px);
+                    opacity: 0.3;
+                    transform: translateZ(-10px);
+                    transition: 1s;
+                    animation: speen 24s cubic-bezier(0.36, 0.2, 0.64, 0.8) infinite;
+                }
+
+                @keyframes speen {
+                    50% { rotate: 180deg; }
+                    to { rotate: 360deg; }
+                }
+
+                .inner-border {
+                    position: absolute;
+                    inset: 0;
+                    border: double 2px transparent;
+                    background-image: linear-gradient(-45deg, #2221, #fff2, #3331);
+                    background-origin: border-box;
+                    clip-path: path(
+                        "M30 0H210A30 30 0 01240 30V210A30 30 0 01210 240H30A30 30 0 010 210V30A30 30 0 0130 0V2A28 28 0 002 30V210A28 28 0 0030 238H210A28 28 0 00238 210V30A28 28 0 00210 2H30"
+                    );
+                    clip-rule: evenodd;
+                    transform: translateZ(calc(var(--z) * 1px));
+                    pointer-events: none;
+                }
+
+                .percent {
+                    position: absolute;
+                    top: 24px;
+                    left: 34px;
+                    font-size: 42px;
+                    color: #ccc;
+                    transition: 0.4s;
+                    transform: translate3d(0px, 0px, calc(40px + var(--z) * 1.5px));
+                    cursor: default;
+                    pointer-events: none;
+                }
+
+                .percent.top {
+                    pointer-events: all;
+                    color: #0000;
+                }
+
+                .percent.bak {
+                    transform: translate3d(0px, 0px, 1px);
+                    filter: blur(8px);
+                    opacity: 0.8;
+                }
+
+                .percent.top:hover ~ .percent {
+                    text-shadow: 0 0 6px #fff3;
+                    transform: translate3d(0px, 0px, calc(60px + var(--z) * 1.5px));
+                }
+
+                .txt {
+                    position: absolute;
+                    font-family: monospace;
+                    cursor: default;
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                    fill: #888;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: #888;
+                    transition: 0.4s, fill 0.2s, color 0.2s;
+                    transform: translate3d(0px, 0px, 20px);
+                }
+
+                .txt:hover {
+                    transform: translate3d(0px, 0px, 40px);
+                    color: #aaa;
+                    fill: #aaa;
+                }
+
+                .charging { top: 104px; left: 28px; font-weight: 700; letter-spacing: 1px; }
+                .health { top: 140px; left: 28px; font-size: 11px; opacity: 0.7; }
+                .cycles { top: 164px; left: 28px; font-size: 11px; opacity: 0.7; }
+
+                .bar-hb {
+                    position: absolute;
+                    width: 190px;
+                    height: 14px;
+                    top: 205px;
+                    left: 25px;
+                    transform: translate3d(0px, 0px, 10px);
+                }
+
+                .bar-hb:hover ~ .bar:not(.bak) {
+                    transform: translate3d(0px, 0px, calc(30px + var(--z) * 2px));
+                }
+
+                .bar {
+                    position: absolute;
+                    width: 180px;
+                    height: 4px;
+                    background: linear-gradient(90deg, #0000 128px, #ffffff05 0);
+                    top: 210px;
+                    left: 30px;
+                    border-radius: 2px;
+                    transform: translate3d(0px, 0px, calc(10px + var(--z) * 1.5px));
+                    transition: 0.4s;
+                    clip-path: path(
+                        "M2 0a1 1 0 000 4h22a1 1 0 000-4Zm30 0a1 1 0 000 4h22a1 1 0 000-4Zm30 0a1 1 0 000 4h22a1 1 0 000-4Zm30 0a1 1 0 000 4h22a1 1 0 000-4Zm30 0a1 1 0 000 4h22a1 1 0 000-4Zm30 0a1 1 0 000 4h22a1 1 0 000-4Z"
+                    );
+                    pointer-events: none;
+                }
+
+                .bar-slider {
+                    width: 128px;
+                    border-radius: inherit;
+                    height: 4px;
+                    background-size: 200%;
+                    animation: bg-anim 4s linear infinite;
+                    transition: 0.3s;
+                }
+
+                .bar.bak {
+                    transform: translate3d(0px, 0px, 1px);
+                    filter: blur(6px);
+                    opacity: 0.1;
+                    clip-path: none;
+                }
+
+                .bar.bak .bar-slider {
+                    width: 124px;
+                }
+
+                @keyframes bg-anim {
+                    from { background-position: 200%, 0%; }
+                }
+            `}</style>
         </div>
     )
 }

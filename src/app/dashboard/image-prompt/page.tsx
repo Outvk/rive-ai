@@ -1,67 +1,56 @@
-import { ImageGeneratorForm } from '@/components/ImageGeneratorForm'
+import { DynamicImageGenerator } from '@/components/DynamicImageGenerator'
 import { createClient } from '@/utils/supabase/server'
-import { ImageIcon } from '@radix-ui/react-icons'
 
 export const metadata = {
     title: 'Prompt to Image - Rive AI',
     description: 'Generate images from text prompts using AI.',
 }
 
-export default async function ImagePromptPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ gid?: string }>
-}) {
-    const { gid } = await searchParams
-
+export default async function ImagePromptPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('credits')
-        .eq('id', user?.id)
-        .single()
+    let credits = 10
+    let history: any[] = []
 
-    const credits = profile?.credits ?? 0
+    if (user) {
+        // Fetch credits
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', user.id)
+            .single()
+        credits = profile?.credits ?? 10
 
-    let initialPrompt: string | undefined
-    let initialImage: string | undefined
-
-    if (gid && user?.id) {
-        const { data: gen, error } = await supabase
-            .from('ai_generations')
-            .select('prompt, result')
-            .eq('id', gid)
+        // Fetch history from the NEW DEDICATED table
+        const { data: images, error: historyError } = await supabase
+            .from('ai_images')
+            .select('*')
             .eq('user_id', user.id)
-            .maybeSingle()
-        if (error) {
-            console.error('Failed to load generation:', error)
+            .order('created_at', { ascending: false })
+            .limit(20)
+
+        if (historyError) {
+            console.error("Supabase Images Table Error:", historyError)
         }
-        if (gen) {
-            initialPrompt = gen.prompt
-            initialImage = gen.result
+
+        console.log(`Fetched ${images?.length ?? 0} images from dedicated table for user ${user.id}`)
+
+        if (images) {
+            history = images.map(img => ({
+                id: img.id.toString(),
+                type: 'image',
+                url: img.image_url,
+                prompt: img.prompt,
+                timestamp: new Date(img.created_at)
+            }))
         }
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 fade-in h-full flex flex-col">
-            <div>
-                <h1 className="text-2xl font-semibold text-zinc-100 mb-1 flex items-center gap-2">
-                    <ImageIcon className="w-6 h-6 text-purple-400" />
-                    Prompt to Image
-                </h1>
-                <p className="text-sm text-zinc-400">Type a description and generate images instantly.</p>
-            </div>
-
-            <div className="flex-1 min-h-0 relative">
-                <ImageGeneratorForm
-                    key={gid ?? 'new'}
-                    initialCredits={credits}
-                    initialPrompt={initialPrompt}
-                    initialImageBase64={initialImage}
-                />
-            </div>
+        <div className="w-full h-full flex flex-col items-center justify-start p-4 overflow-hidden">
+            <DynamicImageGenerator initialCredits={credits} initialHistory={history} />
         </div>
     )
 }
+

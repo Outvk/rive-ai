@@ -23,8 +23,8 @@ export function ImageGeneratorForm({
 
     useEffect(() => {
         if (initialPrompt !== undefined) setPrompt(initialPrompt)
-        if (initialImageBase64 !== undefined) setImageBase64(initialImageBase64)
-    }, [initialPrompt, initialImageBase64])
+        setImageBase64(null) // Reset on refresh
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -45,10 +45,35 @@ export function ImageGeneratorForm({
             const data = await res.json()
             if (!res.ok) throw new Error(data?.error || 'Generation failed')
             if (data.image) {
+                console.log("V1 Generator: Image received, saving to ai_images...");
                 setImageBase64(data.image)
                 setCurrentCredits(prev => Math.max(0, prev - 10))
-                router.refresh()
-                await saveGeneration(prompt.trim(), data.image, 'image')
+
+                try {
+                    console.log("V1 Generator: Saving via API route...");
+                    const saveRes = await fetch('/api/history/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: prompt.trim(),
+                            imageUrl: data.image,
+                            settings: { mode: 'v1' }
+                        })
+                    });
+
+                    const saveResult = await saveRes.json();
+
+                    if (!saveRes.ok) {
+                        console.error("V1 Save Error:", saveResult.error);
+                        toast.error(`Save failed: ${saveResult.error}`);
+                    } else {
+                        console.log("V1 Save Success: Added to ai_images dedicated table.");
+                        toast.success("Saved to history");
+                        router.refresh();
+                    }
+                } catch (saveErr) {
+                    console.error("V1 Critical Save Error:", saveErr);
+                }
             }
         } catch (err: any) {
             console.error('Image generation error', err)

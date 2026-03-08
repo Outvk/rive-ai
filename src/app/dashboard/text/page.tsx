@@ -29,7 +29,7 @@ export default async function TextGeneratorPage({
     let conversationId: string | undefined
     let initialMessages: UIMessage[] = []
 
-    if (cid && user?.id) {
+    if (cid && cid !== 'new' && user?.id) {
         const { data: conv, error } = await supabase
             .from('chat_conversations')
             .select('id, messages')
@@ -54,7 +54,6 @@ export default async function TextGeneratorPage({
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
                 <TextGeneratorForm
-                    key={conversationId ?? 'new'}
                     initialCredits={credits}
                     conversationId={conversationId}
                     initialChatMessages={initialMessages}
