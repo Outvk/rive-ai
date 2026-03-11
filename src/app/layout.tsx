@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import localFont from "next/font/local";
+import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import MorphPanel from "@/components/ui/ai-input";
 import { ThemeProvider } from "@/components/theme-provider";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+});
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider

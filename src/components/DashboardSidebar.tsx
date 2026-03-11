@@ -64,7 +64,7 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
     const isImageGenerator = pathname === '/dashboard/image-prompt'
     const isSpeech = pathname === '/dashboard/text-to-speech'
     const isVideoGenerator = pathname === '/dashboard/video'
-    const isSettingsMode = ['/dashboard/profile', '/dashboard/billing', '/dashboard/pricing', '/dashboard/privacy', '/dashboard/terms'].includes(pathname || '')
+    const isSettingsMode = ['/dashboard/profile', '/dashboard/billing', '/dashboard/pricing', '/dashboard/privacy', '/dashboard/terms', '/dashboard/api', '/dashboard/docs'].includes(pathname || '')
     const searchParams = useSearchParams()
     const activeCid = searchParams?.get('cid')
     const router = useRouter()
@@ -375,6 +375,22 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Pricing Plans
                     </Link>
 
+                    <Link
+                        href="/dashboard/api"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/api' ? 'bg-white/10 text-white' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <Link2Icon className="w-4 h-4 text-zinc-400" />
+                        API Keys
+                    </Link>
+
+                    <Link
+                        href="/dashboard/docs"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/docs' ? 'bg-white/10 text-white' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <LayoutList className="w-4 h-4 text-zinc-400" />
+                        API Documentation
+                    </Link>
+
                     <div className="pt-6 pb-2">
                         <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Legal</p>
                     </div>
@@ -455,9 +471,21 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Transactions History
                     </Link>
 
+                    <Link
+                        href="/dashboard/api"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/api' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <Link2Icon className={`w-4 h-4 ${pathname === '/dashboard/api' ? 'text-indigo-400' : 'text-zinc-400'}`} />
+                        API Keys
+                    </Link>
 
-
-
+                    <Link
+                        href="/dashboard/docs"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/docs' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <LayoutList className={`w-4 h-4 ${pathname === '/dashboard/docs' ? 'text-indigo-400' : 'text-zinc-400'}`} />
+                        API Documentation
+                    </Link>
 
                 </nav>
             )}

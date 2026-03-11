@@ -595,6 +595,21 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                     />
                 </div>
 
+                <div className="pt-1">
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-11 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="w-4 h-4" />
+                        )}
+                        {isLoading ? 'Generating...' : `Generate ${mode === "image" ? "Image" : "Avatar"}`}
+                    </button>
+                </div>
+
                 {renderSettings()}
 
                 <div className="pt-2 border-t border-zinc-800/50">
@@ -635,20 +650,6 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                 </div>
             </div>
 
-            <div className="mt-auto pt-4">
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"
-                >
-                    {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        <Sparkles className="w-4 h-4" />
-                    )}
-                    {isLoading ? 'Generating...' : `Generate ${mode === "image" ? "Image" : "Avatar"}`}
-                </button>
-            </div>
         </form>
     )
 

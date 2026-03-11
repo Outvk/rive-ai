@@ -159,8 +159,8 @@ export function MorphPanel() {
                                         <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 animate-pulse" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-widest leading-none mb-0.5">Ruixen AI</h3>
-                                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">Assistant is online</p>
+                                        <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-widest leading-none mb-0.5 font-outfit">Ruixen AI</h3>
+                                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium font-outfit">Assistant is online</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={triggerClose} className="w-8 h-8 rounded-full text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5">
@@ -173,7 +173,7 @@ export function MorphPanel() {
                                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-4 border border-indigo-100 dark:border-indigo-500/20">
                                     <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                                 </div>
-                                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed font-outfit">
                                     Hello! I'm Ruixen. <br /> Coming soon.
                                 </p>
                             </div>
@@ -197,7 +197,7 @@ export function MorphPanel() {
                                     </button>
                                 </div>
                                 <div className="mt-2 flex items-center justify-center px-1">
-                                    <span className="text-[9px] text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest">Powered by Ruixen AI</span>
+                                    <span className="text-[9px] text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest font-outfit">Powered by Ruixen AI</span>
                                 </div>
                             </div>
                         </motion.div>

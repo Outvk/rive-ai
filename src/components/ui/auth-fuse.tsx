@@ -11,83 +11,13 @@ import { twMerge } from "tailwind-merge";
 import { loginAction, signupAction } from "@/app/login/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Silk from "@/components/ui/Silk";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export interface TypewriterProps {
-    text: string | string[];
-    speed?: number;
-    cursor?: string;
-    loop?: boolean;
-    deleteSpeed?: number;
-    delay?: number;
-    className?: string;
-}
 
-export function Typewriter({
-    text,
-    speed = 100,
-    cursor = "|",
-    loop = false,
-    deleteSpeed = 50,
-    delay = 1500,
-    className,
-}: TypewriterProps) {
-    const [displayText, setDisplayText] = useState("");
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [textArrayIndex, setTextArrayIndex] = useState(0);
-
-    const textArray = Array.isArray(text) ? text : [text];
-    const currentText = textArray[textArrayIndex] || "";
-
-    useEffect(() => {
-        if (!currentText) return;
-
-        const timeout = setTimeout(
-            () => {
-                if (!isDeleting) {
-                    if (currentIndex < currentText.length) {
-                        setDisplayText((prev) => prev + currentText[currentIndex]);
-                        setCurrentIndex((prev) => prev + 1);
-                    } else if (loop) {
-                        setTimeout(() => setIsDeleting(true), delay);
-                    }
-                } else {
-                    if (displayText.length > 0) {
-                        setDisplayText((prev) => prev.slice(0, -1));
-                    } else {
-                        setIsDeleting(false);
-                        setCurrentIndex(0);
-                        setTextArrayIndex((prev) => (prev + 1) % textArray.length);
-                    }
-                }
-            },
-            isDeleting ? deleteSpeed : speed,
-        );
-
-        return () => clearTimeout(timeout);
-    }, [
-        currentIndex,
-        isDeleting,
-        currentText,
-        loop,
-        speed,
-        deleteSpeed,
-        delay,
-        displayText,
-        text,
-    ]);
-
-    return (
-        <span className={className}>
-            {displayText}
-            <span className="animate-pulse">{cursor}</span>
-        </span>
-    );
-}
 
 const labelVariants = cva(
     "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white/70"
@@ -298,46 +228,15 @@ interface AuthUIProps {
     signUpContent?: AuthContentProps;
 }
 
-const defaultSignInContent = {
-    image: {
-        src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
-        alt: "A beautiful abstract background for sign-in"
-    },
-    quote: {
-        text: "Welcome Back! The journey continues.",
-        author: "Rive AI"
-    }
-};
 
-const defaultSignUpContent = {
-    image: {
-        src: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop",
-        alt: "A vibrant, modern space for new beginnings"
-    },
-    quote: {
-        text: "Create an account. A new chapter awaits.",
-        author: "Rive AI"
-    }
-};
 
 export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) {
     const [isSignIn, setIsSignIn] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const toggleForm = () => setIsSignIn((prev) => !prev);
 
-    const finalSignInContent = {
-        image: { ...defaultSignInContent.image, ...signInContent.image },
-        quote: { ...defaultSignInContent.quote, ...signInContent.quote },
-    };
-    const finalSignUpContent = {
-        image: { ...defaultSignUpContent.image, ...signUpContent.image },
-        quote: { ...defaultSignUpContent.quote, ...signUpContent.quote },
-    };
-
-    const currentContent = isSignIn ? finalSignInContent : finalSignUpContent;
-
     return (
-        <div className="w-full min-h-screen md:grid md:grid-cols-2 bg-black border-r border-white/5 dark">
+        <div className="w-full min-h-screen grid md:grid-cols-2 bg-black bg-[radial-gradient(circle_at_20%_20%,rgba(116,5,255,0.05)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(193,144,255,0.05)_0%,transparent_50%)] dark">
             <style>{`
         input[type="password"]::-ms-reveal,
         input[type="password"]::-ms-clear {
@@ -351,40 +250,51 @@ export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) 
             -webkit-text-fill-color: white !important;
         }
       `}</style>
-            <div className="flex h-screen items-center justify-center p-6 md:h-auto md:p-0 md:py-12 bg-black">
-                <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
+
+            {/* Left Section - Form */}
+            <div className="flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm border-r border-white/5">
+                <div className="w-full max-w-md">
+                    <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
+                </div>
             </div>
 
-            <div className="hidden md:flex flex-col p-4 bg-black">
-                <div
-                    className="relative flex-1 bg-cover bg-center transition-all duration-700 ease-in-out border border-white/5 rounded-[2.5rem] overflow-hidden group shadow-2xl"
-                    style={{ backgroundImage: `url(${currentContent.image.src})` }}
-                    key={currentContent.image.src}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
+            {/* Right Section - Sidebar (Left & Bottom Aligned) */}
+            <div className="hidden md:flex flex-col items-start justify-end p-12 relative overflow-hidden bg-black/20">
+                {/* Animated Logo - Left-aligned and positioned bottom */}
+                <div className="w-full max-w-[95%] mb-0 overflow-hidden flex justify-start">
+                    <img
+                        src="/Comp-1.gif"
+                        alt="Rive AI Animated Logo"
+                        className="w-full h-auto max-h-[400px] object-contain block z-10 auth-animated-logo"
+                        style={{ position: 'absolute', bottom: '200px', left: '-17px' }}
+                    />
+                </div>
 
-                    <div className="relative z-10 flex h-full flex-col items-center justify-end p-12 pb-24">
-                        <blockquote className="space-y-4 text-center">
-                            <p className="text-2xl font-light text-white tracking-wide">
-                                “<Typewriter
-                                    key={currentContent.quote.text}
-                                    text={currentContent.quote.text}
-                                    speed={60}
-                                    className="text-white"
-                                />”
-                            </p>
-                            <cite className="block text-sm font-medium text-zinc-400 not-italic uppercase tracking-[0.2em]">
-                                — {currentContent.quote.author}
-                            </cite>
-                        </blockquote>
-                    </div>
+                <div className="relative w-full max-w-[95%] h-64 group mt-[-30px]">
+                    {/* Animated ambient glow around the banner */}
+                    <div className="absolute -inset-2 bg-gradient-to-r from-[#7405FF]/10 via-transparent to-[#C190FF]/10 rounded-[2rem] blur-xl opacity-30 group-hover:opacity-60 transition-opacity duration-1000" />
 
-                    {/* Brand Overlay */}
-                    <div className="absolute top-12 left-12 z-20 flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                            <span className="text-white text-xl font-bold">R</span>
+                    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/30 backdrop-blur-xl shadow-2xl style={{ position: 'absolute', bottom: '200px', left: '-50px' }}">
+                        <Silk
+                            speed={5}
+                            scale={0.7}
+                            noiseIntensity={1.2}
+                            rotation={0.4}
+                        />
+
+                        {/* Interactive overlay details */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                        <div className="absolute bottom-6 left-10 right-10 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="h-[1px] w-12 bg-white/20" />
+                                <p className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-medium">
+                                    System Core / {isSignIn ? "Sequence 01" : "Access 02"}
+                                </p>
+                            </div>
+                            <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-mono">
+                                LVL-90 // CORE_PROC
+                            </div>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">Rive AI</span>
                     </div>
                 </div>
             </div>

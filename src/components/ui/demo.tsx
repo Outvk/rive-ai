@@ -111,9 +111,9 @@ const HalideLanding: React.FC = () => {
         }
 
         /* Using the provided riveAi.png image */
-        .layer-1 { background-image: url('/riveAiI.png'); filter: grayscale(0.5) contrast(1.2) brightness(0.7); }
-        .layer-2 { background-image: url('/riveAIi.png'); filter: grayscale(0.3) contrast(1.1) brightness(0.9); opacity: 0.6; mix-blend-mode: screen; }
-        .layer-3 { background-image: url('/riveAiI.png'); filter: grayscale(0.2) contrast(1.3) brightness(1); opacity: 0.4; mix-blend-mode: overlay; }
+        .layer-1 { background-image: url('/dash3.png'); filter: grayscale(0.5) contrast(1.2) brightness(0.7); }
+        .layer-2 { background-image: url('/dash3.png'); filter: grayscale(0.3) contrast(1.1) brightness(0.9); opacity: 0.6; mix-blend-mode: screen; }
+        .layer-3 { background-image: url('/dash3.png'); filter: grayscale(0.2) contrast(1.3) brightness(1); opacity: 0.4; mix-blend-mode: overlay; }
 
         .contours {
           position: absolute;

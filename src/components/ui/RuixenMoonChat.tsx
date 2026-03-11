@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
     Trash2,
     MessageSquare,
     X as CloseIcon,
+    AlertTriangle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -154,9 +155,26 @@ export default function RuixenMoonChat({
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    // Optimized scroll to bottom that doesn't feel laggy
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+        const scrollToBottom = () => {
+            if (messagesEndRef.current) {
+                messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+            }
+        };
+
+        // Only scroll if we are already at the bottom (or very near it)
+        // This prevents the "jump" if the user is reading something earlier
+        const container = messagesEndRef.current?.parentElement?.parentElement;
+        if (container) {
+            const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 150;
+            if (isAtBottom || messages.length <= 1) {
+                scrollToBottom();
+            }
+        } else {
+            scrollToBottom();
+        }
+    }, [messages, isLoading]);
 
     return (
         <div
@@ -282,7 +300,7 @@ export default function RuixenMoonChat({
                 )}
 
                 {/* Messages Area - Absolute to cover full height and scroll */}
-                <div className="absolute inset-0 overflow-y-auto px-4 pt-10 pb-64 no-scrollbar scroll-smooth">
+                <div className="absolute inset-0 overflow-y-auto px-4 pt-10 pb-64 no-scrollbar">
                     <div className="w-full max-w-3xl mx-auto flex flex-col items-center min-h-[calc(100vh-10rem)] justify-center">
                         {messages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center text-center">
@@ -291,10 +309,10 @@ export default function RuixenMoonChat({
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.8 }}
                                 >
-                                    <h1 className="text-6xl font-black text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.1)] mb-6 tracking-tighter">
+                                    <h1 className="text-7xl font-black text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.1)] mb-6 tracking-tighter font-outfit">
                                         Ruixen AI
                                     </h1>
-                                    <p className="text-zinc-400 text-lg max-w-sm font-light leading-relaxed">
+                                    <p className="text-zinc-400 text-xl max-w-sm font-light leading-relaxed font-outfit">
                                         How can I help you elevate your creativity today?
                                     </p>
                                 </motion.div>
@@ -335,8 +353,8 @@ export default function RuixenMoonChat({
                                                 </div>
 
                                                 <div className={cn(
-                                                    "text-base leading-relaxed break-words",
-                                                    m.role === "user" ? "text-zinc-100 font-medium" : "text-zinc-200 font-light"
+                                                    "text-lg leading-relaxed break-words font-outfit",
+                                                    m.role === "user" ? "text-zinc-100 font-medium" : "text-zinc-300 font-light"
                                                 )}>
                                                     {(() => {
                                                         const rawContent = getMessageContent(m);
@@ -376,13 +394,47 @@ export default function RuixenMoonChat({
                                                                 ) : (
                                                                     <ReactMarkdown
                                                                         components={{
-                                                                            p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
-                                                                            h1: ({ children }) => <h1 className="text-2xl font-bold text-white mb-4">{children}</h1>,
-                                                                            h2: ({ children }) => <h2 className="text-xl font-bold text-white mb-3">{children}</h2>,
-                                                                            h3: ({ children }) => <h3 className="text-lg font-bold text-white mb-2">{children}</h3>,
-                                                                            ul: ({ children }) => <ul className="list-disc ml-6 mb-4 space-y-2">{children}</ul>,
-                                                                            ol: ({ children }) => <ol className="list-decimal ml-6 mb-4 space-y-2">{children}</ol>,
-                                                                            li: ({ children }) => <li className="pl-1">{children}</li>,
+                                                                            p: ({ children }) => <p className="mb-5 last:mb-0 text-[17px] leading-[1.6]">{children}</p>,
+                                                                            h1: ({ children }) => <h1 className="text-4xl font-black text-white mb-6 mt-8 tracking-tight font-outfit">{children}</h1>,
+                                                                            h2: ({ children }) => <h2 className="text-3xl font-bold text-white mb-5 mt-7 tracking-tight font-outfit">{children}</h2>,
+                                                                            h3: ({ children }) => <h3 className="text-2xl font-semibold text-white mb-4 mt-6 font-outfit">{children}</h3>,
+                                                                            ul: ({ children }) => <ul className="list-disc ml-6 mb-5 space-y-3 text-[16px]">{children}</ul>,
+                                                                            ol: ({ children }) => <ol className="list-decimal ml-6 mb-5 space-y-3 text-[16px]">{children}</ol>,
+                                                                            li: ({ children }) => <li className="pl-2">{children}</li>,
+                                                                            blockquote: ({ children }) => {
+                                                                                // Robustly extract text from children to check for "WARNING:"
+                                                                                const getRecursiveText = (node: any): string => {
+                                                                                    if (typeof node === 'string') return node;
+                                                                                    if (Array.isArray(node)) return node.map(getRecursiveText).join("");
+                                                                                    if (node?.props?.children) return getRecursiveText(node.props.children);
+                                                                                    return "";
+                                                                                };
+                                                                                const textContent = getRecursiveText(children);
+                                                                                const isWarning = textContent.includes("WARNING:");
+                                                                                if (isWarning) {
+                                                                                    return (
+                                                                                        <div className="my-8 relative overflow-hidden rounded-2xl border border-red-500/10 bg-red-500/[0.03] p-6 backdrop-blur-sm group transition-all hover:bg-red-500/[0.05]">
+                                                                                            <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-red-500/0 via-red-500/40 to-red-500/0" />
+                                                                                            <div className="flex items-start gap-5">
+                                                                                                <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+                                                                                                    <AlertTriangle className="h-5 w-5" />
+                                                                                                </div>
+                                                                                                <div className="flex flex-col space-y-1">
+                                                                                                    <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-500/80">System Warning</span>
+                                                                                                    <div className="text-[14px] leading-relaxed text-zinc-300 font-light prose-zinc prose-invert max-w-none">
+                                                                                                        {children}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    );
+                                                                                }
+                                                                                return (
+                                                                                    <div className="border-l-4 border-indigo-500/30 bg-white/5 p-4 my-4 rounded-r-lg text-zinc-300 italic text-sm">
+                                                                                        {children}
+                                                                                    </div>
+                                                                                );
+                                                                            },
                                                                             code: ({ inline, className, children, ...props }: any) => {
                                                                                 const match = /language-(\w+)/.exec(className || "");
                                                                                 return !inline && match ? (
@@ -476,8 +528,8 @@ export default function RuixenMoonChat({
                                 }}
                                 placeholder="Type a message or ask about your PDF..."
                                 className={cn(
-                                    "w-full resize-none border-none",
-                                    "bg-transparent text-zinc-100 text-base",
+                                    "w-full resize-none border-none font-outfit",
+                                    "bg-transparent text-zinc-100 text-[17px]",
                                     "focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0",
                                     "placeholder:text-zinc-500 min-h-[48px]",
                                     "py-4 px-6 overflow-hidden"
