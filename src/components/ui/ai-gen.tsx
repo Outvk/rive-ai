@@ -334,6 +334,16 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
         setSettings({ ...settings, prompt: suggestion })
     }
 
+    const isValidImageUrl = (url: any): boolean => {
+        if (!url || typeof url !== 'string' || url.trim() === '') return false;
+        // Basic check for common valid image sources in this app
+        return url.startsWith('/') || 
+               url.startsWith('http://') || 
+               url.startsWith('https://') || 
+               url.startsWith('data:image/') || 
+               url.startsWith('blob:');
+    }
+
     const togglePlay = () => setIsPlaying(!isPlaying)
     const toggleRotate = () => setIsRotating(!isRotating)
 
@@ -692,7 +702,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                         >
                             <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-zinc-800">
                                 <Image
-                                    src={item.url || "/placeholder.svg"}
+                                    src={isValidImageUrl(item.url) ? item.url : "/placeholder.svg"}
                                     alt={item.prompt}
                                     fill
                                     className="object-cover"
@@ -746,7 +756,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                             >
                                 {item ? (
                                     <Image
-                                        src={item.url}
+                                        src={isValidImageUrl(item.url) ? item.url : "/placeholder.svg"}
                                         fill
                                         alt={`AI generated ${mode}`}
                                         className={`object-cover w-full h-full transition-opacity duration-500 ${isRotating ? "animate-spin-slow" : ""}`}

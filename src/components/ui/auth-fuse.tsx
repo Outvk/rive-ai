@@ -11,6 +11,7 @@ import { twMerge } from "tailwind-merge";
 import { loginAction, signupAction } from "@/app/login/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Silk from "@/components/ui/Silk";
 
 function cn(...inputs: ClassValue[]) {
@@ -135,10 +136,10 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     };
 
     return (
-        <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-8">
-            <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold text-white">Sign in to your account</h1>
-                <p className="text-balance text-sm text-white/50">Enter your email below to sign in</p>
+        <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-1 text-center">
+                <h1 className="text-xl font-bold text-white">Sign in to your account</h1>
+                <p className="text-balance text-xs text-white/50">Enter your email below to sign in</p>
             </div>
             <div className="grid gap-4">
                 <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
@@ -174,10 +175,10 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     };
 
     return (
-        <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-8">
-            <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold text-white">Create an account</h1>
-                <p className="text-balance text-sm text-white/50">Enter your details below to sign up</p>
+        <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-1 text-center">
+                <h1 className="text-xl font-bold text-white">Create an account</h1>
+                <p className="text-balance text-xs text-white/50">Enter your details below to sign up</p>
             </div>
             <div className="grid gap-4">
                 <div className="grid gap-1"><Label htmlFor="full_name">Full Name</Label><Input id="full_name" name="full_name" type="text" placeholder="John Doe" required autoComplete="name" /></div>
@@ -193,19 +194,19 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
 
 function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { isSignIn: boolean; onToggle: () => void; isLoading: boolean; setIsLoading: (v: boolean) => void }) {
     return (
-        <div className="mx-auto grid w-[350px] gap-2">
+        <div className="mx-auto grid w-[320px] gap-2">
             {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
-            <div className="text-center text-sm text-white/40">
+            <div className="text-center text-xs text-white/40">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
-                <Button variant="link" className="pl-1 text-white hover:text-white/80 transition-colors" onClick={onToggle} disabled={isLoading}>
+                <Button variant="link" className="h-auto p-0 text-white hover:text-white/80 transition-colors text-xs" onClick={onToggle} disabled={isLoading}>
                     {isSignIn ? "Sign up" : "Sign in"}
                 </Button>
             </div>
-            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-white/10">
-                <span className="relative z-10 bg-black px-2 text-white/30 uppercase text-[10px] font-bold tracking-widest">Or continue with</span>
+            <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-white/10">
+                <span className="relative z-10 bg-[#09090b] px-2 text-white/30 uppercase text-[9px] font-bold tracking-widest">Or continue with</span>
             </div>
-            <Button variant="outline" type="button" className="text-white/80 border-white/10 hover:bg-white/5" onClick={() => console.log("UI: Google button clicked")} disabled={isLoading}>
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google icon" className="mr-2 h-4 w-4 " />
+            <Button variant="outline" type="button" size="sm" className="text-white/80 border-white/10 hover:bg-white/5 h-9" onClick={() => console.log("UI: Google button clicked")} disabled={isLoading}>
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google icon" className="mr-2 h-3.5 w-3.5 " />
                 Continue with Google
             </Button>
         </div>
@@ -236,64 +237,90 @@ export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) 
     const toggleForm = () => setIsSignIn((prev) => !prev);
 
     return (
-        <div className="w-full min-h-screen grid md:grid-cols-2 bg-black bg-[radial-gradient(circle_at_20%_20%,rgba(116,5,255,0.05)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(193,144,255,0.05)_0%,transparent_50%)] dark">
+        <div className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-black dark font-outfit">
             <style>{`
-        input[type="password"]::-ms-reveal,
-        input[type="password"]::-ms-clear {
-          display: none;
-        }
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
-        input:-webkit-autofill:active{
-            -webkit-box-shadow: 0 0 0 30px black inset !important;
-            -webkit-text-fill-color: white !important;
-        }
-      `}</style>
-
-            {/* Left Section - Form */}
-            <div className="flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm border-r border-white/5">
-                <div className="w-full max-w-md">
-                    <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
-                </div>
+                input[type="password"]::-ms-reveal,
+                input[type="password"]::-ms-clear {
+                    display: none;
+                }
+                input:-webkit-autofill,
+                input:-webkit-autofill:hover, 
+                input:-webkit-autofill:focus, 
+                input:-webkit-autofill:active {
+                    -webkit-box-shadow: 0 0 0 30px #09090b inset !important;
+                    -webkit-text-fill-color: white !important;
+                }
+            `}</style>
+            
+            {/* Silk Background */}
+            <div className="absolute inset-0 z-0">
+                <Silk
+                    speed={2}
+                    scale={0.5}
+                    noiseIntensity={1.5}
+                    rotation={0.2}
+                />
+               
             </div>
 
-            {/* Right Section - Sidebar (Left & Bottom Aligned) */}
-            <div className="hidden md:flex flex-col items-start justify-end p-12 relative overflow-hidden bg-black/20">
-                {/* Animated Logo - Left-aligned and positioned bottom */}
-                <div className="w-full max-w-[95%] mb-0 overflow-hidden flex justify-start">
-                    <img
-                        src="/Comp-1.gif"
-                        alt="Rive AI Animated Logo"
-                        className="w-full h-auto max-h-[400px] object-contain block z-10 auth-animated-logo"
-                        style={{ position: 'absolute', bottom: '200px', left: '-17px' }}
-                    />
+            {/* Main Auth Card */}
+            <div className="relative z-10 w-full max-w-4xl h-[520px] grid md:grid-cols-[1fr_1fr] bg-black/95 backdrop-blur-4xl border border-white/10 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden m-4 group">
+                {/* Glow Effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/10 to-indigo-500/20 rounded-[2rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000 pointer-events-none" />
+
+                {/* Left Section - Form */}
+                <div className="relative flex flex-col items-center justify-center p-6 md:p-10 border-r border-white/5 bg-black/20">
+                    <div className="w-full max-w-[280px]">
+                        <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
+                    </div>
                 </div>
 
-                <div className="relative w-full max-w-[95%] h-64 group mt-[-30px]">
-                    {/* Animated ambient glow around the banner */}
-                    <div className="absolute -inset-2 bg-gradient-to-r from-[#7405FF]/10 via-transparent to-[#C190FF]/10 rounded-[2rem] blur-xl opacity-30 group-hover:opacity-60 transition-opacity duration-1000" />
+                {/* Right Section - Brand/Logo */}
+                <div className="relative hidden md:flex flex-col items-center justify-center p-10 bg-black">
+                    <div className="relative w-full flex flex-col items-center text-center">
+                        {/* Logo Animation */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[210px] w-full max-w-[220px] flex justify-center perspective-1000 z-0">
+                            <Link href="/">
+                                <img
+                                    src="/Comp-1.gif"
+                                    alt="Rive AI Animated Logo"
+                                    className="w-full h-auto max-h-[420px] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] cursor-pointer hover:scale-105 transition-transform duration-500"
+                                />
+                            </Link>
+                        </div>
 
-                    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/30 backdrop-blur-xl shadow-2xl style={{ position: 'absolute', bottom: '200px', left: '-50px' }}">
-                        <Silk
-                            speed={5}
-                            scale={0.7}
-                            noiseIntensity={1.2}
-                            rotation={0.4}
-                        />
+                        {/* Title & Description */}
+                        <div className="relative z-10 space-y-2 max-w-[320px] mt-24">
+                            <h2 style={{ fontFamily: '"Noto Serif", serif' }} className="text-3xl font-black text-white tracking-tighter">
+                                Enjoy yr journey
+                            </h2>
+                            <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                                Join the elite circle of creators using next-generation intelligence to shape the future of digital art, animation, and storytelling.
+                            </p>
+                            <div className="pt-2 flex items-center justify-center gap-4">
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Engines</span>
+                                    <span className="text-[10px] font-semibold text-zinc-500">v4.2 Turbo</span>
+                                </div>
+                                <div className="h-4 w-[1px] bg-white/10" />
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest leading-none mb-1">Status</span>
+                                    <span className="text-[10px] font-semibold text-zinc-500">Core Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        {/* Interactive overlay details */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-                        <div className="absolute bottom-6 left-10 right-10 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="h-[1px] w-12 bg-white/20" />
-                                <p className="text-[10px] uppercase tracking-[0.4em] text-white/40 font-medium">
-                                    System Core / {isSignIn ? "Sequence 01" : "Access 02"}
-                                </p>
-                            </div>
-                            <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-mono">
-                                LVL-90 // CORE_PROC
-                            </div>
+                    {/* Decorative Bottom Bar */}
+                    <div className="absolute bottom-6 left-10 right-10 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="h-[1px] w-6 bg-white/20" />
+                            <p className="text-[8px] uppercase tracking-[0.2em] text-white/30 font-medium">
+                                System / {isSignIn ? "Login" : "Join"}
+                            </p>
+                        </div>
+                        <div className="text-[8px] uppercase tracking-[0.1em] text-white/20 font-mono">
+                            STX-09 // AUTH_MOD
                         </div>
                     </div>
                 </div>

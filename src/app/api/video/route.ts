@@ -82,6 +82,7 @@ export async function POST(req: Request) {
     const prompt = body.prompt.trim()
     const mode = body.mode === 'image' ? 'image' : 'text'
     const imageBase64 = typeof body.imageBase64 === 'string' ? body.imageBase64 : undefined
+    const negativePrompt = typeof body.negativePrompt === 'string' ? body.negativePrompt : undefined
 
     if (!prompt) {
       return json({ error: 'Missing prompt' }, 400)
@@ -122,6 +123,7 @@ export async function POST(req: Request) {
             prompt,
             num_frames: 49,
             num_inference_steps: 30,
+            negative_prompt: negativePrompt || undefined,
           },
         }
         if (provider) args.provider = provider
@@ -157,6 +159,7 @@ export async function POST(req: Request) {
           parameters: {
             num_frames: 49,
             num_inference_steps: 30,
+            negative_prompt: negativePrompt || undefined,
           },
         }
         if (provider) args.provider = provider

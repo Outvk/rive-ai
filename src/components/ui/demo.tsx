@@ -216,8 +216,8 @@ const HalideLanding: React.FC = () => {
                             <p>[ AI TOOLS ARCHITECTURE ]</p>
                             <p>FOUR POWERFUL AI TOOLS AT YOUR FINGERTIPS</p>
                         </div>
-                        <a href="#tools" className="cta-button">
-                            MONITOR USAGE <ArrowRight className="w-4 h-4" />
+                        <a href="/" className="cta-button">
+                            HOME PAGE <ArrowRight className="w-4 h-4" />
                         </a>
                     </div>
                 </div>

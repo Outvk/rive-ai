@@ -29,17 +29,17 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
                     ? "bg-gradient-to-b from-zinc-950 via-zinc-950/80 to-transparent"
                     : "border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl"
             )}>
-                <div className="relative z-20 flex h-16 items-center justify-end px-8 w-full max-w-6xl mx-auto gap-4">
+                <div className="relative z-20 flex h-16 items-center justify-end px-8 w-full max-w-6xl mx-auto gap-4 ">
 
                     <button
                         onClick={() => setSidebarVersion(sidebarVersion === 'v1' ? 'v2' : 'v1')}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 shadow-inner border border-white/5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+                        className="flex mr-auto items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 shadow-inner border border-white/5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all "
                         title="Switch Sidebar Design"
                     >
                         {sidebarVersion === 'v1' ? (
-                            <><LayoutGrid className="w-3.5 h-3.5" /> Classic Design</>
+                            <><LayoutGrid className="w-3.5 h-3.5" /> Rive V1.0</>
                         ) : (
-                            <><LayoutList className="w-3.5 h-3.5" /> Modern Design</>
+                            <><LayoutList className="w-3.5 h-3.5" /> Rive V2.0</>
                         )}
                     </button>
 
@@ -50,7 +50,7 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
 
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="relative h-8 px-4 rounded-xl overflow-hidden transition-all duration-500 group flex items-center justify-center"
+                            className="relative h-7 px-4 rounded-xl overflow-hidden transition-all duration-500 group flex items-center justify-center"
                         >
                             {/* Layer 1: Border gradient */}
                             <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#7405FF] via-[#15002F] to-[#C190FF]">
@@ -67,7 +67,7 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
                             {/* Content */}
                             <div className="relative flex items-center justify-center gap-1.5">
                                 <PlusIcon className="w-3.5 h-3.5 text-[#E9D5FF] drop-shadow-[0_0_8px_rgba(193,144,255,0.9)]" />
-                                <span className="text-xs font-semibold tracking-tight text-white/90">Buy Credits</span>
+                                <span className="text-xs font-semibold tracking-tight text-white/90">Buy Credits🪙</span>
                             </div>
                             {/* Hover shimmer */}
                             <div className="absolute inset-[1px] opacity-0 transition-opacity duration-300 bg-gradient-to-r from-[#7405FF]/20 via-[#C190FF]/10 to-[#7405FF]/20 group-hover:opacity-100 rounded-xl"></div>
@@ -97,12 +97,12 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-xl font-bold text-zinc-300 uppercase">{userInitial}</span>
+                                            <span className="text-xl font-bold text-zinc-300 uppercase">River</span>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-bold text-white truncate">
-                                            {userEmail?.split('@')[0] || 'User'}
+                                            River
                                         </p>
                                         <p className="text-xs text-zinc-500 truncate">
                                             {userEmail}

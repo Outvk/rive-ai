@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export const runtime = 'nodejs'
 
-export async function GET() {
+export async function GET(req: Request) {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -13,22 +13,53 @@ export async function GET() {
         })
     }
 
-    // Hardcoded reliable ElevenLabs premade voices
-    const female = [
-        { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel', gender: 'female', preview_url: 'https://storage.googleapis.com/eleven-public-prod/premade/voices/21m00Tcm4TlvDq8ikWAM/df6788f9-5c96-470d-8312-aab3b3d8f50a.mp3' },
-        { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella', gender: 'female', preview_url: 'https://storage.googleapis.com/eleven-public-prod/premade/voices/EXAVITQu4vr4xnSDxMaL/04363f5a-7258-4f69-8099-b1ef561e9ece.mp3' },
-        { id: 'MF3mGyEYCl7XYWbV9V6O', name: 'Elli', gender: 'female', preview_url: 'https://storage.googleapis.com/eleven-public-prod/premade/voices/MF3mGyEYCl7XYWbV9V6O/ded4d912-8fed-4c5d-94ea-2a0c0b8fad64.mp3' },
-    ]
+    if (!process.env.ELEVENLABS_API_KEY) {
+        return new Response(JSON.stringify({ error: 'Missing ELEVENLABS_API_KEY' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        })
+    }
 
-    const male = [
-        { id: 'TxGEqnHWrfWFTfGW9XjX', name: 'Josh', gender: 'male', preview_url: 'https://storage.googleapis.com/eleven-public-prod/premade/voices/TxGEqnHWrfWFTfGW9XjX/2e3c55a8-b36e-4e9c-a462-2abf5be57c75.mp3' },
-        { id: 'VR6AewLTigWG4xSOukaG', name: 'Arnold', gender: 'male', preview_url: 'https://storage.googleapis.com/eleven-public-prod/premade/voices/VR6AewLTigWG4xSOukaG/a5d40a8a-9e85-4817-a2e7-b4cf868efa22.mp3' },
-        { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam', gender: 'male', preview_url: 'https://storage.googleapis.com/eleven-public-prod/premade/voices/pNInz6obpgDQGcFmaJgB/e7a28f11-82c3-4208-9a91-cc8cacca6c58.mp3' },
-    ]
+    try {
+        const response = await fetch('https://api.elevenlabs.io/v1/voices', {
+            headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY! }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch voices from ElevenLabs');
+        }
 
-    return new Response(JSON.stringify({ male, female }), {
-        headers: { 'Content-Type': 'application/json' },
-    })
+        const data = await response.json();
+        
+        // Categorize voices by gender label
+        const female = data.voices
+            .filter((v: any) => v.labels?.gender === 'female' || v.name.toLowerCase().includes('female'))
+            .map((v: any) => ({
+                id: v.voice_id,
+                name: v.name,
+                gender: 'female',
+                preview_url: v.preview_url
+            }));
+
+        const male = data.voices
+            .filter((v: any) => v.labels?.gender === 'male' || v.name.toLowerCase().includes('male'))
+            .map((v: any) => ({
+                id: v.voice_id,
+                name: v.name,
+                gender: 'male',
+                preview_url: v.preview_url
+            }));
+
+        return new Response(JSON.stringify({ male, female }), {
+            headers: { 'Content-Type': 'application/json' },
+        });
+    } catch (err: any) {
+        console.error('Failed to fetch voices:', err);
+        return new Response(JSON.stringify({ error: err.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
 }
 
 // POST - generate speech
@@ -76,7 +107,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json()
         text = body.text
-        voiceId = body.voiceId || '21m00Tcm4TlvDq8ikWAM'
+        voiceId = body.voiceId || 'EXAVITQu4vr4xnSDxMaL'
         language = body.language || 'en'
     } catch {
         return new Response(JSON.stringify({ error: 'Invalid request body' }), {

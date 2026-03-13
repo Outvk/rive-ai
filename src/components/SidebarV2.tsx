@@ -107,15 +107,16 @@ export function SidebarV2({
         if (pathname === "/dashboard") setActiveRail("home");
         else if (pathname.startsWith("/dashboard/text") ||
             pathname.startsWith("/dashboard/image") ||
-            pathname.startsWith("/dashboard/video")) setActiveRail("tools");
-        else if (pathname.startsWith("/dashboard/credits")) setActiveRail("account");
+            pathname.startsWith("/dashboard/video") ||
+            pathname.startsWith("/dashboard/enhance")) setActiveRail("tools");
+        else if (pathname.startsWith("/dashboard/credits") || 
+                 pathname.startsWith("/dashboard/billing") || 
+                 pathname.startsWith("/dashboard/pricing")) setActiveRail("account");
         else if (pathname.startsWith("/dashboard/privacy") ||
             pathname.startsWith("/dashboard/security") ||
             pathname.startsWith("/dashboard/terms")) setActiveRail("legal");
         else if (pathname.startsWith("/dashboard/profile") ||
-            pathname.startsWith("/dashboard/billing") ||
             pathname.startsWith("/dashboard/support") ||
-            pathname.startsWith("/dashboard/pricing") ||
             pathname.startsWith("/dashboard/api")) setActiveRail("settings");
     }, [pathname]);
 
@@ -190,6 +191,7 @@ export function SidebarV2({
                             items: [
                                 { icon: <Chat size={16} />, label: "Text Generator", href: "/dashboard/text" },
                                 { icon: <ImageIcon size={16} />, label: "Prompt to Image", href: "/dashboard/image-prompt" },
+                                { icon: <ModelBuilder size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
                                 { icon: <VolumeUp size={16} />, label: "Text to Speech", href: "/dashboard/text-to-speech" },
                                 { icon: <VideoIcon size={16} />, label: "Video Generator", href: "/dashboard/video" },
                             ]
@@ -198,12 +200,19 @@ export function SidebarV2({
                 };
             case "account":
                 return {
-                    title: "Transactions",
+                    title: "Account",
                     sections: [
                         {
                             title: "Credits",
                             items: [
                                 { icon: <Time size={16} />, label: "History Log", href: "/dashboard/credits" },
+                            ]
+                        },
+                        {
+                            title: "Plan & Billing",
+                            items: [
+                                { icon: <View size={16} />, label: "Pricing Plans", href: "/dashboard/pricing" },
+                                { icon: <Money size={16} />, label: "Billing", href: "/dashboard/billing" },
                             ]
                         }
                     ]
@@ -230,9 +239,7 @@ export function SidebarV2({
                             title: "User Profile",
                             items: [
                                 { icon: <UserIcon size={16} />, label: "Profile Edit", href: "/dashboard/profile" },
-                                { icon: <Money size={16} />, label: "Billing", href: "/dashboard/billing" },
                                 { icon: <Help size={16} />, label: "Support & Help", href: "/dashboard/support" },
-                                { icon: <View size={16} />, label: "Pricing Plans", href: "/dashboard/pricing" },
                             ]
                         },
                         {
@@ -259,6 +266,7 @@ export function SidebarV2({
             <aside className="w-16 flex flex-col items-center py-6 gap-3 border-r border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950/20">
                 <div className="mb-6 mt-1">
                     <div className="h-5 w-8 flex items-center justify-center z-10">
+                        
                         <video
                             ref={logoVideoRef}
                             src="/logovd.mp4"
@@ -418,7 +426,7 @@ export function SidebarV2({
                 <div className="absolute left-16 top-6 z-[9999]">
                     <button
                         onClick={() => setIsCollapsed(false)}
-                        className="p-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-r-lg shadow-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all animate-in slide-in-from-left-4"
+                        className="p-2 bg-[#6B0BE4] text-white rounded-r-lg shadow-lg hover:bg-[#C195FF] transition-all animate-in slide-in-from-left-4"
                     >
                         <ChevronDownIcon size={16} className="-rotate-90" />
                     </button>

@@ -64,7 +64,7 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
     const isImageGenerator = pathname === '/dashboard/image-prompt'
     const isSpeech = pathname === '/dashboard/text-to-speech'
     const isVideoGenerator = pathname === '/dashboard/video'
-    const isSettingsMode = ['/dashboard/profile', '/dashboard/billing', '/dashboard/pricing', '/dashboard/privacy', '/dashboard/terms', '/dashboard/api', '/dashboard/docs'].includes(pathname || '')
+    const isSettingsMode = ['/dashboard/profile', '/dashboard/privacy', '/dashboard/terms', '/dashboard/api', '/dashboard/docs'].includes(pathname || '')
     const searchParams = useSearchParams()
     const activeCid = searchParams?.get('cid')
     const router = useRouter()
@@ -359,21 +359,7 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Profile Edit
                     </Link>
 
-                    <Link
-                        href="/dashboard/billing"
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/billing' ? 'bg-white/10 text-white' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
-                    >
-                        <CardStackIcon className="w-4 h-4 text-zinc-400" />
-                        Billing
-                    </Link>
 
-                    <Link
-                        href="/dashboard/pricing"
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/pricing' ? 'bg-white/10 text-white' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
-                    >
-                        <LayoutList className="w-4 h-4 text-zinc-400" />
-                        Pricing Plans
-                    </Link>
 
                     <Link
                         href="/dashboard/api"
@@ -469,6 +455,22 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                     >
                         <ClockIcon className={`w-4 h-4 ${pathname === '/dashboard/credits' ? 'text-indigo-400' : 'text-zinc-400'}`} />
                         Transactions History
+                    </Link>
+
+                    <Link
+                        href="/dashboard/pricing"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/pricing' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <LayoutList className={`w-4 h-4 ${pathname === '/dashboard/pricing' ? 'text-indigo-400' : 'text-zinc-400'}`} />
+                        Pricing Plans
+                    </Link>
+
+                    <Link
+                        href="/dashboard/billing"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/billing' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <CardStackIcon className={`w-4 h-4 ${pathname === '/dashboard/billing' ? 'text-indigo-400' : 'text-zinc-400'}`} />
+                        Billing
                     </Link>
 
                     <Link

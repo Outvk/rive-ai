@@ -393,32 +393,41 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                                         Loading ElevenLabs voices...
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {displayedVoices.map((voice) => (
-                                            <div
-                                                key={voice.id}
-                                                onClick={() => setSelectedVoice(voice)}
-                                                className={`relative flex flex-col p-2.5 rounded-xl border cursor-pointer transition-all ${selectedVoice?.id === voice.id
-                                                    ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
-                                                    : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xs font-semibold truncate">{voice.name}</span>
-                                                    {selectedVoice?.id === voice.id && <Check className="w-3 h-3" />}
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        handlePreview(voice)
-                                                    }}
-                                                    className="mt-2 w-full h-6 flex items-center justify-center rounded-md bg-zinc-800 group-hover:bg-zinc-700 text-[10px] font-medium transition-colors"
-                                                >
-                                                    <Play className="w-2.5 h-2.5 mr-1.5" /> Preview
-                                                </button>
-                                            </div>
-                                        ))}
+                                    <div className="flex gap-2">
+                                        <Select
+                                            value={selectedVoice?.id}
+                                            onValueChange={(value) => {
+                                                const voice = displayedVoices.find(v => v.id === value)
+                                                if (voice) setSelectedVoice(voice)
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-full bg-zinc-900 border-zinc-800 h-10 text-xs text-zinc-100 font-outfit">
+                                                <SelectValue placeholder="Select a voice" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-zinc-900 border-zinc-700 text-zinc-100 font-outfit">
+                                                {displayedVoices.map((voice) => (
+                                                    <div key={voice.id} className="flex items-center group/item pr-2">
+                                                        <SelectItem value={voice.id} className="flex-1 text-xs focus:bg-zinc-800 focus:text-amber-400">
+                                                            {voice.name}
+                                                        </SelectItem>
+                                                        {voice.preview_url && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    handlePreview(voice);
+                                                                }}
+                                                                className="h-6 w-6 flex items-center justify-center rounded-md bg-zinc-800 hover:bg-amber-500/20 text-zinc-500 hover:text-amber-400 transition-colors"
+                                                            >
+                                                                <Play className="w-2.5 h-2.5" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
                                     </div>
                                 )}
                             </div>
@@ -426,13 +435,13 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                             <div className="space-y-2">
                                 <Label className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">Language</Label>
                                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                                    <SelectTrigger className="w-full bg-zinc-900 border-zinc-800 h-9 text-xs">
+                                    <SelectTrigger className="w-full bg-zinc-900 border-zinc-800 h-9 text-xs font-outfit">
                                         <div className="flex items-center gap-2">
                                             <Globe className="w-3.5 h-3.5 text-zinc-500" />
                                             <SelectValue />
                                         </div>
                                     </SelectTrigger>
-                                    <SelectContent className="bg-zinc-900 border-zinc-800">
+                                    <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-100 font-outfit">
                                         {LANGUAGES.map((lang) => (
                                             <SelectItem key={lang.code} value={lang.code} className="text-xs focus:bg-zinc-800">
                                                 {lang.label}
@@ -448,7 +457,7 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                                     value={text}
                                     onChange={(e) => setText(e.target.value)}
                                     placeholder="Enter your script here..."
-                                    className="min-h-[100px] bg-zinc-900 border-zinc-800 text-sm focus-visible:ring-amber-500/40 resize-none"
+                                    className="min-h-[100px] bg-zinc-900 border-zinc-800 text-sm focus-visible:ring-amber-500/40 resize-none font-outfit"
                                 />
                                 <div className="flex justify-between items-center px-1">
                                     <span className="text-[10px] text-zinc-600 font-mono">{text.length} characters</span>

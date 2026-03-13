@@ -56,7 +56,7 @@ export function ImageGeneratorForm({
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             prompt: prompt.trim(),
-                            imageUrl: data.image,
+                            imageUrl: `data:image/png;base64,${data.image}`,
                             settings: { mode: 'v1' }
                         })
                     });

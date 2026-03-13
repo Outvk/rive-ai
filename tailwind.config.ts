@@ -60,9 +60,10 @@ const config: Config = {
 				sans: ['var(--font-geist-sans)', 'system-ui', 'sans-serif'],
 				mono: ['var(--font-geist-mono)', 'monospace'],
 				outfit: ['var(--font-outfit)', 'sans-serif'],
+				noto: ['var(--font-noto)', 'sans-serif'],
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), require("daisyui")],
 };
 export default config;
