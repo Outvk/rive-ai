@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -22,9 +22,11 @@ import {
     Trash2,
     MessageSquare,
     X as CloseIcon,
+    AlertTriangle,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import GradualBlurMemo from "./GradualBlur";
 
 interface AutoResizeProps {
     minHeight: number;
@@ -76,6 +78,35 @@ interface RuixenMoonChatProps {
     onSelectConversation?: (id: string) => void;
     currentConversationId?: string;
 }
+
+// Helper to identify and render color previews in text
+const renderContentWithColors = (content: any): any => {
+    if (typeof content !== 'string') {
+        if (Array.isArray(content)) {
+            return content.map((c, i) => <React.Fragment key={i}>{renderContentWithColors(c)}</React.Fragment>);
+        }
+        return content;
+    }
+
+    const colorRegex = /(#(?:[0-9a-fA-F]{3}){1,2}\b|rgba?\(\d+,\s*\d+,\s*\d+(?:,\s*[0-9.]+)?\)|hsla?\(\d+,\s*\d+%,\s*\d+%(?:,\s*[0-9.]+)?\))/g;
+    const parts = content.split(colorRegex);
+    if (parts.length <= 1) return content;
+
+    return parts.map((part, i) => {
+        if (i % 2 === 1) { // It's a match
+            return (
+                <span key={i} className="inline-flex items-center gap-1.5 align-middle px-1.5 py-0.5 mx-0.5 rounded bg-white/5 border border-white/10 group/color cursor-default transition-colors hover:bg-white/10">
+                    <span
+                        className="w-3.5 h-3.5 rounded-sm border border-white/20 shadow-sm"
+                        style={{ backgroundColor: part }}
+                    />
+                    <span className="font-mono text-[11px] text-zinc-300 select-all">{part}</span>
+                </span>
+            );
+        }
+        return part;
+    });
+};
 
 export default function RuixenMoonChat({
     messages,
@@ -154,9 +185,26 @@ export default function RuixenMoonChat({
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    // Optimized scroll to bottom that doesn't feel laggy
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+        const scrollToBottom = () => {
+            if (messagesEndRef.current) {
+                messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+            }
+        };
+
+        // Only scroll if we are already at the bottom (or very near it)
+        // This prevents the "jump" if the user is reading something earlier
+        const container = messagesEndRef.current?.parentElement?.parentElement;
+        if (container) {
+            const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 150;
+            if (isAtBottom || messages.length <= 1) {
+                scrollToBottom();
+            }
+        } else {
+            scrollToBottom();
+        }
+    }, [messages, isLoading]);
 
     return (
         <div
@@ -282,8 +330,8 @@ export default function RuixenMoonChat({
                 )}
 
                 {/* Messages Area - Absolute to cover full height and scroll */}
-                <div className="absolute inset-0 overflow-y-auto px-4 pt-10 pb-64 no-scrollbar scroll-smooth">
-                    <div className="w-full max-w-3xl mx-auto flex flex-col items-center min-h-[calc(100vh-10rem)] justify-center">
+                <div style={{ backgroundColor: "#09090B" , }} className="absolute inset-0 overflow-y-auto px-4 pt-10 pb-64 no-scrollbar">
+                    <div style={{ backgroundColor: "#09090B" , }} className="w-full max-w-3xl mx-auto flex flex-col items-center min-h-[calc(100vh-10rem)] justify-center">
                         {messages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center text-center">
                                 <motion.div
@@ -291,10 +339,10 @@ export default function RuixenMoonChat({
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.8 }}
                                 >
-                                    <h1 className="text-6xl font-black text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.1)] mb-6 tracking-tighter">
-                                        Ruixen AI
+                                    <h1 style={{ fontFamily: '"Noto Serif", serif', color: "#ddddddff" }} className="text-5xl font-black text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.1)] mb-4 tracking-tighter font-noto">
+                                        Bonsoir river ✧
                                     </h1>
-                                    <p className="text-zinc-400 text-lg max-w-sm font-light leading-relaxed">
+                                    <p className="text-zinc-400 text-xl max-w-sm font-light leading-relaxed font-outfit">
                                         How can I help you elevate your creativity today?
                                     </p>
                                 </motion.div>
@@ -302,131 +350,189 @@ export default function RuixenMoonChat({
                         ) : (
                             <div className="w-full space-y-10 mt-auto">
                                 <AnimatePresence mode="popLayout">
-                                    {messages.filter((m, index, self) =>
-                                        index === self.findIndex((t) => t.id === m.id)
-                                    ).map((m) => (
-                                        <motion.div
-                                            key={m.id || `msg-${Math.random()}`}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className={cn(
-                                                "flex w-full gap-5",
-                                                m.role === "user" ? "flex-row-reverse" : "flex-row text-left"
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                "w-9 h-9 rounded-full flex items-center justify-center text-[10px] shrink-0 shadow-lg transition-transform",
-                                                m.role === "user"
-                                                    ? "bg-indigo-600 font-bold text-white uppercase"
-                                                    : "bg-gradient-to-tr from-indigo-500 to-purple-600 font-black text-white"
-                                            )}>
-                                                {m.role === "user" ? "U" : "R"}
-                                            </div>
+                                    {(() => {
+                                        // Deduplicate messages efficiently
+                                        const uniqueMessages = messages.reduce((acc: any[], current: any) => {
+                                            const x = acc.find(item => item.id === current.id);
+                                            if (!x) return acc.concat([current]);
+                                            return acc;
+                                        }, []);
 
-                                            <div className={cn(
-                                                "flex-1 min-w-0 pt-1",
-                                                m.role === "user" ? "text-right" : "text-left"
-                                            )}>
-                                                <div className={cn(
-                                                    "text-[10px] font-bold uppercase tracking-widest mb-2 opacity-40",
-                                                    m.role === "user" ? "text-indigo-400" : "text-zinc-400"
-                                                )}>
-                                                    {m.role === "user" ? "You" : "Ruixen"}
-                                                </div>
+                                        return uniqueMessages.map((m, idx, arr) => {
+                                            // Hide assistant message while it's still generating (loading)
+                                            if (m.role === "assistant" && isLoading && idx === arr.length - 1) return null;
 
-                                                <div className={cn(
-                                                    "text-base leading-relaxed break-words",
-                                                    m.role === "user" ? "text-zinc-100 font-medium" : "text-zinc-200 font-light"
-                                                )}>
-                                                    {(() => {
-                                                        const rawContent = getMessageContent(m);
-                                                        const fileMatch = rawContent.match(/\[\[CONTEXT_FILE:(.*?)\]\]/);
-                                                        const fileName = fileMatch ? fileMatch[1] : null;
+                                            return (
+                                                <motion.div
+                                                    key={m.id || `msg-${idx}`}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className={cn(
+                                                        "flex w-full gap-5",
+                                                        m.role === "user" ? "justify-end" : "flex-row text-left"
+                                                    )}
+                                                >
+                                                    {m.role !== "user" && (
+                                                        <div className={cn(
+                                                            "w-9 h-9 rounded-full flex items-center justify-center text-[10px] shrink-0 shadow-lg transition-transform",
+                                                            "bg-gradient-to-tr from-indigo-200 to-purple-900 font-black text-white"
+                                                        )}>
+                                                            R
+                                                        </div>
+                                                    )}
 
-                                                        // Remove the metadata and the bulk context from rendering
-                                                        const cleanContent = rawContent
-                                                            .replace(/\[\[CONTEXT_FILE:.*?\]\]/, "")
-                                                            .replace(/\[DOCUMENT_CONTEXT_START\][\s\S]*?\[DOCUMENT_CONTEXT_END\]/, "")
-                                                            .trim();
+                                                    <div className={cn(
+                                                        "flex-1 min-w-0 pt-1",
+                                                        m.role === "user" ? "flex flex-col items-end" : "text-left"
+                                                    )}>
+                                                        {m.role !== "user" && (
+                                                            <div className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-40 text-zinc-400">
+                                                                Ruixen
+                                                            </div>
+                                                        )}
 
-                                                        return (
-                                                            <>
-                                                                {fileName && (
-                                                                    <div className={cn(
-                                                                        "mb-4 p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3 w-fit hover:bg-white/10 transition-colors group/card cursor-default",
-                                                                        m.role === "user" ? "ml-auto" : ""
-                                                                    )}>
-                                                                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                                                                            <Paperclip className="w-4 h-4" />
-                                                                        </div>
-                                                                        <div className={cn(
-                                                                            "flex flex-col",
-                                                                            m.role === "user" ? "items-end" : "items-start"
-                                                                        )}>
-                                                                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none mb-1">Attached Context</span>
-                                                                            <span className="text-xs font-semibold text-zinc-200 truncate max-w-[180px]">{fileName}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                                {!cleanContent && m.role !== 'user' ? (
-                                                                    <div className="flex flex-col gap-2">
-                                                                        <span className="text-xs text-zinc-500 italic">Empty response content from provider...</span>
-                                                                        {m.status && <span className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest">Status: {m.status}</span>}
-                                                                    </div>
-                                                                ) : (
-                                                                    <ReactMarkdown
-                                                                        components={{
-                                                                            p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
-                                                                            h1: ({ children }) => <h1 className="text-2xl font-bold text-white mb-4">{children}</h1>,
-                                                                            h2: ({ children }) => <h2 className="text-xl font-bold text-white mb-3">{children}</h2>,
-                                                                            h3: ({ children }) => <h3 className="text-lg font-bold text-white mb-2">{children}</h3>,
-                                                                            ul: ({ children }) => <ul className="list-disc ml-6 mb-4 space-y-2">{children}</ul>,
-                                                                            ol: ({ children }) => <ol className="list-decimal ml-6 mb-4 space-y-2">{children}</ol>,
-                                                                            li: ({ children }) => <li className="pl-1">{children}</li>,
-                                                                            code: ({ inline, className, children, ...props }: any) => {
-                                                                                const match = /language-(\w+)/.exec(className || "");
-                                                                                return !inline && match ? (
-                                                                                    <div className="relative group/code my-6 rounded-xl overflow-hidden border border-white/10 bg-zinc-950/80 shadow-2xl">
-                                                                                        <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
-                                                                                            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{match[1]}</span>
-                                                                                            <Button
-                                                                                                variant="ghost"
-                                                                                                size="sm"
-                                                                                                className="h-6 px-2 text-[10px] text-zinc-400 hover:text-white"
-                                                                                                onClick={() => navigator.clipboard.writeText(String(children))}
-                                                                                            >
-                                                                                                Copy Code
-                                                                                            </Button>
-                                                                                        </div>
-                                                                                        <pre className="p-5 overflow-x-auto no-scrollbar font-mono text-sm leading-relaxed text-indigo-100">
-                                                                                            {children}
-                                                                                        </pre>
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <code className="bg-white/10 px-1.5 py-0.5 rounded text-indigo-300 font-mono text-[13px]" {...props}>
-                                                                                        {children}
-                                                                                    </code>
-                                                                                );
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        {cleanContent}
-                                                                    </ReactMarkdown>
-                                                                )}
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                                        <div className={cn(
+                                                            "text-lg leading-relaxed break-words font-outfit",
+                                                            m.role === "user" 
+                                                                ? "text-zinc-100 font-medium bg-[#262624] px-5 py-3 rounded-2xl w-fit max-w-[90%] border border-white/5 shadow-sm" 
+                                                                : "text-zinc-300 font-light"
+                                                        )}>
+                                                            {(() => {
+                                                                const rawContent = getMessageContent(m);
+                                                                const fileMatch = rawContent.match(/\[\[CONTEXT_FILE:(.*?)\]\]/);
+                                                                const fileName = fileMatch ? fileMatch[1] : null;
+
+                                                                const cleanContent = rawContent
+                                                                    .replace(/\[\[CONTEXT_FILE:.*?\]\]/, "")
+                                                                    .replace(/\[DOCUMENT_CONTEXT_START\][\s\S]*?\[DOCUMENT_CONTEXT_END\]/, "")
+                                                                    .trim();
+
+                                                                return (
+                                                                    <>
+                                                                        {fileName && (
+                                                                            <div className={cn(
+                                                                                "mb-4 p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3 w-fit hover:bg-white/10 transition-colors group/card cursor-default",
+                                                                                m.role === "user" ? "ml-auto" : ""
+                                                                            )}>
+                                                                                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                                                                    <Paperclip className="w-4 h-4" />
+                                                                                </div>
+                                                                                <div className={cn(
+                                                                                    "flex flex-col",
+                                                                                    m.role === "user" ? "items-end" : "items-start"
+                                                                                )}>
+                                                                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none mb-1">Attached Context</span>
+                                                                                    <span className="text-xs font-semibold text-zinc-200 truncate max-w-[180px]">{fileName}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                        {!cleanContent && m.role !== 'user' ? (
+                                                                            <div className="flex flex-col gap-2">
+                                                                                <span className="text-xs text-zinc-500 italic">Empty response content from provider...</span>
+                                                                                {m.status && <span className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest">Status: {m.status}</span>}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <ReactMarkdown
+                                                                                components={{
+                                                                                    p: ({ children }) => <p className="mb-5 last:mb-0 text-[17px] leading-[1.6]">{renderContentWithColors(children)}</p>,
+                                                                                    h1: ({ children }) => <h1 style={{ fontFamily: '"Noto Serif", serif', color: "#ddddddff" }} className="text-4xl font-black text-white mb-6 mt-8 tracking-tight ">{children}</h1>,
+                                                                                    h2: ({ children }) => <h2 className="text-3xl font-bold text-white mb-5 mt-7 tracking-tight ">{children}</h2>,
+                                                                                    h3: ({ children }) => <h3 className="text-2xl font-semibold text-white mb-4 mt-6 tracking-tight ">{children}</h3>,
+                                                                                    ul: ({ children }) => <ul className="list-disc ml-6 mb-5 space-y-3 text-[16px]">{children}</ul>,
+                                                                                    ol: ({ children }) => <ol className="list-decimal ml-6 mb-5 space-y-3 text-[16px]">{children}</ol>,
+                                                                                    li: ({ children }) => <li className="pl-2">{renderContentWithColors(children)}</li>,
+                                                                                    blockquote: ({ children }) => {
+                                                                                        const getRecursiveText = (node: any): string => {
+                                                                                            if (typeof node === 'string') return node;
+                                                                                            if (Array.isArray(node)) return node.map(getRecursiveText).join("");
+                                                                                            if (node?.props?.children) return getRecursiveText(node.props.children);
+                                                                                            return "";
+                                                                                        };
+                                                                                        const textContent = getRecursiveText(children);
+                                                                                        const isWarning = textContent.includes("WARNING:");
+                                                                                        if (isWarning) {
+                                                                                            return (
+                                                                                                <div className="my-8 relative overflow-hidden rounded-2xl border border-red-500/10 bg-red-500/[0.03] p-6 backdrop-blur-sm group transition-all hover:bg-red-500/[0.05]">
+                                                                                                    <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-red-500/0 via-red-500/40 to-red-500/0" />
+                                                                                                    <div className="flex items-start gap-5">
+                                                                                                        <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+                                                                                                            <AlertTriangle className="h-5 w-5" />
+                                                                                                        </div>
+                                                                                                        <div className="flex flex-col space-y-1">
+                                                                                                            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-500/80">System Warning</span>
+                                                                                                            <div className="text-[14px] leading-relaxed text-zinc-300 font-light prose-zinc prose-invert max-w-none">
+                                                                                                                {children}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            );
+                                                                                        }
+                                                                                        return (
+                                                                                            <div className="border-l-4 border-indigo-500/30 bg-white/5 p-4 my-4 rounded-r-lg text-zinc-300 italic text-sm">
+                                                                                                {children}
+                                                                                            </div>
+                                                                                        );
+                                                                                    },
+                                                                                    code: ({ inline, className, children, ...props }: any) => {
+                                                                                        const text = String(children);
+                                                                                        const match = /language-(\w+)/.exec(className || "");
+                                                                                        const colorRegex = /^#(?:[0-9a-fA-F]{3}){1,2}$|^rgba?\(\d+,\s*\d+,\s*\d+(?:,\s*[0-9.]+)?\)$|^hsla?\(\d+,\s*\d+%,\s*\d+%(?:,\s*[0-9.]+)?\)$/;
+
+                                                                                        if (inline && colorRegex.test(text.trim())) {
+                                                                                            return renderContentWithColors(text.trim());
+                                                                                        }
+
+                                                                                        return !inline && match ? (
+                                                                                            <div className="relative group/code my-6 rounded-xl overflow-hidden border border-white/10 bg-zinc-950/80 shadow-2xl">
+                                                                                                <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+                                                                                                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{match[1]}</span>
+                                                                                                    <Button
+                                                                                                        variant="ghost"
+                                                                                                        size="sm"
+                                                                                                        className="h-6 px-2 text-[10px] text-zinc-400 hover:text-white"
+                                                                                                        onClick={() => navigator.clipboard.writeText(String(children))}
+                                                                                                    >
+                                                                                                        Copy Code
+                                                                                                    </Button>
+                                                                                                </div>
+                                                                                                <pre className="p-5 overflow-x-auto no-scrollbar font-mono text-sm leading-relaxed text-indigo-100">
+                                                                                                    {children}
+                                                                                                </pre>
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            <code className="bg-white/10 px-1.5 py-0.5 rounded text-indigo-300 font-mono text-[13px]" {...props}>
+                                                                                                {renderContentWithColors(children)}
+                                                                                            </code>
+                                                                                        );
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                {cleanContent}
+                                                                            </ReactMarkdown>
+                                                                        )}
+                                                                    </>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            );
+                                        });
+                                    })()}
                                 </AnimatePresence>
                                 {isLoading && (
-                                    <div className="flex w-full gap-4 justify-start">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-black text-white shrink-0 animate-pulse">R</div>
-                                        <div className="bg-black/40 border border-white/10 backdrop-blur-md px-4 py-3 rounded-2xl flex items-center gap-2">
-                                            <Loader2 className="w-3 h-3 animate-spin text-zinc-400" />
-                                            <span className="text-xs text-zinc-400 font-medium">Ruixen is thinking...</span>
+                                    <div className="flex w-full gap-5 justify-start animate-in fade-in slide-in-from-left-2 duration-300">
+                                        <div className="w-9 h-9 flex items-center justify-center shrink-0 mt-1">
+                                            <RuixenLoader isMini />
+                                        </div>
+                                        <div className="flex-1 pt-1">
+                                            <div className="text-[10px] font-bold uppercase tracking-widest mb-2 opacity-40 text-zinc-400">
+                                                Ruixen
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-[11px] text-zinc-500 font-bold uppercase tracking-[0.2em] animate-pulse">Is Thinking...</span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -437,11 +543,11 @@ export default function RuixenMoonChat({
                 </div>
 
                 {/* Fixed Input Bottom Section - Layered on top */}
-                <div className="absolute bottom-0 inset-x-0 w-full flex flex-col items-center pointer-events-none">
+                <div className="absolute bottom-0 inset-x-0 w-full flex flex-col items-center pointer-events-none ">
                     {/* Visual fade-out effect for messages scrolling behind */}
-                    <div className="w-full h-32 bg-gradient-to-t from-black via-black/80 to-transparent" />
+                    <div className="w-full h-32 bg-gradient-to-t from-[#09090B] via-[#09090B]/80 to-transparent" />
 
-                    <div className="w-full max-w-3xl px-4 pb-10 bg-black pointer-events-auto">
+                    <div style={{ backgroundColor: "#09090B" , }} className="w-full max-w-3xl px-4 pb-10 bg-black pointer-events-auto">
                         {/* File Badge */}
                         {selectedFile && (
                             <motion.div
@@ -476,8 +582,8 @@ export default function RuixenMoonChat({
                                 }}
                                 placeholder="Type a message or ask about your PDF..."
                                 className={cn(
-                                    "w-full resize-none border-none",
-                                    "bg-transparent text-zinc-100 text-base",
+                                    "w-full resize-none border-none font-outfit",
+                                    "bg-transparent text-zinc-100 text-[17px]",
                                     "focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0",
                                     "placeholder:text-zinc-500 min-h-[48px]",
                                     "py-4 px-6 overflow-hidden"
@@ -576,6 +682,7 @@ interface QuickActionProps {
     onClick?: () => void;
 }
 
+
 function QuickAction({ icon, label, onClick }: QuickActionProps) {
     return (
         <Button
@@ -588,3 +695,101 @@ function QuickAction({ icon, label, onClick }: QuickActionProps) {
         </Button>
     );
 }
+
+const RUIXEN_LOADER_STYLES = `
+    .loader-wrapper {
+      --fill-color: #6366f1;
+      --shine-color: rgba(99, 102, 241, 0.4);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 10px var(--shine-color));
+    }
+
+    .loader-wrapper #pegtopone {
+      position: absolute;
+      animation: flowe-one 1s linear infinite;
+    }
+
+    .loader-wrapper #pegtoptwo {
+      position: absolute;
+      opacity: 0;
+      transform: scale(0) translateY(-200px) translateX(-100px);
+      animation: flowe-two 1s linear infinite;
+      animation-delay: 0.3s;
+    }
+
+    .loader-wrapper #pegtopthree {
+      position: absolute;
+      opacity: 0;
+      transform: scale(0) translateY(-200px) translateX(100px);
+      animation: flowe-three 1s linear infinite;
+      animation-delay: 0.6s;
+    }
+
+    .loader-wrapper svg g path:first-child {
+      fill: var(--fill-color);
+    }
+
+    @keyframes flowe-one {
+      0% { transform: scale(0.5) translateY(-50px); opacity: 0; }
+      25% { transform: scale(0.75) translateY(-25px); opacity: 1; }
+      50% { transform: scale(1) translateY(0px); opacity: 1; }
+      75% { transform: scale(0.5) translateY(15px); opacity: 1; }
+      100% { transform: scale(0) translateY(30px); opacity: 0; }
+    }
+
+    @keyframes flowe-two {
+      0% { transform: scale(0.5) rotateZ(-10deg) translateY(-50px) translateX(-40px); opacity: 0; }
+      25% { transform: scale(1) rotateZ(-5deg) translateY(-25px) translateX(-20px); opacity: 1; }
+      50% { transform: scale(1) rotateZ(0deg) translateY(0px) translateX(-10px); opacity: 1; }
+      75% { transform: scale(0.5) rotateZ(5deg) translateY(15px) translateX(0px); opacity: 1; }
+      100% { transform: scale(0) rotateZ(10deg) translateY(30px) translateX(10px); opacity: 0; }
+    }
+
+    @keyframes flowe-three {
+      0% { transform: scale(0.5) rotateZ(10deg) translateY(-50px) translateX(40px); opacity: 0; }
+      25% { transform: scale(1) rotateZ(5deg) translateY(-25px) translateX(20px); opacity: 1; }
+      50% { transform: scale(1) rotateZ(0deg) translateY(0px) translateX(10px); opacity: 1; }
+      75% { transform: scale(0.5) rotateZ(-5deg) translateY(15px) translateX(0px); opacity: 1; }
+      100% { transform: scale(0) rotateZ(-10deg) translateY(40px) translateX(-10px); opacity: 0; }
+    }
+`;
+
+const RuixenLoader = React.memo(({ isMini }: { isMini?: boolean }) => {
+    return (
+        <div className="ruixen-custom-loader-container">
+            <style dangerouslySetInnerHTML={{ __html: RUIXEN_LOADER_STYLES }} />
+            <div className="loader-wrapper" style={{
+                transform: `scale(${isMini ? '0.35' : '0.6'})`,
+                width: isMini ? '40px' : '100px',
+                height: isMini ? '40px' : '60px',
+            }}>
+                <svg id="pegtopone" viewBox="0 0 100 100">
+                    <defs>
+                        <filter id="shine-1"><feGaussianBlur stdDeviation="3" /></filter>
+                        <mask id="mask-1"><path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="white" /></mask>
+                        <radialGradient id="grad-1-1" cx="50" cy="66" r="30" gradientTransform="translate(0 35) scale(1 0.5)" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="black" stopOpacity="0.3" /><stop offset="100%" stopColor="black" stopOpacity="0" /></radialGradient>
+                    </defs>
+                    <g>
+                        <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor" />
+                        <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#grad-1-1)" />
+                    </g>
+                </svg>
+                <svg id="pegtoptwo" viewBox="0 0 100 100">
+                    <g>
+                        <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor" />
+                        <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#grad-1-1)" />
+                    </g>
+                </svg>
+                <svg id="pegtopthree" viewBox="0 0 100 100">
+                    <g>
+                        <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="currentColor" />
+                        <path d="M63,37c-6.7-4-4-27-13-27s-6.3,23-13,27-27,4-27,13,20.3,9,27,13,4,27,13,27,6.3-23,13-27,27-4,27-13-20.3-9-27-13Z" fill="url(#grad-1-1)" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+    );
+});

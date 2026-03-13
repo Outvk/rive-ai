@@ -43,7 +43,7 @@ function PricingTableCell({
     return (
         <td
             data-slot="table-cell"
-            className={cn('p-4 align-middle whitespace-nowrap', className)}
+            className={cn('p-4 align-middle whitespace-nowrap font-mono font-normal', className)}
             {...props}
         >
             {children === true ? (
@@ -91,14 +91,14 @@ function PricingTablePlan({
             )}
             {...props}
         >
-            <div className="flex items-center gap-2">
-                <div className="flex items-center justify-center rounded-full border border-white/10 p-1.5">
+            <div className="flex items-center gap-2 flex-nowrap min-w-0">
+                <div className="flex items-center justify-center rounded-full border border-white/10 p-1.5 shrink-0">
                     {Icon && <Icon className="h-3 w-3 text-indigo-400" />}
                 </div>
-                <h3 className="text-zinc-400 font-mono text-xs uppercase tracking-wider">{name}</h3>
+                <h3 className="text-zinc-400 font-mono text-xs uppercase tracking-wider shrink-0">{name}</h3>
                 <Badge
                     variant="secondary"
-                    className="ml-auto rounded-full border border-white/10 bg-zinc-800 text-zinc-300 px-2 py-0.5 text-[10px] font-normal"
+                    className="ml-auto rounded-full border border-white/10 bg-zinc-800 text-zinc-300 px-1.5 py-0 text-[9px] font-normal whitespace-nowrap leading-4"
                 >
                     {badge}
                 </Badge>

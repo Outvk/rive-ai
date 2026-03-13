@@ -5,6 +5,7 @@ import { useSidebar } from "./SidebarContext";
 import { TextToSpeechForm } from "./TextToSpeechForm";
 import { AISpeechGeneration } from "./ui/ai-speech";
 import { SpeakerModerateIcon } from "@radix-ui/react-icons";
+import { AudioEffectsTool } from "./AudioEffectsTool";
 
 interface TextToSpeechContainerProps {
     credits: number;
@@ -50,6 +51,9 @@ export function TextToSpeechContainer({ credits, history }: TextToSpeechContaine
                         initialHistory={history}
                     />
                 </div>
+
+                {/* New Audio Effects Tool */}
+                <AudioEffectsTool />
             </div>
         </div>
     );

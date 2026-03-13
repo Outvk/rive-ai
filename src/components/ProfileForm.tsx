@@ -4,31 +4,88 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { updateProfileSettings } from '@/app/dashboard/profile/actions'
-
+import { User, Mail, Shield, Bell, Key, Palette, LogOut, CheckCircle2, ChevronRight, Zap, Image as LucideImageIcon } from 'lucide-react'
 import { Grainient } from '@/components/Grainient'
 
 export function ProfileForm({
     initialName,
     email,
     initials,
-    avatarUrl: initialAvatarUrl
+    avatarUrl: initialAvatarUrl,
+    initialColor1,
+    initialColor2,
+    initialColor3,
+    initialCardBg
 }: {
     initialName: string,
     email: string,
     initials: string,
-    avatarUrl?: string
+    avatarUrl?: string,
+    initialColor1?: string,
+    initialColor2?: string,
+    initialColor3?: string,
+    initialCardBg?: string
 }) {
     const router = useRouter()
     const [isSaving, setIsSaving] = useState(false)
     const [fullName, setFullName] = useState(initialName)
     const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [activeTab, setActiveTab] = useState('general')
+    
+    // Preferences State
+    const [color1, setColor1] = useState(initialColor1 || '#FF9FFC')
+    const [color2, setColor2] = useState(initialColor2 || '#5227FF')
+    const [color3, setColor3] = useState(initialColor3 || '#B19EEF')
+    const [cardImagePreview, setCardImagePreview] = useState<string | null>(initialCardBg || null)
+    const [cardBgFile, setCardBgFile] = useState<File | null>(null)
+
+    const menuItems = [
+        { id: 'general', label: 'General Info', icon: User },
+        { id: 'preferences', label: 'Preferences', icon: Palette },
+        { id: 'security', label: 'Password & Security', icon: Shield },
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+    ]
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
             const url = URL.createObjectURL(file)
             setPreviewUrl(url)
+        }
+    }
+
+    const handleCardBgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setCardBgFile(file)
+            const url = URL.createObjectURL(file)
+            setCardImagePreview(url)
+        }
+    }
+
+    const handleSavePreferences = async () => {
+        setIsSaving(true)
+        const formData = new FormData()
+        formData.append('color1', color1)
+        formData.append('color2', color2)
+        formData.append('color3', color3)
+        if (cardBgFile) {
+            formData.append('card_bg', cardBgFile)
+        }
+
+        const { error } = await updateProfileSettings(formData)
+
+        if (error) {
+            toast.error(error)
+            setIsSaving(false)
+        } else {
+            toast.success('Preferences saved!', {
+                icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            })
+            router.refresh()
+            setIsSaving(false)
+            setCardBgFile(null)
         }
     }
 
@@ -42,14 +99,15 @@ export function ProfileForm({
             toast.error(error)
             setIsSaving(false)
         } else {
-            toast.success('Profile updated successfully')
+            toast.success('Profile updated successfully', {
+                icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+            })
             router.refresh()
             setIsSaving(false)
             setPreviewUrl(null)
         }
     }
 
-    // Effect to update local state if props change (e.g. from router.refresh)
     useEffect(() => {
         setFullName(initialName)
     }, [initialName])
@@ -59,114 +117,344 @@ export function ProfileForm({
     }, [initialAvatarUrl])
 
     return (
-        <div className="max-w-2xl mt-8">
-            <div className="relative border border-white/5 rounded-2xl p-8 overflow-hidden">
-                {/* Grainient Background */}
-                <div className="absolute inset-0 z-0">
-                    <Grainient
-                        color1="#FF9FFC"
-                        color2="#5227FF"
-                        color3="#B19EEF"
-                        timeSpeed={0.25}
-                        colorBalance={0}
-                        warpStrength={1}
-                        warpFrequency={5}
-                        warpSpeed={2}
-                        warpAmplitude={50}
-                        blendAngle={0}
-                        blendSoftness={0.05}
-                        rotationAmount={500}
-                        noiseScale={2}
-                        grainAmount={0.1}
-                        grainScale={2}
-                        grainAnimated={false}
-                        contrast={1.5}
-                        gamma={1}
-                        saturation={1}
-                        centerX={0}
-                        centerY={0}
-                        zoom={0.9}
-                    />
-                    {/* Add a dark overlay so text is readable */}
-                    <div className="absolute inset-0 bg-zinc-350/70 backdrop-blur-3xl" />
+        <div className="w-full max-w-5xl mx-auto mt-4 h-[700px] bg-[#09090b] border border-zinc-800/80 rounded-2xl flex overflow-hidden shadow-2xl">
+            
+            {/* Sidebar Navigation */}
+            <div className="w-[280px] bg-[#0c0c0e] border-r border-zinc-800/80 p-5 flex flex-col hidden md:flex">
+                <div className="flex items-center gap-4 mb-10 px-2 mt-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 text-white font-bold text-xl uppercase overflow-hidden border-2 border-zinc-800">
+                        {previewUrl || avatarUrl ? (
+                            <img src={previewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            initials
+                        )}
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-zinc-100 truncate w-32">{fullName}</h3>
+                        <p className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase mt-0.5">Pro User</p>
+                    </div>
                 </div>
 
-                {/* Content */}
-                <div className="relative z-10">
-                    <div className="flex items-center gap-6 mb-8">
-                        <div className="relative group">
-                            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-900 flex items-center justify-center shadow-lg shadow-purple-500/20 text-2xl font-bold text-white uppercase overflow-hidden border-2 border-white/10">
-                                {previewUrl || avatarUrl ? (
-                                    <img src={previewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                                ) : (
-                                    initials
-                                )}
+                <nav className="flex-1 space-y-1">
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all ${
+                                activeTab === item.id 
+                                    ? 'bg-zinc-800/80 text-white shadow-sm' 
+                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
+                            }`}
+                        >
+                            <item.icon className="w-4 h-4 shrink-0" />
+                            {item.label}
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="mt-auto border-t border-zinc-800/50 pt-4">
+                    <button className="w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all">
+                        <LogOut className="w-4 h-4 shrink-0" />
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 bg-black overflow-y-auto custom-scrollbar relative">
+                {activeTab === 'general' && (
+                    <div className="min-h-full animate-in fade-in duration-500 relative">
+                        <div className="max-w-2xl p-8 xl:p-10 relative z-10">
+                            <form onSubmit={handleSubmit} className="space-y-8">
+                                
+                                {/* Card with glowing background */}
+                                <div className="relative border border-zinc-800/80 rounded-2xl overflow-hidden p-6 md:p-8 shadow-2xl">
+                                    {/* Grainient Background */}
+                                    <div className="absolute inset-0 z-0 pointer-events-none">
+                                        {cardImagePreview ? (
+                                            <img src={cardImagePreview} alt="Background" className="w-full h-full object-cover opacity-60" />
+                                        ) : (
+                                            <Grainient
+                                                color1={color1}
+                                                color2={color2}
+                                                color3={color3}
+                                                timeSpeed={0.25}
+                                                colorBalance={0}
+                                                warpStrength={1}
+                                                warpFrequency={5}
+                                                warpSpeed={2}
+                                                warpAmplitude={50}
+                                                blendAngle={0}
+                                                blendSoftness={0.05}
+                                                rotationAmount={500}
+                                                noiseScale={2}
+                                                grainAmount={0.1}
+                                                grainScale={2}
+                                                grainAnimated={false}
+                                                contrast={1.5}
+                                                gamma={1}
+                                                saturation={1}
+                                                centerX={0}
+                                                centerY={0}
+                                                zoom={0.9}
+                                            />
+                                        )}
+                                        {/* Dark overlay so text is readable */}
+                                       
+                                    </div>
+
+                                    <div className="relative z-10">
+                                        <div className="mb-8">
+                                            <h2 className="text-2xl font-bold text-black mb-1">User Information</h2>
+                                            <p className="text-sm text-zinc-800">Manage your personal details.</p>
+                                        </div>
+
+                                        {/* Avatar Upload */}
+                                        <div className="flex items-center gap-6">
+                                <div className="relative group cursor-pointer">
+                                    <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center text-3xl font-bold text-zinc-600 uppercase overflow-hidden border border-zinc-700/50 transition duration-300 group-hover:border-violet-500/50 shadow-xl group-hover:shadow-violet-500/20">
+                                        {previewUrl || avatarUrl ? (
+                                            <img src={previewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover:opacity-75 transition" />
+                                        ) : (
+                                            initials
+                                        )}
+                                    </div>
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition duration-300">
+                                        <div className="bg-black/60 rounded-full px-3 py-1.5 text-[10px] font-semibold tracking-wider uppercase text-white backdrop-blur-md border border-white/10">
+                                            Change
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        name="avatar"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
+                                </div>
+                                            <div className="space-y-1">
+                                                <h4 className="text-sm font-medium text-black">Profile Picture</h4>
+                                                <p className="text-xs text-zinc-800 max-w-sm">Upload a professional photo or avatar. JPG, GIF or PNG. Max size 5MB.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <div className="grid grid-cols-1 gap-6">
+                                <div className="space-y-2">
+                                    <label htmlFor="fullName" className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                        Full Name
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <User className="h-4 w-4 text-zinc-500" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            id="fullName"
+                                            name="fullName"
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            required
+                                            minLength={2}
+                                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                        Email Address
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <Mail className="h-4 w-4 text-zinc-600" />
+                                        </div>
+                                        <input
+                                            type="email"
+                                            defaultValue={email}
+                                            disabled
+                                            className="w-full bg-zinc-900/20 border border-zinc-800/50 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-500 cursor-not-allowed"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                            <Shield className="h-4 w-4 text-emerald-500/50" />
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-zinc-600 pl-1">
+                                        Email bound to your auth provider.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-medium text-zinc-900">{fullName}</h2>
-                            <p className="text-sm text-zinc-700 mt-1">{email}</p>
+
+                            <div className="pt-8">
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="w-48 h-12 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(139,92,246,0.2)] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                                >
+                                    {isSaving ? 'Saving Changes...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
                         </div>
                     </div>
+                )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-900 mb-2">
-                                Profile Picture
-                            </label>
-                            <input
-                                type="file"
-                                name="avatar"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                className="w-full text-sm text-zinc-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-500/10 file:text-indigo-900 hover:file:bg-indigo-500/20 transition-all cursor-pointer"
-                            />
+                {activeTab === 'preferences' && (
+                    <div className="max-w-2xl p-8 lg:p-12 animate-in slide-in-from-right-4 duration-500">
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Personalization</h2>
+                            <p className="text-sm text-zinc-500">Customize your Rive interface and profile cards.</p>
                         </div>
 
-                        <div>
-                            <label htmlFor="fullName" className="block text-sm font-medium text-zinc-900 mb-2">
-                                Full Name
-                            </label>
-                            <input
-                                type="text"
-                                id="fullName"
-                                name="fullName"
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                required
-                                minLength={2}
-                                className="w-full bg-zinc-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                                placeholder="Enter your full name"
-                            />
+                        <div className="space-y-10">
+                            {/* Accent Colors */}
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-violet-500/10 rounded-lg">
+                                        <Palette className="w-4 h-4 text-violet-500" />
+                                    </div>
+                                    <h3 className="text-sm font-semibold text-zinc-200">Card Gradient Colors</h3>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="space-y-3 p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Color 1</label>
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 shrink-0">
+                                                <input 
+                                                    type="color" 
+                                                    value={color1} 
+                                                    onChange={(e) => setColor1(e.target.value)}
+                                                    className="absolute inset-[-50%] w-[200%] h-[200%] cursor-pointer border-none p-0"
+                                                />
+                                            </div>
+                                            <input 
+                                                type="text"
+                                                value={color1}
+                                                onChange={(e) => setColor1(e.target.value)}
+                                                className="bg-zinc-950/50 border border-zinc-800 rounded-lg px-2 py-2 text-[10px] font-mono text-zinc-200 uppercase w-20 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-all"
+                                                placeholder="#000000"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3 p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Color 2</label>
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 shrink-0">
+                                                <input 
+                                                    type="color" 
+                                                    value={color2} 
+                                                    onChange={(e) => setColor2(e.target.value)}
+                                                    className="absolute inset-[-50%] w-[200%] h-[200%] cursor-pointer border-none p-0"
+                                                />
+                                            </div>
+                                            <input 
+                                                type="text"
+                                                value={color2}
+                                                onChange={(e) => setColor2(e.target.value)}
+                                                className="bg-zinc-950/50 border border-zinc-800 rounded-lg px-2 py-2 text-[10px] font-mono text-zinc-200 uppercase w-20 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-all"
+                                                placeholder="#000000"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3 p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <label className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Color 3</label>
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-zinc-700 shrink-0">
+                                                <input 
+                                                    type="color" 
+                                                    value={color3} 
+                                                    onChange={(e) => setColor3(e.target.value)}
+                                                    className="absolute inset-[-50%] w-[200%] h-[200%] cursor-pointer border-none p-0"
+                                                />
+                                            </div>
+                                            <input 
+                                                type="text"
+                                                value={color3}
+                                                onChange={(e) => setColor3(e.target.value)}
+                                                className="bg-zinc-950/50 border border-zinc-800 rounded-lg px-2 py-2 text-[10px] font-mono text-zinc-200 uppercase w-20 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-all"
+                                                placeholder="#000000"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Background Image */}
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-indigo-500/10 rounded-lg">
+                                        <LucideImageIcon className="w-4 h-4 text-indigo-500" />
+                                    </div>
+                                    <h3 className="text-sm font-semibold text-zinc-200">Card Background Image</h3>
+                                </div>
+                                <div className="relative group overflow-hidden border-2 border-dashed border-zinc-800 rounded-2xl transition-all hover:border-violet-500/30 hover:bg-violet-500/[0.02] active:scale-[0.99]">
+                                    <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        onChange={handleCardBgChange}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    />
+                                    <div className="p-8 flex flex-col items-center justify-center text-center">
+                                        {cardImagePreview ? (
+                                            <div className="space-y-4">
+                                                <div className="w-32 h-20 rounded-lg overflow-hidden border border-zinc-700 shadow-xl mx-auto">
+                                                    <img src={cardImagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                </div>
+                                                <p className="text-xs text-violet-400 font-medium tracking-wide">Click to replace background</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center mb-4 border border-zinc-800 group-hover:bg-zinc-800 transition-colors">
+                                                    <LucideImageIcon className="w-5 h-5 text-zinc-500 group-hover:text-violet-500" />
+                                                </div>
+                                                <p className="text-sm text-zinc-300 font-medium">Upload Card Image</p>
+                                                <p className="text-xs text-zinc-500 mt-1">Recommended: 800x400 PNG or JPG</p>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-900 mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                defaultValue={email}
-                                disabled
-                                className="w-full bg-zinc-950/30 border border-white/5 rounded-xl px-4 py-3 text-zinc-400 cursor-not-allowed"
-                                title="Email address cannot be changed"
-                            />
-                            <p className="text-[10px] text-zinc-900 mt-2">
-                                Email associated with your Rive AI account. Contact support to change this.
-                            </p>
-                        </div>
-
-                        <div className="pt-4 border-t border-white/5 flex justify-end">
+                        <div className="mt-12 pt-8 border-t border-zinc-800/50 flex justify-between items-center">
                             <button
-                                type="submit"
-                                disabled={isSaving}
-                                className="bg-zinc-100 hover:bg-white text-zinc-900 px-6 py-2.5 rounded-full text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-white/10"
+                                onClick={() => {
+                                    setColor1('#FF9FFC')
+                                    setColor2('#5227FF')
+                                    setColor3('#B19EEF')
+                                    setCardImagePreview(null)
+                                }}
+                                className="text-xs font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
                             >
-                                {isSaving ? 'Saving...' : 'Save Changes'}
+                                Reset to Default
+                            </button>
+                            <button
+                                onClick={handleSavePreferences}
+                                disabled={isSaving}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                            >
+                                {isSaving ? 'Saving...' : 'Save Settings'}
                             </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                )}
+
+                {(activeTab === 'security' || activeTab === 'notifications') && (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-500">
+                        <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-600 mb-6 border border-zinc-800">
+                            {activeTab === 'security' && <Shield className="w-8 h-8 opacity-50" />}
+                            {activeTab === 'notifications' && <Bell className="w-8 h-8 opacity-50" />}
+                        </div>
+                        <h2 className="text-xl font-bold text-white mb-2">
+                            {menuItems.find(m => m.id === activeTab)?.label}
+                        </h2>
+                        <p className="text-zinc-500 max-w-md text-sm">
+                            This panel is currently being upgraded for the Rive V2 platform. Full controls will be available in the next release.
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     )

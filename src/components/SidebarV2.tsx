@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -43,39 +43,21 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/dashboard/actions";
 
-/** ======================= Local SVG paths (inline) ======================= */
-const svgPaths = {
-    p36880f80: "M0.32 0C0.20799 0 0.151984 0 0.109202 0.0217987C0.0715695 0.0409734 0.0409734 0.0715695 0.0217987 0.109202C0 0.151984 0 0.20799 0 0.32V6.68C0 6.79201 0 6.84801 0.0217987 6.8908C0.0409734 6.92843 0.0715695 6.95902 0.109202 0.9782C0.151984 7 0.207989 7 0.32 7L3.68 7C3.79201 7 3.84802 7 3.8908 6.9782C3.92843 6.95903 3.95903 6.92843 3.9782 6.8908C4 6.84801 4 6.79201 4 6.68V4.32C4 4.20799 4 4.1519 4.0218 4.1092C4.04097 4.07157 4.07157 4.04097 4.1092 4.0218C4.15198 4 4.20799 4 4.32 4L19.68 4C19.792 4 19.848 4 19.8908 4.0218C19.9284 4.04097 19.959 4.07157 19.9782 4.1092C20 4.15198 20 4.20799 20 4.32V6.68C20 6.79201 20 6.84802 20.0218 6.8908C20.041 6.92843 20.0716 6.95903 20.1092 6.9782C20.152 7 20.208 7 20.32 7L23.68 7C23.792 7 23.848 7 23.8908 6.9782C23.9284 6.95903 23.959 6.92843 23.9782 6.8908C24 6.84802 24 6.79201 24 6.68V0.32C24 0.20799 24 0.151984 23.9782 0.109202C23.959 0.0715695 23.9284 0.0409734 23.8908 0.0217987C23.848 0 23.792 0 23.68 0H0.32Z",
-    p355df480: "M0.32 16C0.20799 16 0.151984 16 0.109202 15.9782C0.0715695 15.959 0.0409734 15.9284 0.0217987 15.8908C0 15.848 0 15.792 0 15.68V9.32C0 9.20799 0 9.15198 0.0217987 9.1092C0.0409734 9.07157 0.0715695 9.04097 0.0217987 9.02180C0.151984 9 0.207989 9 0.32 9H3.68C3.79201 9 3.84802 9 3.8908 9.0218C3.92843 9.04097 3.95903 9.07157 3.9782 9.1092C4 9.15198 4 9.20799 4 9.32V11.68C4 11.792 4 11.848 4.0218 11.8908C4.04097 11.9284 4.07157 11.959 4.1092 11.9782C4.15198 12 4.20799 12 4.32 12L19.68 12C19.792 12 19.848 12 19.8908 11.9782C19.9284 11.959 19.959 11.9284 19.9782 11.8908C20 11.848 20 11.792 20 11.68V9.32C20 9.20799 20 9.15199 20.0218 9.1092C20.041 9.07157 20.0716 9.04098 20.1092 9.0218C20.152 9 20.208 9 20.32 9H23.68C23.792 9 23.848 9 23.8908 9.0218C23.9284 9.04098 23.959 9.07157 23.9782 9.1092C24 9.15199 24 9.20799 24 9.32V15.68C24 15.792 24 15.848 23.9782 15.8908C23.959 15.9284 23.9284 15.959 23.8908 15.9782C23.848 16 23.792 16 23.68 16H0.32Z",
-    pfa0d600: "M6.32 10C6.20799 10 6.15198 10 6.1092 9.9782C6.07157 9.95903 6.04097 9.92843 6.0218 9.8908C6 9.84802 6 9.79201 6 9.68C6 6.32 6 6.20799 6.0218 6.1092C6.04097 6.07157 6.07157 6.04097 6.1092 6.0218C6.15198 6 6.20799 6 6.32 6L17.68 6C17.792 6 17.848 6 17.8908 6.0218C17.9284 6.04097 17.959 6.07157 17.9782 6.1092C18 6.15198 18 6.20799 18 6.32V9.68C18 9.79201 18 9.84802 17.9782 9.8908C17.959 9.92843 17.9284 9.95903 17.8908 9.9782C17.848 10 17.792 10 17.68 10H6.32Z",
-};
 
 const softSpringEasing = "cubic-bezier(0.25, 1.1, 0.4, 1)";
 
 /* ----------------------------- Components ----------------------------- */
 
-function InterfacesLogoSquare() {
-    return (
-        <div className="aspect-[24/24] grow min-h-px min-w-px overflow-clip relative shrink-0 scale-110">
-            <div className="absolute aspect-[24/16] left-0 right-0 top-1/2 -translate-y-1/2">
-                <svg className="block size-full" fill="none" viewBox="0 0 24 16">
-                    <g>
-                        <path d={svgPaths.p36880f80} fill="#818cf8" />
-                        <path d={svgPaths.p355df480} fill="#818cf8" />
-                        <path d={svgPaths.pfa0d600} fill="#818cf8" />
-                    </g>
-                </svg>
-            </div>
-        </div>
-    );
-}
-
 function BrandBadge() {
     return (
         <div className="relative shrink-0 w-full mb-2">
             <div className="flex items-center p-1 w-full">
-                <div className="h-10 w-8 flex items-center justify-center pl-2">
-                    <InterfacesLogoSquare />
+                <div className="h-10 w-10 flex items-center justify-center">
+                    <img
+                        src="/5.png"
+                        alt="Logo"
+                        className="w-full h-full object-contain scale-[2] origin-center -translate-y-5"
+                    />
                 </div>
                 <div className="px-2 py-1">
                     <div className="font-['Lexend:SemiBold',_sans-serif] text-[18px] text-zinc-50 dark:text-zinc-50 tracking-tight">
@@ -113,6 +95,7 @@ export function SidebarV2({
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [mounted, setMounted] = useState(false);
+    const logoVideoRef = useRef<HTMLVideoElement>(null);
 
     // Prevent hydration mismatch
     useEffect(() => {
@@ -124,13 +107,17 @@ export function SidebarV2({
         if (pathname === "/dashboard") setActiveRail("home");
         else if (pathname.startsWith("/dashboard/text") ||
             pathname.startsWith("/dashboard/image") ||
-            pathname.startsWith("/dashboard/video")) setActiveRail("tools");
-        else if (pathname.startsWith("/dashboard/credits")) setActiveRail("account");
+            pathname.startsWith("/dashboard/video") ||
+            pathname.startsWith("/dashboard/enhance")) setActiveRail("tools");
+        else if (pathname.startsWith("/dashboard/credits") || 
+                 pathname.startsWith("/dashboard/billing") || 
+                 pathname.startsWith("/dashboard/pricing")) setActiveRail("account");
         else if (pathname.startsWith("/dashboard/privacy") ||
+            pathname.startsWith("/dashboard/security") ||
             pathname.startsWith("/dashboard/terms")) setActiveRail("legal");
         else if (pathname.startsWith("/dashboard/profile") ||
-            pathname.startsWith("/dashboard/billing") ||
-            pathname.startsWith("/dashboard/pricing")) setActiveRail("settings");
+            pathname.startsWith("/dashboard/support") ||
+            pathname.startsWith("/dashboard/api")) setActiveRail("settings");
     }, [pathname]);
 
     const toggleExpanded = (itemKey: string) => {
@@ -204,6 +191,7 @@ export function SidebarV2({
                             items: [
                                 { icon: <Chat size={16} />, label: "Text Generator", href: "/dashboard/text" },
                                 { icon: <ImageIcon size={16} />, label: "Prompt to Image", href: "/dashboard/image-prompt" },
+                                { icon: <ModelBuilder size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
                                 { icon: <VolumeUp size={16} />, label: "Text to Speech", href: "/dashboard/text-to-speech" },
                                 { icon: <VideoIcon size={16} />, label: "Video Generator", href: "/dashboard/video" },
                             ]
@@ -212,12 +200,19 @@ export function SidebarV2({
                 };
             case "account":
                 return {
-                    title: "Transactions",
+                    title: "Account",
                     sections: [
                         {
                             title: "Credits",
                             items: [
                                 { icon: <Time size={16} />, label: "History Log", href: "/dashboard/credits" },
+                            ]
+                        },
+                        {
+                            title: "Plan & Billing",
+                            items: [
+                                { icon: <View size={16} />, label: "Pricing Plans", href: "/dashboard/pricing" },
+                                { icon: <Money size={16} />, label: "Billing", href: "/dashboard/billing" },
                             ]
                         }
                     ]
@@ -230,6 +225,7 @@ export function SidebarV2({
                             title: "Documents",
                             items: [
                                 { icon: <Locked size={16} />, label: "Privacy Policy", href: "/dashboard/privacy" },
+                                { icon: <Security size={16} />, label: "Security & Safety", href: "/dashboard/security" },
                                 { icon: <DocumentAdd size={16} />, label: "Terms of Service", href: "/dashboard/terms" },
                             ]
                         }
@@ -243,8 +239,14 @@ export function SidebarV2({
                             title: "User Profile",
                             items: [
                                 { icon: <UserIcon size={16} />, label: "Profile Edit", href: "/dashboard/profile" },
-                                { icon: <Money size={16} />, label: "Billing", href: "/dashboard/billing" },
-                                { icon: <View size={16} />, label: "Pricing Plans", href: "/dashboard/pricing" },
+                                { icon: <Help size={16} />, label: "Support & Help", href: "/dashboard/support" },
+                            ]
+                        },
+                        {
+                            title: "Developers",
+                            items: [
+                                { icon: <Integration size={16} />, label: "API Keys", href: "/dashboard/api" },
+                                { icon: <DocumentAdd size={16} />, label: "API Documentation", href: "/dashboard/docs" },
                             ]
                         }
                     ]
@@ -262,8 +264,24 @@ export function SidebarV2({
         <div className="flex flex-row h-screen bg-white dark:bg-black overflow-hidden select-none border-r border-zinc-200 dark:border-white/5">
             {/* ── RAIL NAVIGATION ── */}
             <aside className="w-16 flex flex-col items-center py-6 gap-3 border-r border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950/20">
-                <div className="mb-4">
-                    <InterfacesLogoSquare />
+                <div className="mb-6 mt-1">
+                    <div className="h-5 w-8 flex items-center justify-center z-10">
+                        
+                        <video
+                            ref={logoVideoRef}
+                            src="/logovd.mp4"
+                            muted
+                            playsInline
+                            className="w-full h-full object-contain scale-[2.2] origin-center -translate-y-1 cursor-pointer"
+                            onMouseEnter={() => logoVideoRef.current?.play()}
+                            onMouseLeave={() => {
+                                if (logoVideoRef.current) {
+                                    logoVideoRef.current.pause();
+                                    logoVideoRef.current.currentTime = 0;
+                                }
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {navRailItems.map((item) => (
@@ -408,7 +426,7 @@ export function SidebarV2({
                 <div className="absolute left-16 top-6 z-[9999]">
                     <button
                         onClick={() => setIsCollapsed(false)}
-                        className="p-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-r-lg shadow-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all animate-in slide-in-from-left-4"
+                        className="p-2 bg-[#6B0BE4] text-white rounded-r-lg shadow-lg hover:bg-[#C195FF] transition-all animate-in slide-in-from-left-4"
                     >
                         <ChevronDownIcon size={16} className="-rotate-90" />
                     </button>

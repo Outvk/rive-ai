@@ -49,6 +49,10 @@ export default async function ProfilePage() {
                     email={user.email || ''}
                     initials={initials}
                     avatarUrl={profile?.avatar_url}
+                    initialColor1={profile?.color1}
+                    initialColor2={profile?.color2}
+                    initialColor3={profile?.color3}
+                    initialCardBg={profile?.card_bg_url}
                 />
             </div>
         </div>

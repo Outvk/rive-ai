@@ -11,7 +11,7 @@ import {
     Star,
     Gift,
 } from 'lucide-react'
-import { Mastercard, GoldCard } from '@/components/BillingCards'
+import { BillingCards3D } from '@/components/BillingCards3D'
 
 export const metadata = {
     title: 'Billing & Subscriptions - Rive AI',
@@ -302,21 +302,15 @@ export default async function BillingPage() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '0.75rem',
+                        overflow: 'hidden',
                     }}
                 >
                     <p className="text-xs text-zinc-500 font-semibold uppercase tracking-widest">
                         Your Cards
                     </p>
-                    <div className="flex flex-wrap gap-4 items-center justify-center py-2">
-                        <div className="transition-transform duration-500 hover:scale-105 hover:-rotate-2">
-                            <Mastercard />
-                        </div>
-                        <div className="transition-transform duration-500 hover:scale-105 hover:rotate-2">
-                            <GoldCard />
-                        </div>
-                    </div>
+                    <BillingCards3D cardholderName={profile?.full_name} />
                     <p className="text-center text-xs text-zinc-600">
-                        Hover cards to flip &amp; see details
+                        Hover cards for 3D effect
                     </p>
                 </div>
             </div>

@@ -31,7 +31,7 @@ export function TextGeneratorForm({
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const [input, setInput] = useState('')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
-    const [convId, setConvId] = useState<string>(() => propConversationId ?? crypto.randomUUID())
+    const [convId] = useState<string>(() => propConversationId ?? crypto.randomUUID())
     const [history, setHistory] = useState<any[]>([])
 
     const fetchHistory = async () => {
@@ -60,11 +60,6 @@ export function TextGeneratorForm({
         fetchHistory()
     }, [])
 
-    useEffect(() => {
-        if (propConversationId && propConversationId !== convId) {
-            setConvId(propConversationId)
-        }
-    }, [propConversationId, convId])
 
     const getMessageContent = (m: any) => {
         if (typeof m.content === 'string') return m.content;
@@ -79,6 +74,7 @@ export function TextGeneratorForm({
 
     const { messages, setMessages, sendMessage: chatAppend, status, error } = useChat<UIMessage>({
         id: convId,
+        initialMessages: initialChatMessages,
         api: '/api/chat',
         onError: (err: Error) => {
             if (err.message.includes('402')) {
@@ -136,14 +132,10 @@ export function TextGeneratorForm({
     const isLoading = status === 'submitted' || status === 'streaming'
 
     useEffect(() => {
-        if (initialChatMessages.length > 0 && messages.length === 0) {
-            try {
-                setMessages(initialChatMessages)
-            } catch (err) {
-                console.error('Failed to load initial messages:', err)
-            }
+        if (initialChatMessages.length > 0) {
+            setMessages(initialChatMessages)
         }
-    }, [propConversationId])
+    }, [initialChatMessages])
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -303,20 +295,20 @@ export function TextGeneratorForm({
                                 <MagicWandIcon className="w-6 h-6 text-white animate-pulse" />
                             </div>
                         </div>
-                        <h1 className="text-2xl sm:text-3xl font-medium text-white mb-3 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                        <h1 className="text-4xl sm:text-5xl font-black text-white mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 font-outfit">
                             How can I help you today?
                         </h1>
-                        <p className="text-zinc-400 text-sm max-w-md font-light leading-relaxed mb-8">
+                        <p className="text-zinc-400 text-base max-w-md font-light leading-relaxed mb-8 font-outfit">
                             Transform your ideas into reality with Llama 3.2. Generate marketing copy, blog posts, or creative content in seconds.
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
                             <button onClick={() => setInput("Write a professional blog post about AI trends in 2024.")} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group">
-                                <p className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">Write a blog post</p>
-                                <p className="text-xs text-zinc-500">About AI trends in 2024</p>
+                                <p className="text-sm font-bold text-zinc-300 group-hover:text-white transition-colors font-outfit">Write a blog post</p>
+                                <p className="text-xs text-zinc-500 font-medium font-outfit">About AI trends in 2024</p>
                             </button>
                             <button onClick={() => setInput("Create 5 catchy headlines for a new fitness app.")} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-left group">
-                                <p className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">Generate headlines</p>
-                                <p className="text-xs text-zinc-500">For a fitness application</p>
+                                <p className="text-sm font-bold text-zinc-300 group-hover:text-white transition-colors font-outfit">Generate headlines</p>
+                                <p className="text-xs text-zinc-500 font-medium font-outfit">For a fitness application</p>
                             </button>
                         </div>
                     </motion.div>
@@ -355,21 +347,21 @@ export function TextGeneratorForm({
                                                         </button>
                                                     )}
                                                 </div>
-                                                <div className={`max-w-xl leading-relaxed whitespace-pre-wrap markdown-content ${m.role === 'user'
-                                                    ? 'text-base text-zinc-100 font-medium'
-                                                    : 'text-lg text-zinc-200 font-light'
+                                                <div className={`max-w-xl leading-relaxed whitespace-pre-wrap markdown-content font-outfit ${m.role === 'user'
+                                                    ? 'text-[17px] text-zinc-100 font-medium'
+                                                    : 'text-lg text-zinc-300 font-light'
                                                     }`}>
                                                     {m.role === 'user' ? (
                                                         content
                                                     ) : (
                                                         <ReactMarkdown
                                                             components={{
-                                                                h3: ({ node, ...props }: any) => <h3 className="text-xl font-bold text-white mt-6 mb-3" {...props} />,
-                                                                strong: ({ node, ...props }: any) => <strong className="font-bold text-white" {...props} />,
-                                                                p: ({ node, ...props }: any) => <p className="mb-4 last:mb-0" {...props} />,
-                                                                ul: ({ node, ...props }: any) => <ul className="list-disc ml-6 mb-4 space-y-2" {...props} />,
-                                                                ol: ({ node, ...props }: any) => <ol className="list-decimal ml-6 mb-4 space-y-2" {...props} />,
-                                                                li: ({ node, ...props }: any) => <li className="pl-1" {...props} />,
+                                                                h3: ({ node, ...props }: any) => <h3 className="text-2xl font-black text-white mt-8 mb-4 font-outfit" {...props} />,
+                                                                strong: ({ node, ...props }: any) => <strong className="font-bold text-white font-outfit" {...props} />,
+                                                                p: ({ node, ...props }: any) => <p className="mb-5 last:mb-0 text-[17px] leading-[1.6]" {...props} />,
+                                                                ul: ({ node, ...props }: any) => <ul className="list-disc ml-6 mb-5 space-y-3" {...props} />,
+                                                                ol: ({ node, ...props }: any) => <ol className="list-decimal ml-6 mb-5 space-y-3" {...props} />,
+                                                                li: ({ node, ...props }: any) => <li className="pl-2 font-outfit" {...props} />,
                                                             }}
                                                         >
                                                             {content}
@@ -426,7 +418,7 @@ export function TextGeneratorForm({
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={currentCredits < 10 ? "Insufficient credits to chat..." : "Type anything..."}
                         disabled={isLoading || currentCredits < 10}
-                        className="w-full bg-transparent px-6 py-5 pr-14 text-base text-zinc-100 placeholder:text-zinc-500 outline-none resize-none min-h-[60px] max-h-[200px] transition-all disabled:opacity-50 font-light"
+                        className="w-full bg-transparent px-6 py-5 pr-14 text-lg text-zinc-100 placeholder:text-zinc-500 outline-none resize-none min-h-[60px] max-h-[200px] transition-all disabled:opacity-50 font-light font-outfit"
                         rows={1}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {

@@ -11,83 +11,14 @@ import { twMerge } from "tailwind-merge";
 import { loginAction, signupAction } from "@/app/login/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Silk from "@/components/ui/Silk";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export interface TypewriterProps {
-    text: string | string[];
-    speed?: number;
-    cursor?: string;
-    loop?: boolean;
-    deleteSpeed?: number;
-    delay?: number;
-    className?: string;
-}
 
-export function Typewriter({
-    text,
-    speed = 100,
-    cursor = "|",
-    loop = false,
-    deleteSpeed = 50,
-    delay = 1500,
-    className,
-}: TypewriterProps) {
-    const [displayText, setDisplayText] = useState("");
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [textArrayIndex, setTextArrayIndex] = useState(0);
-
-    const textArray = Array.isArray(text) ? text : [text];
-    const currentText = textArray[textArrayIndex] || "";
-
-    useEffect(() => {
-        if (!currentText) return;
-
-        const timeout = setTimeout(
-            () => {
-                if (!isDeleting) {
-                    if (currentIndex < currentText.length) {
-                        setDisplayText((prev) => prev + currentText[currentIndex]);
-                        setCurrentIndex((prev) => prev + 1);
-                    } else if (loop) {
-                        setTimeout(() => setIsDeleting(true), delay);
-                    }
-                } else {
-                    if (displayText.length > 0) {
-                        setDisplayText((prev) => prev.slice(0, -1));
-                    } else {
-                        setIsDeleting(false);
-                        setCurrentIndex(0);
-                        setTextArrayIndex((prev) => (prev + 1) % textArray.length);
-                    }
-                }
-            },
-            isDeleting ? deleteSpeed : speed,
-        );
-
-        return () => clearTimeout(timeout);
-    }, [
-        currentIndex,
-        isDeleting,
-        currentText,
-        loop,
-        speed,
-        deleteSpeed,
-        delay,
-        displayText,
-        text,
-    ]);
-
-    return (
-        <span className={className}>
-            {displayText}
-            <span className="animate-pulse">{cursor}</span>
-        </span>
-    );
-}
 
 const labelVariants = cva(
     "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white/70"
@@ -205,10 +136,10 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     };
 
     return (
-        <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-8">
-            <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold text-white">Sign in to your account</h1>
-                <p className="text-balance text-sm text-white/50">Enter your email below to sign in</p>
+        <form onSubmit={handleSignIn} autoComplete="on" className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-1 text-center">
+                <h1 className="text-xl font-bold text-white">Sign in to your account</h1>
+                <p className="text-balance text-xs text-white/50">Enter your email below to sign in</p>
             </div>
             <div className="grid gap-4">
                 <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
@@ -244,10 +175,10 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     };
 
     return (
-        <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-8">
-            <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold text-white">Create an account</h1>
-                <p className="text-balance text-sm text-white/50">Enter your details below to sign up</p>
+        <form onSubmit={handleSignUp} autoComplete="on" className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-1 text-center">
+                <h1 className="text-xl font-bold text-white">Create an account</h1>
+                <p className="text-balance text-xs text-white/50">Enter your details below to sign up</p>
             </div>
             <div className="grid gap-4">
                 <div className="grid gap-1"><Label htmlFor="full_name">Full Name</Label><Input id="full_name" name="full_name" type="text" placeholder="John Doe" required autoComplete="name" /></div>
@@ -263,19 +194,19 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
 
 function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { isSignIn: boolean; onToggle: () => void; isLoading: boolean; setIsLoading: (v: boolean) => void }) {
     return (
-        <div className="mx-auto grid w-[350px] gap-2">
+        <div className="mx-auto grid w-[320px] gap-2">
             {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
-            <div className="text-center text-sm text-white/40">
+            <div className="text-center text-xs text-white/40">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
-                <Button variant="link" className="pl-1 text-white hover:text-white/80 transition-colors" onClick={onToggle} disabled={isLoading}>
+                <Button variant="link" className="h-auto p-0 text-white hover:text-white/80 transition-colors text-xs" onClick={onToggle} disabled={isLoading}>
                     {isSignIn ? "Sign up" : "Sign in"}
                 </Button>
             </div>
-            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-white/10">
-                <span className="relative z-10 bg-black px-2 text-white/30 uppercase text-[10px] font-bold tracking-widest">Or continue with</span>
+            <div className="relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-white/10">
+                <span className="relative z-10 bg-[#09090b] px-2 text-white/30 uppercase text-[9px] font-bold tracking-widest">Or continue with</span>
             </div>
-            <Button variant="outline" type="button" className="text-white/80 border-white/10 hover:bg-white/5" onClick={() => console.log("UI: Google button clicked")} disabled={isLoading}>
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google icon" className="mr-2 h-4 w-4 " />
+            <Button variant="outline" type="button" size="sm" className="text-white/80 border-white/10 hover:bg-white/5 h-9" onClick={() => console.log("UI: Google button clicked")} disabled={isLoading}>
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google icon" className="mr-2 h-3.5 w-3.5 " />
                 Continue with Google
             </Button>
         </div>
@@ -298,93 +229,99 @@ interface AuthUIProps {
     signUpContent?: AuthContentProps;
 }
 
-const defaultSignInContent = {
-    image: {
-        src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
-        alt: "A beautiful abstract background for sign-in"
-    },
-    quote: {
-        text: "Welcome Back! The journey continues.",
-        author: "Rive AI"
-    }
-};
 
-const defaultSignUpContent = {
-    image: {
-        src: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop",
-        alt: "A vibrant, modern space for new beginnings"
-    },
-    quote: {
-        text: "Create an account. A new chapter awaits.",
-        author: "Rive AI"
-    }
-};
 
 export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) {
     const [isSignIn, setIsSignIn] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const toggleForm = () => setIsSignIn((prev) => !prev);
 
-    const finalSignInContent = {
-        image: { ...defaultSignInContent.image, ...signInContent.image },
-        quote: { ...defaultSignInContent.quote, ...signInContent.quote },
-    };
-    const finalSignUpContent = {
-        image: { ...defaultSignUpContent.image, ...signUpContent.image },
-        quote: { ...defaultSignUpContent.quote, ...signUpContent.quote },
-    };
-
-    const currentContent = isSignIn ? finalSignInContent : finalSignUpContent;
-
     return (
-        <div className="w-full min-h-screen md:grid md:grid-cols-2 bg-black border-r border-white/5 dark">
+        <div className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-black dark font-outfit">
             <style>{`
-        input[type="password"]::-ms-reveal,
-        input[type="password"]::-ms-clear {
-          display: none;
-        }
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
-        input:-webkit-autofill:active{
-            -webkit-box-shadow: 0 0 0 30px black inset !important;
-            -webkit-text-fill-color: white !important;
-        }
-      `}</style>
-            <div className="flex h-screen items-center justify-center p-6 md:h-auto md:p-0 md:py-12 bg-black">
-                <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
+                input[type="password"]::-ms-reveal,
+                input[type="password"]::-ms-clear {
+                    display: none;
+                }
+                input:-webkit-autofill,
+                input:-webkit-autofill:hover, 
+                input:-webkit-autofill:focus, 
+                input:-webkit-autofill:active {
+                    -webkit-box-shadow: 0 0 0 30px #09090b inset !important;
+                    -webkit-text-fill-color: white !important;
+                }
+            `}</style>
+            
+            {/* Silk Background */}
+            <div className="absolute inset-0 z-0">
+                <Silk
+                    speed={2}
+                    scale={0.5}
+                    noiseIntensity={1.5}
+                    rotation={0.2}
+                />
+               
             </div>
 
-            <div className="hidden md:flex flex-col p-4 bg-black">
-                <div
-                    className="relative flex-1 bg-cover bg-center transition-all duration-700 ease-in-out border border-white/5 rounded-[2.5rem] overflow-hidden group shadow-2xl"
-                    style={{ backgroundImage: `url(${currentContent.image.src})` }}
-                    key={currentContent.image.src}
-                >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90" />
+            {/* Main Auth Card */}
+            <div className="relative z-10 w-full max-w-4xl h-[520px] grid md:grid-cols-[1fr_1fr] bg-black/95 backdrop-blur-4xl border border-white/10 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden m-4 group">
+                {/* Glow Effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/10 to-indigo-500/20 rounded-[2rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000 pointer-events-none" />
 
-                    <div className="relative z-10 flex h-full flex-col items-center justify-end p-12 pb-24">
-                        <blockquote className="space-y-4 text-center">
-                            <p className="text-2xl font-light text-white tracking-wide">
-                                “<Typewriter
-                                    key={currentContent.quote.text}
-                                    text={currentContent.quote.text}
-                                    speed={60}
-                                    className="text-white"
-                                />”
+                {/* Left Section - Form */}
+                <div className="relative flex flex-col items-center justify-center p-6 md:p-10 border-r border-white/5 bg-black/20">
+                    <div className="w-full max-w-[280px]">
+                        <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
+                    </div>
+                </div>
+
+                {/* Right Section - Brand/Logo */}
+                <div className="relative hidden md:flex flex-col items-center justify-center p-10 bg-black">
+                    <div className="relative w-full flex flex-col items-center text-center">
+                        {/* Logo Animation */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[210px] w-full max-w-[220px] flex justify-center perspective-1000 z-0">
+                            <Link href="/">
+                                <img
+                                    src="/Comp-1.gif"
+                                    alt="Rive AI Animated Logo"
+                                    className="w-full h-auto max-h-[420px] object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] cursor-pointer hover:scale-105 transition-transform duration-500"
+                                />
+                            </Link>
+                        </div>
+
+                        {/* Title & Description */}
+                        <div className="relative z-10 space-y-2 max-w-[320px] mt-24">
+                            <h2 style={{ fontFamily: '"Noto Serif", serif' }} className="text-3xl font-black text-white tracking-tighter">
+                                Enjoy yr journey
+                            </h2>
+                            <p className="text-zinc-400 text-sm font-light leading-relaxed">
+                                Join the elite circle of creators using next-generation intelligence to shape the future of digital art, animation, and storytelling.
                             </p>
-                            <cite className="block text-sm font-medium text-zinc-400 not-italic uppercase tracking-[0.2em]">
-                                — {currentContent.quote.author}
-                            </cite>
-                        </blockquote>
+                            <div className="pt-2 flex items-center justify-center gap-4">
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Engines</span>
+                                    <span className="text-[10px] font-semibold text-zinc-500">v4.2 Turbo</span>
+                                </div>
+                                <div className="h-4 w-[1px] bg-white/10" />
+                                <div className="flex flex-col items-center">
+                                    <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest leading-none mb-1">Status</span>
+                                    <span className="text-[10px] font-semibold text-zinc-500">Core Active</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Brand Overlay */}
-                    <div className="absolute top-12 left-12 z-20 flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                            <span className="text-white text-xl font-bold">R</span>
+                    {/* Decorative Bottom Bar */}
+                    <div className="absolute bottom-6 left-10 right-10 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="h-[1px] w-6 bg-white/20" />
+                            <p className="text-[8px] uppercase tracking-[0.2em] text-white/30 font-medium">
+                                System / {isSignIn ? "Login" : "Join"}
+                            </p>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">Rive AI</span>
+                        <div className="text-[8px] uppercase tracking-[0.1em] text-white/20 font-mono">
+                            STX-09 // AUTH_MOD
+                        </div>
                     </div>
                 </div>
             </div>

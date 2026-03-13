@@ -334,6 +334,16 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
         setSettings({ ...settings, prompt: suggestion })
     }
 
+    const isValidImageUrl = (url: any): boolean => {
+        if (!url || typeof url !== 'string' || url.trim() === '') return false;
+        // Basic check for common valid image sources in this app
+        return url.startsWith('/') || 
+               url.startsWith('http://') || 
+               url.startsWith('https://') || 
+               url.startsWith('data:image/') || 
+               url.startsWith('blob:');
+    }
+
     const togglePlay = () => setIsPlaying(!isPlaying)
     const toggleRotate = () => setIsRotating(!isRotating)
 
@@ -595,6 +605,21 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                     />
                 </div>
 
+                <div className="pt-1">
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-11 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"
+                    >
+                        {isLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Sparkles className="w-4 h-4" />
+                        )}
+                        {isLoading ? 'Generating...' : `Generate ${mode === "image" ? "Image" : "Avatar"}`}
+                    </button>
+                </div>
+
                 {renderSettings()}
 
                 <div className="pt-2 border-t border-zinc-800/50">
@@ -635,20 +660,6 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                 </div>
             </div>
 
-            <div className="mt-auto pt-4">
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-11 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"
-                >
-                    {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        <Sparkles className="w-4 h-4" />
-                    )}
-                    {isLoading ? 'Generating...' : `Generate ${mode === "image" ? "Image" : "Avatar"}`}
-                </button>
-            </div>
         </form>
     )
 
@@ -691,7 +702,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                         >
                             <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-zinc-800">
                                 <Image
-                                    src={item.url || "/placeholder.svg"}
+                                    src={isValidImageUrl(item.url) ? item.url : "/placeholder.svg"}
                                     alt={item.prompt}
                                     fill
                                     className="object-cover"
@@ -745,7 +756,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                             >
                                 {item ? (
                                     <Image
-                                        src={item.url}
+                                        src={isValidImageUrl(item.url) ? item.url : "/placeholder.svg"}
                                         fill
                                         alt={`AI generated ${mode}`}
                                         className={`object-cover w-full h-full transition-opacity duration-500 ${isRotating ? "animate-spin-slow" : ""}`}

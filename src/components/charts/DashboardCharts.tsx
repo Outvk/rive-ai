@@ -48,7 +48,7 @@ const chartConfig = {
     video: { label: "Video", color: COLORS.video },
 } satisfies ChartConfig
 
-import { AnimatedTabs } from '@/components/ui/animated-tabs'
+
 
 export function DashboardCharts({ analytics }: Props) {
     const { trendData, totals, totalGenerations } = analytics
@@ -92,213 +92,6 @@ export function DashboardCharts({ analytics }: Props) {
         return <div className="text-zinc-500 text-sm mt-8">No generation data gathered yet. Try generating some content!</div>
     }
 
-    const tabs = [
-        {
-            id: 'overview',
-            label: 'Overview',
-            content: (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* 1. Area Chart */}
-                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
-                        <div className="flex items-center gap-2 mb-4">
-                            <ActivityLogIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Usage Over Time (Area)</h3>
-                        </div>
-                        <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={trendData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorText" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={COLORS.text} stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor={COLORS.text} stopOpacity={0} />
-                                        </linearGradient>
-                                        <linearGradient id="colorImage" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={COLORS.image} stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor={COLORS.image} stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                                    <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => val.slice(5)} />
-                                    <YAxis stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Area type="monotone" dataKey="text" stroke={COLORS.text} fillOpacity={1} fill="url(#colorText)" strokeWidth={2} />
-                                    <Area type="monotone" dataKey="image" stroke={COLORS.image} fillOpacity={1} fill="url(#colorImage)" strokeWidth={2} />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* 2. Advanced Stacked Bar */}
-                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
-                        <div className="flex items-center gap-2 mb-4">
-                            <LayersIcon className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Requests Breakdown</h3>
-                        </div>
-                        <div className="flex-1 w-full min-h-0">
-                            <ChartContainer config={chartConfig} className="w-full h-full">
-                                <BarChart accessibilityLayer data={trendData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                                    <XAxis
-                                        dataKey="date"
-                                        tickLine={false}
-                                        tickMargin={10}
-                                        axisLine={false}
-                                        tickFormatter={(value) => {
-                                            return new Date(value).toLocaleDateString("en-US", {
-                                                weekday: "short",
-                                            })
-                                        }}
-                                    />
-                                    <Bar dataKey="text" stackId="a" fill="var(--color-text)" radius={[0, 0, 4, 4]} />
-                                    <Bar dataKey="image" stackId="a" fill="var(--color-image)" radius={[0, 0, 0, 0]} />
-                                    <Bar dataKey="audio" stackId="a" fill="var(--color-audio)" radius={[0, 0, 0, 0]} />
-                                    <Bar dataKey="video" stackId="a" fill="var(--color-video)" radius={[4, 4, 0, 0]} />
-                                    <ChartUITooltip
-                                        content={
-                                            <ChartTooltipContent
-                                                hideLabel
-                                                className="w-[180px] bg-zinc-950/95 border-white/10"
-                                                formatter={(value, name, item, index) => (
-                                                    <>
-                                                        <div
-                                                            className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-(--color-bg)"
-                                                            style={
-                                                                {
-                                                                    "--color-bg": `var(--color-${name})`,
-                                                                } as React.CSSProperties
-                                                            }
-                                                        />
-                                                        {chartConfig[name as keyof typeof chartConfig]?.label ||
-                                                            name}
-                                                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium text-white tabular-nums">
-                                                            {value}
-                                                        </div>
-                                                        {index === 3 && (
-                                                            <div className="mt-1.5 flex basis-full items-center border-t border-white/10 pt-1.5 text-xs font-medium text-white">
-                                                                Total
-                                                                <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium text-white tabular-nums">
-                                                                    {Number(item.payload.text || 0) + Number(item.payload.image || 0) + Number(item.payload.audio || 0) + Number(item.payload.video || 0)}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                )}
-                                            />
-                                        }
-                                        cursor={false}
-                                    />
-                                </BarChart>
-                            </ChartContainer>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        {
-            id: 'distribution',
-            label: 'Distribution',
-            content: (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* 4. Pie Chart */}
-                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
-                        <div className="flex items-center gap-2 mb-4">
-                            <PieChartIcon className="w-5 h-5 text-red-500 dark:text-red-400" />
-                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Tools Distribution</h3>
-                        </div>
-                        <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        outerRadius={100}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                        stroke="#18181b"
-                                        strokeWidth={2}
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* 5. Radar Chart */}
-                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
-                        <div className="flex items-center gap-2 mb-4">
-                            <TargetIcon className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Activity Dimensions</h3>
-                        </div>
-                        <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius={100} data={radarData}>
-                                    <PolarGrid stroke="#3f3f46" />
-                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#a1a1aa', fontSize: 12 }} />
-                                    <PolarRadiusAxis angle={30} domain={[0, Math.max(10, totalGenerations)]} tick={false} axisLine={false} />
-                                    <Radar name="Generations" dataKey="A" stroke={COLORS.image} fill={COLORS.image} fillOpacity={0.4} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                </RadarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        {
-            id: 'performance',
-            label: 'Performance',
-            content: (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* 3. Line Chart */}
-                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
-                        <div className="flex items-center gap-2 mb-4">
-                            <ActivityLogIcon className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Credits Usage (Line)</h3>
-                        </div>
-                        <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={trendData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                                    <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => val.slice(5)} />
-                                    <YAxis stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} />
-                                    <Tooltip content={<CustomTooltip />} />
-                                    <Line type="monotone" dataKey="credits" name="Credits" stroke={COLORS.credits} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* Standard Bar for context */}
-                    <div className="bg-white/50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/5 rounded-2xl p-6 backdrop-blur-xl flex flex-col h-[350px]">
-                        <div className="flex items-center gap-2 mb-4">
-                            <BarChartIcon className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">Daily Requests (Bar)</h3>
-                        </div>
-                        <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={trendData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                                    <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => val.slice(5)} />
-                                    <YAxis stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#27272a', opacity: 0.4 }} />
-                                    <Bar dataKey="audio" stackId="a" fill={COLORS.audio} radius={[0, 0, 4, 4]} />
-                                    <Bar dataKey="video" stackId="a" fill={COLORS.video} radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-    ]
-
     return (
         <div className="mt-8 space-y-12">
             {/* Quick Stats Grid - 3D Redesign */}
@@ -337,8 +130,210 @@ export function DashboardCharts({ analytics }: Props) {
                 />
             </div>
 
+            {/* Premium Bento Grid Charts */}
             <div className="pt-8 border-t border-white/5">
-                <AnimatedTabs tabs={tabs} />
+                <div className="grid grid-cols-12 gap-6">
+                    {/* 1. Large Usage Trend - Spans 8 columns */}
+                    <div className="col-span-12 lg:col-span-8 bg-zinc-900/40 border border-white/5 rounded-3xl p-8 backdrop-blur-3xl flex flex-col h-[450px] group transition-all hover:bg-zinc-900/60 hover:border-white/10 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+                                    <ActivityLogIcon className="w-5 h-5 text-indigo-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white tracking-tight">Usage Evolution</h3>
+                                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">Real-time engagement tracking</p>
+                                </div>
+                            </div>
+                            <div className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Live Updates</div>
+                        </div>
+                        <div className="flex-1 w-full min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={trendData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorText" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={COLORS.text} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={COLORS.text} stopOpacity={0} />
+                                        </linearGradient>
+                                        <linearGradient id="colorImage" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={COLORS.image} stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor={COLORS.image} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                    <XAxis dataKey="date" stroke="#ffffff20" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => val.slice(5)} />
+                                    <YAxis stroke="#ffffff20" fontSize={10} tickLine={false} axisLine={false} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Area type="monotone" dataKey="text" stroke={COLORS.text} fillOpacity={1} fill="url(#colorText)" strokeWidth={3} />
+                                    <Area type="monotone" dataKey="image" stroke={COLORS.image} fillOpacity={1} fill="url(#colorImage)" strokeWidth={3} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* 2. Tool Distribution - Spans 4 columns */}
+                    <div className="col-span-12 lg:col-span-4 bg-zinc-900/40 border border-white/5 rounded-3xl p-8 backdrop-blur-3xl flex flex-col h-[450px] transition-all hover:bg-zinc-900/60 hover:border-white/10 shadow-2xl relative">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-2.5 rounded-2xl bg-red-500/10 border border-red-500/20">
+                                <PieChartIcon className="w-5 h-5 text-red-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white tracking-tight">Distribution</h3>
+                                <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">Tool popularity</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={85}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                        stroke="none"
+                                    >
+                                        {pieData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={entry.fill}
+                                                className="hover:opacity-80 transition-opacity cursor-pointer shadow-xl"
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                        content={(props) => {
+                                            const { payload } = props;
+                                            return (
+                                                <div className="flex flex-wrap justify-center gap-4 mt-4">
+                                                    {payload?.map((entry: any, index: number) => (
+                                                        <div key={index} className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{entry.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* 3. Requests Breakdown - Spans 6 columns */}
+                    <div className="col-span-12 lg:col-span-6 bg-zinc-900/40 border border-white/5 rounded-3xl p-8 backdrop-blur-3xl flex flex-col h-[400px] transition-all hover:bg-zinc-900/60 hover:border-white/10 shadow-2xl">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+                                <LayersIcon className="w-5 h-5 text-amber-500" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white tracking-tight">Breakdown</h3>
+                                <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">Daily request types</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full min-h-0">
+                            <ChartContainer config={chartConfig} className="w-full h-full">
+                                <BarChart accessibilityLayer data={trendData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                    <XAxis
+                                        dataKey="date"
+                                        tickLine={false}
+                                        tickMargin={10}
+                                        axisLine={false}
+                                        tick={{ fill: "#ffffff20", fontSize: 10 }}
+                                        tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", { weekday: "short" })}
+                                    />
+                                    <Bar dataKey="text" stackId="a" fill="var(--color-text)" radius={[0, 0, 4, 4]} />
+                                    <Bar dataKey="image" stackId="a" fill="var(--color-image)" radius={[0, 0, 0, 0]} />
+                                    <Bar dataKey="audio" stackId="a" fill="var(--color-audio)" radius={[0, 0, 0, 0]} />
+                                    <Bar dataKey="video" stackId="a" fill="var(--color-video)" radius={[4, 4, 0, 0]} />
+                                    <ChartUITooltip
+                                        content={
+                                            <ChartTooltipContent
+                                                hideLabel
+                                                className="bg-black/80 border-white/10 backdrop-blur-xl"
+                                                formatter={(value, name) => (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-2 w-2 rounded-full bg-(--color-bg)" style={{ "--color-bg": `var(--color-${name})` } as any} />
+                                                        <span className="text-xs font-bold text-white capitalize">{name}</span>
+                                                        <span className="ml-auto text-xs font-mono text-zinc-400">{value}</span>
+                                                    </div>
+                                                )}
+                                            />
+                                        }
+                                        cursor={false}
+                                    />
+                                </BarChart>
+                            </ChartContainer>
+                        </div>
+                    </div>
+
+                    {/* 4. Activity Dimensions - Spans 6 columns */}
+                    <div className="col-span-12 lg:col-span-6 bg-zinc-900/40 border border-white/5 rounded-3xl p-8 backdrop-blur-3xl flex flex-col h-[400px] transition-all hover:bg-zinc-900/60 hover:border-white/10 shadow-2xl">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/20">
+                                <TargetIcon className="w-5 h-5 text-purple-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white tracking-tight">Dimensions</h3>
+                                <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest">Multi-tool activity radar</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <RadarChart cx="50%" cy="50%" outerRadius={110} data={radarData}>
+                                    <PolarGrid stroke="#ffffff08" />
+                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#ffffff40', fontSize: 10, fontWeight: 700 }} />
+                                    <PolarRadiusAxis angle={30} domain={[0, Math.max(10, totalGenerations)]} tick={false} axisLine={false} />
+                                    <Radar name="Generations" dataKey="A" stroke={COLORS.image} fill={COLORS.image} fillOpacity={0.3} strokeWidth={3} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                </RadarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* 5. Credit Efficiency - Full Width Footer Card */}
+                    <div className="col-span-12 bg-zinc-900/40 border border-white/5 rounded-3xl p-8 backdrop-blur-3xl flex flex-col lg:flex-row items-center gap-10 transition-all hover:bg-zinc-900/60 hover:border-white/10 shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/[0.03] to-transparent pointer-events-none" />
+                        <div className="w-full lg:w-1/3 space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                                    <ActivityLogIcon className="w-5 h-5 text-emerald-500" />
+                                </div>
+                                <h3 className="text-lg font-bold text-white tracking-tight">Credit Efficiency</h3>
+                            </div>
+                            <p className="text-sm text-zinc-400 leading-relaxed font-light">Your consumption trends show high stability in credit usage across all integrated AI models.</p>
+                            <div className="pt-4 flex gap-6">
+                                <div>
+                                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Efficiency</div>
+                                    <div className="text-xl font-bold text-white">94.2%</div>
+                                </div>
+                                <div>
+                                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Projection</div>
+                                    <div className="text-xl font-bold text-emerald-400">+12%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full h-[200px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={trendData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                    <XAxis dataKey="date" hide />
+                                    <YAxis hide domain={['auto', 'auto']} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Line type="monotone" dataKey="credits" name="Credits" stroke={COLORS.credits} strokeWidth={3} dot={false} activeDot={{ r: 6, fill: COLORS.credits, stroke: '#000', strokeWidth: 2 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )
