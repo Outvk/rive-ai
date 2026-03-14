@@ -3,11 +3,19 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Sparkles, Video, AudioLines, ArrowRight } from 'lucide-react';
+import { Sparkles, Video, AudioLines, ArrowRight, FileText, Box, Maximize2 } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const features = [
+   
+    {
+        icon: FileText,
+        title: "Text Reasoning",
+        description: "Advanced Llama 3.2 intelligence for complex reasoning, creative writing, and deep technical assistance.",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200",
+        stats: { accuracy: "97%", speed: "0.1s" }
+    },
     {
         icon: Sparkles,
         title: "Image Generation",
@@ -16,7 +24,6 @@ const features = [
         video: "/image.mp4",
         stats: { accuracy: "99%", speed: "0.4s" }
     },
-
     {
         icon: Video,
         title: "Video Generation",
@@ -33,6 +40,22 @@ const features = [
         video: "/sound.mp4",
         stats: { accuracy: "98%", speed: "0.2s" }
     },
+
+    {
+        icon: Box,
+        title: "3D Generation",
+        description: "Convert textual descriptions or 2D images into high-fidelity 3D assets ready for games, AR, and spatial computing.",
+        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200",
+        stats: { accuracy: "94%", speed: "2.4s" }
+    },
+    {
+        icon: Maximize2,
+        title: "Neural Enhance",
+        description: "Professional-grade background removal, upscaling, and restorative AI to transform any visual asset into a masterpiece.",
+        image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200",
+        stats: { accuracy: "99%", speed: "0.8s" }
+    },
+
 
 ];
 

@@ -182,23 +182,49 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                     ) : (
                         <div className="flex flex-col gap-1">
                             {recentImages.map((gen) => (
-                                <Link
+                                <div
                                     key={gen.id}
-                                    href={`/dashboard/image-prompt?gid=${gen.id}`}
-                                    className="group px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all"
+                                    className="group px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all relative"
                                 >
-                                    <p className="text-xs font-medium text-zinc-300 truncate mb-0.5 group-hover:text-white transition-colors">
-                                        {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
-                                    </p>
-                                    <div className="mt-1">
-                                        <img
-                                            src={`data:image/png;base64,${gen.result}`}
-                                            alt="thumb"
-                                            className="w-full h-auto rounded-sm"
-                                        />
+                                    <div className="flex items-start justify-between">
+                                        <Link href={`/dashboard/image-prompt?gid=${gen.id}`} className="flex-1 pr-4">
+                                            <p className="text-xs font-medium text-zinc-300 truncate mb-0.5 group-hover:text-white transition-colors">
+                                                {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
+                                            </p>
+                                        </Link>
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation()
+                                                e.preventDefault()
+                                                const confirmed = window.confirm('Delete this image?')
+                                                if (!confirmed) return
+
+                                                try {
+                                                    const res = await fetch(`/api/history/delete?id=${gen.id}`, { method: 'DELETE' })
+                                                    if (!res.ok) throw new Error('Failed to delete')
+                                                    router.refresh()
+                                                } catch (err) {
+                                                    console.error('Delete error:', err)
+                                                    alert('Failed to delete image.')
+                                                }
+                                            }}
+                                            className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                            title="Delete image"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                                        </button>
                                     </div>
+                                    <Link href={`/dashboard/image-prompt?gid=${gen.id}`}>
+                                        <div className="mt-1">
+                                            <img
+                                                src={`data:image/png;base64,${gen.result}`}
+                                                alt="thumb"
+                                                className="w-full h-auto rounded-sm ring-1 ring-white/10"
+                                            />
+                                        </div>
+                                    </Link>
                                     <p className="text-[10px] text-zinc-700 mt-1">{timeAgo(gen.created_at)}</p>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     )}
@@ -237,14 +263,39 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                             {recentSpeech.map((gen) => (
                                 <div
                                     key={gen.id}
-                                    className="group px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all"
+                                    className="group px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all relative"
                                 >
-                                    <p className="text-xs font-medium text-zinc-300 truncate mb-1.5 group-hover:text-white transition-colors">
-                                        {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
-                                    </p>
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1 pr-4">
+                                            <p className="text-xs font-medium text-zinc-300 truncate mb-1.5 group-hover:text-white transition-colors">
+                                                {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation()
+                                                e.preventDefault()
+                                                const confirmed = window.confirm('Delete this audio?')
+                                                if (!confirmed) return
+
+                                                try {
+                                                    const res = await fetch(`/api/history/delete?id=${gen.id}`, { method: 'DELETE' })
+                                                    if (!res.ok) throw new Error('Failed to delete')
+                                                    router.refresh()
+                                                } catch (err) {
+                                                    console.error('Delete error:', err)
+                                                    alert('Failed to delete audio.')
+                                                }
+                                            }}
+                                            className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                            title="Delete speech"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                                        </button>
+                                    </div>
                                     <audio
                                         controls
-                                        className="w-full h-7"
+                                        className="w-full h-7 mt-1 opacity-80 group-hover:opacity-100 transition-opacity"
                                         src={`data:audio/mpeg;base64,${gen.result}`}
                                     />
                                     <p className="text-[10px] text-zinc-700 mt-1">{timeAgo(gen.created_at)}</p>

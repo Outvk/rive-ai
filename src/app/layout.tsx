@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import MorphPanel from "@/components/ui/ai-input";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthLoaderProvider } from "@/components/AuthLoader";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -44,9 +45,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <MorphPanel />
-          <Toaster theme="dark" position="bottom-right" />
+          <AuthLoaderProvider>
+            {children}
+            <MorphPanel />
+            <Toaster theme="dark" position="bottom-right" />
+          </AuthLoaderProvider>
         </ThemeProvider>
       </body>
     </html>

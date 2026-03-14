@@ -334,13 +334,12 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                                 filteredHistory.map((item) => (
                                     <div
                                         key={item.id}
-                                        onClick={() => handleSelectHistoryItem(item)}
-                                        className={`p-3 rounded-xl border transition-all cursor-pointer group ${selectedItemId === item.id
+                                        className={`p-3 rounded-xl border transition-all cursor-pointer group relative ${selectedItemId === item.id
                                             ? 'bg-amber-500/10 border-amber-500/30'
                                             : 'bg-zinc-900/30 border-zinc-800/50 hover:border-zinc-700'
                                             }`}
                                     >
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3" onClick={() => handleSelectHistoryItem(item)}>
                                             <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 transition-colors">
                                                 <Volume2 className="w-4 h-4" />
                                             </div>
@@ -348,6 +347,34 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                                                 <p className="text-xs text-zinc-200 truncate font-medium">{item.prompt}</p>
                                                 <p className="text-[10px] text-zinc-500 mt-0.5">{formatDate(item.created_at)}</p>
                                             </div>
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation()
+                                                    e.preventDefault()
+                                                    const confirmed = window.confirm('Delete this from history?')
+                                                    if (!confirmed) return
+
+                                                    try {
+                                                        const res = await fetch(`/api/history/delete?id=${item.id}&table=ai_generations`, { method: 'DELETE' })
+                                                        if (!res.ok) throw new Error('Failed to delete')
+
+                                                        setHistory(prev => prev.filter(i => i.id !== item.id))
+                                                        if (selectedItemId === item.id) {
+                                                            setAudioBase64(null)
+                                                            setSelectedItemId(null)
+                                                        }
+                                                        toast.success("Audio removed")
+                                                        router.refresh()
+                                                    } catch (err) {
+                                                        console.error('Delete error:', err)
+                                                        toast.error('Failed to delete item.')
+                                                    }
+                                                }}
+                                                className="p-1.5 rounded-md text-zinc-600 hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover:opacity-100 transition-all"
+                                                title="Delete audio"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
                                         </div>
                                     </div>
                                 ))

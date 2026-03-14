@@ -63,7 +63,7 @@ export default function RuixenMoonChat() {
     return (
         <div className="w-full max-w-2xl">
             {/* Input Box Section */}
-            <div className="relative bg-black/60 backdrop-blur-md rounded-xl border border-neutral-700 overflow-hidden">
+            <div className="relative bg-black/60 backdrop-blur-md rounded-xl border-neutral-700 overflow-hidden">
                 <Textarea
                     ref={textareaRef}
                     value={message}
@@ -130,7 +130,7 @@ function QuickAction({ icon, label }: QuickActionProps) {
     return (
         <Button
             variant="outline"
-            className="flex items-center gap-1.5 h-8 rounded-full border-neutral-700 bg-black/50 text-neutral-300 hover:text-white hover:bg-neutral-700 px-3"
+            className="flex items-center gap-1.5 h-8 rounded-full  bg-black/50 text-neutral-300 hover:text-white hover:bg-neutral-500 px-3"
         >
             {icon}
             <span className="text-[10px] sm:text-xs">{label}</span>

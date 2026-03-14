@@ -5,7 +5,7 @@ import { TextIcon, ImageIcon, SpeakerLoudIcon, ArrowRightIcon, DashboardIcon } f
 import HalideLanding from '@/components/ui/demo'
 import { fetchOverviewAnalytics } from '@/app/dashboard/overview-actions'
 import { DashboardCharts } from '@/components/charts/DashboardCharts'
-import { FileText, MessageSquare, Image, Volume2, Video, ArrowRight } from "lucide-react"
+import { FileText, MessageSquare, Image, Volume2, Video, ArrowRight, Box } from "lucide-react"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { cn } from "@/lib/utils"
 import { useSidebar } from '@/components/SidebarContext'
@@ -23,13 +23,13 @@ export default function DashboardPage() {
         <div className="max-w-5xl mx-auto space-y-10 fade-in pb-20">
 
             {/* Page Header */}
-            <div>
-                <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-1 flex items-center gap-2">
-                    <DashboardIcon className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+            <div className="space-y-1">
+                <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3 font-outfit">
+                    <DashboardIcon className="w-7 h-7 text-indigo-500" />
                     Overview
                 </h1>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Welcome back! Here's a summary of your AI studio activity.
+                <p className="text-base text-zinc-500 font-medium">
+                    Welcome back! Here's a summary of your premium AI studio activity.
                 </p>
             </div>
 
@@ -44,9 +44,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Tools Grid Header */}
-            <div className="mt-16 mb-6">
-                <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">AI Studio Tools</h2>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Select a tool to start generating content.</p>
+            <div className="mt-20 mb-8">
+                <h2 className="text-2xl font-bold text-white tracking-tight font-outfit">Creative Engines</h2>
+                <p className="text-zinc-500 font-medium mt-1">Select a specialized neural tool to start your workflow.</p>
             </div>
 
             {/* Conditional Tools Design */}
@@ -173,13 +173,21 @@ function GlowingGrid() {
                 badge="Premium"
             />
             <GridItem
-                area="md:[grid-area:3/1/4/13] xl:[grid-area:2/8/3/13]"
+                area="md:[grid-area:3/1/4/7] xl:[grid-area:2/5/3/9]"
                 icon={<Video className="h-5 w-5" />}
                 title="Instant Video"
                 description="Transform your prompts and scripts into professional video content."
-                href="#"
+                href="/dashboard/video"
                 badge="Soon"
                 disabled
+            />
+            <GridItem
+                area="md:[grid-area:3/7/4/13] xl:[grid-area:2/9/3/13]"
+                icon={<Box className="h-5 w-5" />}
+                title="3D Generation"
+                description="Convert text or images into high-fidelity 3D assets for games and AR."
+                href="/dashboard/3d"
+                badge="New"
             />
         </ul>
     );
@@ -221,10 +229,10 @@ const GridItem = ({ area, icon, title, description, href, badge, disabled }: Gri
                                 )}
                             </div>
                             <div className="space-y-3">
-                                <h3 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                                <h3 className="text-xl font-bold tracking-tight text-white font-outfit">
                                     {title}
                                 </h3>
-                                <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+                                <p className="text-sm leading-relaxed text-zinc-500 font-medium">
                                     {description}
                                 </p>
                             </div>

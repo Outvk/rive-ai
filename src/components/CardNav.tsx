@@ -5,6 +5,8 @@ import { gsap } from 'gsap';
 import { GoArrowUpRight } from 'react-icons/go';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthLoader } from '@/components/AuthLoader';
+import { useRouter } from 'next/navigation';
 import './CardNav.css';
 
 interface NavLink {
@@ -42,6 +44,16 @@ export default function CardNav({
     const navRef = useRef<HTMLElement>(null);
     const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
     const tlRef = useRef<gsap.core.Timeline | null>(null);
+    const { showLoader } = useAuthLoader();
+    const router = useRouter();
+
+    const handleLoginClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        showLoader("Preparing your creative session...");
+        setTimeout(() => {
+            router.push('/login');
+        }, 100);
+    };
 
     const calculateHeight = () => {
         const navEl = navRef.current;
@@ -204,7 +216,11 @@ export default function CardNav({
                         <span className="text-white font-bold tracking-wide text-lg hidden sm:block">  </span>
                     </Link>
 
-                    <Link href="/login" className="relative h-11 px-7 rounded-xl overflow-hidden transition-all duration-500 group flex items-center justify-center">
+                    <Link 
+                        href="/login" 
+                        onClick={handleLoginClick}
+                        className="relative h-11 px-7 rounded-xl overflow-hidden transition-all duration-500 group flex items-center justify-center border-none"
+                    >
                         <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#7405FF] via-[#15002F] to-[#C190FF]">
                             <div className="absolute inset-0 bg-[#15002F] rounded-xl opacity-90"></div>
                         </div>
@@ -250,6 +266,11 @@ export default function CardNav({
                                     <Link
                                         key={`${lnk.label}-${i}`}
                                         href={lnk.href}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            showLoader(`Opening ${lnk.label}...`);
+                                            setTimeout(() => router.push(lnk.href), 100);
+                                        }}
                                         className="nav-card-link"
                                         aria-label={lnk.ariaLabel}
                                     >

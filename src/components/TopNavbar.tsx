@@ -23,12 +23,7 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
 
     return (
         <>
-            <header className={cn(
-                "sticky top-0 z-50 w-full transition-all duration-300",
-                sidebarVersion === 'v2'
-                    ? "bg-gradient-to-b from-zinc-950 via-zinc-950/80 to-transparent"
-                    : "border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl"
-            )}>
+            <header className="sticky top-0 z-50 w-full bg-transparent transition-all duration-300">
                 <div className="relative z-20 flex h-16 items-center justify-end px-8 w-full max-w-6xl mx-auto gap-4 ">
 
                     <button
@@ -127,7 +122,7 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
                         target="parent"
                         position="top"
                         height="4rem"
-                        strength={3}
+                        strength={1}
                         divCount={10}
                         curve="ease-out"
                         exponential

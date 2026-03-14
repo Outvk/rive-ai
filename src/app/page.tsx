@@ -6,8 +6,20 @@ import FloatingLines from '@/components/FloatingLines';
 import RuixenMoonChat from '@/components/ui/ruixen-moon-chat';
 import HorizontalShowcase from '@/components/ui/HorizontalShowcase';
 import GradualBlur from '@/components/ui/GradualBlur';
+import { useAuthLoader } from '@/components/AuthLoader';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
+  const { showLoader } = useAuthLoader();
+  const router = useRouter();
+
+  const handleStartClick = () => {
+    showLoader("Initializing your creative workspace...");
+    setTimeout(() => {
+      router.push('/login');
+    }, 100);
+  };
+
   const navItems = [
     {
       label: "Product",
@@ -99,7 +111,10 @@ export default function LandingPage() {
             Join thousands of developers building the future of the web with Rive AI.
           </p>
           <div className="flex justify-center gap-4">
-            <button className="px-8 py-3 rounded-xl bg-[#7405FF] text-white font-semibold hover:bg-[#C190FF] transition-colors">
+            <button 
+              onClick={handleStartClick}
+              className="px-8 py-3 rounded-xl bg-[#7405FF] text-white font-semibold hover:bg-[#C190FF] transition-colors"
+            >
               Get Started
             </button>
           </div>

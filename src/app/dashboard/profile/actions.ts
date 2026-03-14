@@ -21,9 +21,14 @@ export async function updateProfileSettings(formData: FormData) {
     const color2 = formData.get('color2') as string
     const color3 = formData.get('color3') as string
     const cardBgFile = formData.get('card_bg') as File | null
+    const removeCardBg = formData.get('remove_card_bg') === 'true'
 
     let avatarUrl = undefined
-    let cardBgUrl = undefined
+    let cardBgUrl: string | null | undefined = undefined
+
+    if (removeCardBg) {
+        cardBgUrl = null
+    }
 
     if (avatarFile && avatarFile.size > 0) {
         // Upload to Supabase Storage
@@ -54,7 +59,7 @@ export async function updateProfileSettings(formData: FormData) {
         const filePath = `${fileName}`
 
         const { error: uploadError } = await supabase.storage
-            .from('avatars') // Reusing avatars bucket or assuming 'backgrounds' exists. Let's stick to 'avatars' for simplicity if no other bucket
+            .from('avatars') 
             .upload(filePath, cardBgFile)
 
         if (uploadError) {
@@ -78,7 +83,7 @@ export async function updateProfileSettings(formData: FormData) {
     if (color1) updateData.color1 = color1
     if (color2) updateData.color2 = color2
     if (color3) updateData.color3 = color3
-    if (cardBgUrl) updateData.card_bg_url = cardBgUrl
+    if (cardBgUrl !== undefined) updateData.card_bg_url = cardBgUrl
 
     const { error: updateError } = await supabase
         .from('profiles')
@@ -91,6 +96,34 @@ export async function updateProfileSettings(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
+
+    return { success: true }
+}
+
+export async function requestPasswordReset(email: string) {
+    const supabase = await createClient()
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard/profile?reset=true`,
+    })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    return { success: true }
+}
+
+export async function updateUserPassword(password: string) {
+    const supabase = await createClient()
+    
+    const { error } = await supabase.auth.updateUser({
+        password: password
+    })
+
+    if (error) {
+        return { error: error.message }
+    }
 
     return { success: true }
 }
