@@ -42,6 +42,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Rive AI - Dashboard",
   description: "Next Generation AI SaaS",
+  icons: {
+    icon: "/minilogo.svg",
+  },
 };
 
 export default function RootLayout({
