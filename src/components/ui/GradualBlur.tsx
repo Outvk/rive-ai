@@ -70,13 +70,15 @@ const CURVE_FUNCTIONS: Record<string, (p: number) => number> = {
 const mergeConfigs = (...configs: any[]): GradualBlurConfig =>
     configs.reduce((acc, c) => ({ ...acc, ...c }), {}) as GradualBlurConfig;
 
-const getGradientDirection = (position: string) =>
-({
-    top: 'to top',
-    bottom: 'to bottom',
-    left: 'to left',
-    right: 'to right'
-}[position as any] || 'to bottom');
+const getGradientDirection = (position: string) => {
+    const directions: Record<string, string> = {
+        top: 'to top',
+        bottom: 'to bottom',
+        left: 'to left',
+        right: 'to right'
+    };
+    return directions[position] || 'to bottom';
+};
 
 const debounce = (fn: (...args: any[]) => void, wait: number) => {
     let t: any;
