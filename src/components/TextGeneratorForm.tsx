@@ -16,10 +16,12 @@ import { createClient } from '@/utils/supabase/client'
 
 export function TextGeneratorForm({
     initialCredits = 0,
+    userName = 'User',
     conversationId: propConversationId,
     initialChatMessages = [],
 }: {
     initialCredits?: number
+    userName?: string
     conversationId?: string
     initialChatMessages?: UIMessage[]
 }) {
@@ -257,6 +259,7 @@ export function TextGeneratorForm({
             <RuixenMoonChat
                 messages={messages}
                 input={input}
+                userName={userName}
                 handleInputChange={(e) => setInput(e.target.value)}
                 handleSubmit={handleFormSubmit}
                 isLoading={isLoading}

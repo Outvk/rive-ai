@@ -1,17 +1,15 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { headers } from 'next/headers'
 
-const getURL = () => {
-    let url =
-        process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
-        process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
-        'http://localhost:3000/'
-    // Make sure to include `https://` when not localhost.
-    url = url.includes('http') ? url : `https://${url}`
-    // Make sure to exclude a trailing `/` for consistency with existing code
-    url = url.endsWith('/') ? url.slice(0, -1) : url
-    return url
+const getBaseURL = async () => {
+    const host = (await headers()).get('host')
+    if (!host) {
+        return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    }
+    const protocol = host.includes('localhost') ? 'http' : 'https'
+    return `${protocol}://${host}`
 }
 
 export async function loginAction(formData: FormData) {
@@ -55,8 +53,9 @@ export async function forgotPasswordAction(formData: FormData) {
     const supabase = await createClient()
     const email = formData.get('email') as string
     
+    const baseURL = await getBaseURL()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${getURL()}/dashboard/profile?reset=true`,
+        redirectTo: `${baseURL}/dashboard/profile?reset=true`,
     })
 
     if (error) {
@@ -68,10 +67,11 @@ export async function forgotPasswordAction(formData: FormData) {
 
 export async function signInWithGoogleAction() {
     const supabase = await createClient()
+    const baseURL = await getBaseURL()
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${getURL()}/auth/callback`,
+            redirectTo: `${baseURL}/auth/callback`,
         },
     })
 
