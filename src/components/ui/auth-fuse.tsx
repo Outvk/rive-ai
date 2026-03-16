@@ -390,7 +390,7 @@ export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) 
 
                         {/* Title & Description */}
                         <div className="relative z-10 space-y-2 max-w-[320px] mt-24">
-                            <h2 style={{ fontFamily: '"Noto Serif", serif' }} className="text-3xl font-black text-white tracking-tighter">
+                            <h2 style={{ fontFamily: '"Noto Serif", serif', fontWeight: '400' }} className="text-3xl font-black text-white tracking-tighter">
                                 Enjoy yr journey
                             </h2>
                             <p className="text-zinc-400 text-sm font-light leading-relaxed">

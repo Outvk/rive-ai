@@ -61,6 +61,7 @@ const config: Config = {
 				mono: ['var(--font-geist-mono)', 'monospace'],
 				outfit: ['var(--font-outfit)', 'sans-serif'],
 				noto: ['var(--font-noto)', 'sans-serif'],
+				'ibm-mono': ['var(--font-ibm-plex-mono)', 'monospace'],
 			}
 		}
 	},

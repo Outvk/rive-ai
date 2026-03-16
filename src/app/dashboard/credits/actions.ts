@@ -18,6 +18,19 @@ export async function addCredits(amount: number) {
     }
 
     revalidatePath('/dashboard', 'layout')
+
+    // Add notification for credit purchase
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+        const { error: notifError } = await supabase.from('notifications').insert({
+            user_id: user.id,
+            title: 'Credits Added! 🪙',
+            message: `Successfully added ${amount} credits to your account. Your creative fuel is ready!`,
+            type: 'success'
+        })
+        if (notifError) console.error('Notification insert error (credits):', notifError)
+    }
+
     return { success: true }
 }
 

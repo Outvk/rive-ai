@@ -19,7 +19,7 @@ import {
     CardStackIcon,
     LockClosedIcon,
 } from '@radix-ui/react-icons'
-import { LayoutList } from 'lucide-react'
+import { LayoutList, Bell } from 'lucide-react'
 import { ClientSidebarProfile } from '@/components/ClientSidebarProfile'
 import { deleteConversation } from '@/app/dashboard/text/actions'
 
@@ -410,6 +410,14 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Profile Edit
                     </Link>
 
+                    <Link
+                        href="/dashboard/notifications"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/notifications' ? 'bg-white/10 text-white' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <Bell className="w-4 h-4 text-zinc-400" />
+                        Activity Hub
+                    </Link>
+
 
 
                     <Link
@@ -506,6 +514,14 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                     >
                         <ClockIcon className={`w-4 h-4 ${pathname === '/dashboard/credits' ? 'text-indigo-400' : 'text-zinc-400'}`} />
                         Transactions History
+                    </Link>
+
+                    <Link
+                        href="/dashboard/notifications"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/notifications' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <Bell className={`w-4 h-4 ${pathname === '/dashboard/notifications' ? 'text-violet-400' : 'text-zinc-400'}`} />
+                        Activity Hub
                     </Link>
 
                     <Link

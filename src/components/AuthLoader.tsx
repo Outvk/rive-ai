@@ -81,7 +81,7 @@ export function AuthLoaderProvider({ children }: { children: React.ReactNode }) 
                             <motion.p
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-zinc-500 text-[9px] font-bold uppercase tracking-[0.3em]"
+                                className="text-zinc-500 text-[9px] font-bold uppercase tracking-[0.3em] font-ibm-mono"
                             >
                                 {message}
                             </motion.p>

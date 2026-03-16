@@ -95,6 +95,7 @@ export default async function DashboardLayout({
                         userEmail={user.email || ''}
                         userInitial={profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                         avatarUrl={profile?.avatar_url}
+                        userId={user.id}
                     />
 
                     {/* Subtle Background Glows */}

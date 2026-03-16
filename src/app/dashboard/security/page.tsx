@@ -203,7 +203,7 @@ function SecurityPillar({ title, description, icon, features, delay }: any) {
             className="p-10 rounded-[2.5rem] bg-gradient-to-br from-zinc-900/40 to-black border border-white/5 backdrop-blur-3xl hover:border-white/20 transition-all group"
         >
             <div className="flex items-center gap-6 mb-8">
-                <div className="p-4 rounded-2.5xl bg-zinc-800/50 border border-white/10 group-hover:rotate-[360deg] transition-all duration-[1.5s]">
+                <div className="p-4 rounded-2xl bg-zinc-800/50 border border-white/10 group-hover:rotate-[360deg] transition-all duration-[1500ms]">
                     {icon}
                 </div>
                 <h3 className="text-2xl font-bold tracking-tight text-white">{title}</h3>

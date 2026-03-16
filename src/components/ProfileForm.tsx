@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { updateProfileSettings, requestPasswordReset, updateUserPassword } from '@/app/dashboard/profile/actions'
 import { User, Mail, Shield, Bell, Key, Palette, LogOut, CheckCircle2, ChevronRight, Zap, Image as LucideImageIcon, Lock, Fingerprint, RefreshCcw } from 'lucide-react'
 import { Grainient } from '@/components/Grainient'
+import { Switch } from '@/components/ui/switch'
 
 export function ProfileForm({
     initialName,
@@ -50,6 +51,12 @@ export function ProfileForm({
     const [retypePassword, setRetypePassword] = useState('')
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
 
+    // Notification State
+    const [notifEmail, setNotifEmail] = useState(true)
+    const [notifUpdates, setNotifUpdates] = useState(true)
+    const [notifSecurity, setNotifSecurity] = useState(true)
+    const [notifMarketing, setNotifMarketing] = useState(false)
+
     const todayDate = new Date().toLocaleDateString('en-GB') // 13/11/2025 style
 
     const menuItems = [
@@ -89,6 +96,12 @@ export function ProfileForm({
         if (shouldRemoveCardBg) {
             formData.append('remove_card_bg', 'true')
         }
+        
+        // Include notifications in preferences save to prevent reset
+        formData.append('notif_email', String(notifEmail))
+        formData.append('notif_updates', String(notifUpdates))
+        formData.append('notif_security', String(notifSecurity))
+        formData.append('notif_marketing', String(notifMarketing))
 
         const { error } = await updateProfileSettings(formData)
 
@@ -113,6 +126,12 @@ export function ProfileForm({
         if (shouldRemoveCardBg) {
             formData.append('remove_card_bg', 'true')
         }
+        
+        formData.append('notif_email', String(notifEmail))
+        formData.append('notif_updates', String(notifUpdates))
+        formData.append('notif_security', String(notifSecurity))
+        formData.append('notif_marketing', String(notifMarketing))
+
         const { error } = await updateProfileSettings(formData)
 
         if (error) {
@@ -278,8 +297,8 @@ export function ProfileForm({
 
                                     <div className="relative z-10">
                                         <div className="mb-8">
-                                            <h2 className="text-2xl font-bold text-white mb-1">User Information</h2>
-                                            <p className="text-sm text-zinc-400">Manage your personal details.</p>
+                                            <h2 className="text-2xl font-bold text-black mb-1">User Information</h2>
+                                            <p className="text-sm text-zinc-800">Manage your personal details.</p>
                                         </div>
 
                                         <div className="flex items-center gap-6">
@@ -305,8 +324,8 @@ export function ProfileForm({
                                                 />
                                             </div>
                                             <div className="space-y-1">
-                                                <h4 className="text-sm font-medium text-white">Profile Picture</h4>
-                                                <p className="text-xs text-zinc-400 max-w-sm">Upload a professional photo or avatar. JPG, GIF or PNG. Max size 5MB.</p>
+                                                <h4 className="text-sm font-medium text-black">Profile Picture</h4>
+                                                <p className="text-xs text-zinc-800 max-w-sm">Upload a professional photo or avatar. JPG, GIF or PNG. Max size 5MB.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -649,16 +668,88 @@ export function ProfileForm({
                 )}
 
                 {activeTab === 'notifications' && (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-500">
-                        <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-600 mb-6 border border-zinc-800">
-                            <Bell className="w-8 h-8 opacity-50" />
+                    <div className="max-w-2xl p-8 lg:p-12 animate-in slide-in-from-right-4 duration-500">
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Notification Settings</h2>
+                            <p className="text-sm text-zinc-500">Manage how you receive updates and alerts.</p>
                         </div>
-                        <h2 className="text-xl font-bold text-white mb-2">
-                            Notifications
-                        </h2>
-                        <p className="text-zinc-500 max-w-md text-sm">
-                            This panel is currently being upgraded for the Rive V2 platform. Full controls will be available in the next release.
-                        </p>
+
+                        <div className="space-y-8">
+                            {/* Notification Groups */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 px-1">Email Notifications</h3>
+                                
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Email Digest</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Receive a weekly summary of your AI generations and credits usage.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifEmail} onCheckedChange={setNotifEmail} />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Product Updates</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Get notified when we release new features or AI models.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifUpdates} onCheckedChange={setNotifUpdates} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 px-1">Security & Account</h3>
+                                
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Security Alerts</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Important notifications about password changes and new logins.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifSecurity} onCheckedChange={setNotifSecurity} />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Marketing & Offers</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Receive special offers and promotional content from Rive partners.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifMarketing} onCheckedChange={setNotifMarketing} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-12 pt-8 border-t border-zinc-800/50 flex justify-end items-center">
+                            <button
+                                onClick={async () => {
+                                    setIsSaving(true)
+                                    const formData = new FormData()
+                                    formData.append('notif_email', String(notifEmail))
+                                    formData.append('notif_updates', String(notifUpdates))
+                                    formData.append('notif_security', String(notifSecurity))
+                                    formData.append('notif_marketing', String(notifMarketing))
+                                    
+                                    const { error } = await updateProfileSettings(formData)
+                                    if (error) toast.error(error)
+                                    else toast.success('Notification settings saved!')
+                                    setIsSaving(false)
+                                }}
+                                disabled={isSaving}
+                                className="flex items-center gap-2 px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                            >
+                                {isSaving ? 'Saving...' : 'Save Preferences'}
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

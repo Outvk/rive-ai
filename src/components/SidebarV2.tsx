@@ -248,6 +248,7 @@ export function SidebarV2({
                             title: "User Profile",
                             items: [
                                 { icon: <UserIcon size={16} />, label: "Profile Edit", href: "/dashboard/profile" },
+                                { icon: <Notification size={16} />, label: "Activity Hub", href: "/dashboard/notifications" },
                                 { icon: <Help size={16} />, label: "Support & Help", href: "/dashboard/support" },
                             ]
                         },

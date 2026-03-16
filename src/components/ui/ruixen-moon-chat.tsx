@@ -4,6 +4,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { useAuthLoader } from "@/components/AuthLoader";
 import {
     ImageIcon,
     FileUp,
@@ -59,6 +62,37 @@ export default function RuixenMoonChat() {
         minHeight: 48,
         maxHeight: 150,
     });
+    
+    const router = useRouter();
+    const { showLoader } = useAuthLoader();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSend = async () => {
+        if (!message.trim() || isLoading) return;
+        setIsLoading(true);
+        showLoader("Initializing your creative workspace...");
+
+        try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                router.push("/dashboard/text");
+            } else {
+                router.push("/login");
+            }
+        } catch (error) {
+            console.error("Auth check failed:", error);
+            setIsLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
 
     return (
         <div className="w-full max-w-2xl">
@@ -71,6 +105,8 @@ export default function RuixenMoonChat() {
                         setMessage(e.target.value);
                         adjustHeight();
                     }}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading}
                     placeholder="Type your request..."
                     className={cn(
                         "w-full px-4 py-3 resize-none border-none",
@@ -93,10 +129,13 @@ export default function RuixenMoonChat() {
 
                     <div className="flex items-center gap-2">
                         <Button
-                            disabled
+                            onClick={handleSend}
+                            disabled={!message.trim() || isLoading}
                             className={cn(
                                 "flex items-center gap-1 px-3 py-2 h-9 rounded-lg transition-colors",
-                                "bg-neutral-700 text-neutral-400 cursor-not-allowed"
+                                !message.trim() || isLoading
+                                    ? "bg-neutral-700 text-neutral-400 cursor-not-allowed"
+                                    : "bg-white text-black hover:bg-neutral-200"
                             )}
                         >
                             <ArrowUpIcon className="w-4 h-4" />

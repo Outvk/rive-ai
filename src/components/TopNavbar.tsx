@@ -6,24 +6,26 @@ import { CreditBadge } from './CreditBadge'
 import { BuyCreditsModal } from './BuyCreditsModal'
 import Link from 'next/link'
 import { useSidebar } from './SidebarContext'
-import { LayoutList, LayoutGrid } from 'lucide-react'
+import { LayoutList, LayoutGrid, Crown } from 'lucide-react'
 import GradualBlur from './ui/GradualBlur'
 import { cn } from '@/lib/utils'
+import { NotificationBell } from './NotificationBell'
 
 type TopNavbarProps = {
     credits: number
     userEmail?: string
     userInitial?: string
     avatarUrl?: string
+    userId: string
 }
 
-export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: TopNavbarProps) {
+export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, userId }: TopNavbarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { sidebarVersion, setSidebarVersion } = useSidebar()
 
     return (
         <>
-            <header className="sticky top-0 z-50 w-full bg-transparent transition-all duration-300">
+            <header className="sticky top-0 z-50 w-full bg-gradient-to-b from-black/80 to-transparent transition-all duration-300">
                 <div className="relative z-20 flex h-16 items-center justify-end px-8 w-full max-w-6xl mx-auto gap-4 ">
 
                     <button
@@ -38,7 +40,9 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
                         )}
                     </button>
 
-                    <div className="flex items-center gap-4 bg-zinc-900/50 px-3 py-1.5 rounded-full border border-white/5 shadow-inner">
+                    <NotificationBell userId={userId} />
+
+                    <div className="flex items-center gap-3 bg-zinc-900/50 px-3 py-1.5 rounded-full border border-white/5 shadow-inner ml-2">
                         <CreditBadge credits={credits} />
 
                         <div className="w-[1px] h-4 bg-white/10" />
@@ -61,15 +65,17 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl }: 
                             <div className="absolute inset-[1px] shadow-[inset_0_0_12px_rgba(116,5,255,0.25)] rounded-xl"></div>
                             {/* Content */}
                             <div className="relative flex items-center justify-center gap-1.5">
-                                <PlusIcon className="w-3.5 h-3.5 text-[#E9D5FF] drop-shadow-[0_0_8px_rgba(193,144,255,0.9)]" />
-                                <span className="text-xs font-semibold tracking-tight text-white/90">Buy Credits🪙</span>
+                                <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                                <span className="text-xs font-semibold tracking-tight text-white/90">Get Pro Credits</span>
+                                <span className="text-[8px] font-black bg-amber-500 text-zinc-950 px-1 rounded-sm ml-0.5 tracking-tighter">PRO</span>
                             </div>
                             {/* Hover shimmer */}
                             <div className="absolute inset-[1px] opacity-0 transition-opacity duration-300 bg-gradient-to-r from-[#7405FF]/20 via-[#C190FF]/10 to-[#7405FF]/20 group-hover:opacity-100 rounded-xl"></div>
                         </button>
                     </div>
 
-                    <div className="ml-4 pl-4 border-l border-white/10 flex items-center relative group">
+
+                    <div className="ml-0 pl-0 flex items-center relative group">
                         <Link
                             href="/dashboard/profile"
                             className="relative flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-zinc-800 to-zinc-700 border border-white/10 hover:border-indigo-500/50 hover:shadow-[0_0_15px_rgba(99,102,241,0.2)] transition-all overflow-hidden z-10"

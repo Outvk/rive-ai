@@ -613,7 +613,7 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
               />
               <div
                 className="w-24 h-24 border-[3px] border-purple-500 border-b-transparent rounded-full animate-spin absolute inset-0"
-                style={{ animationDuration: '1.5s', animationDirection: 'reverse' }}
+                style={{ animationDuration: '1500ms', animationDirection: 'reverse' }}
               />
             </div>
             <div className="space-y-1.5 text-center">

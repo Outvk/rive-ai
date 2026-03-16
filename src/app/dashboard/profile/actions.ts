@@ -23,6 +23,11 @@ export async function updateProfileSettings(formData: FormData) {
     const cardBgFile = formData.get('card_bg') as File | null
     const removeCardBg = formData.get('remove_card_bg') === 'true'
 
+    const notifEmail = formData.get('notif_email') === 'true'
+    const notifUpdates = formData.get('notif_updates') === 'true'
+    const notifSecurity = formData.get('notif_security') === 'true'
+    const notifMarketing = formData.get('notif_marketing') === 'true'
+
     let avatarUrl = undefined
     let cardBgUrl: string | null | undefined = undefined
 
@@ -76,10 +81,18 @@ export async function updateProfileSettings(formData: FormData) {
 
     const updateData: any = {
         updated_at: new Date().toISOString(),
+        notif_email: notifEmail,
+        notif_updates: notifUpdates,
+        notif_security: notifSecurity,
+        notif_marketing: notifMarketing,
     }
 
     if (fullName) updateData.full_name = fullName.trim()
     if (avatarUrl) updateData.avatar_url = avatarUrl
+    if (notifEmail !== undefined) updateData.notif_email = notifEmail
+    if (notifUpdates !== undefined) updateData.notif_updates = notifUpdates
+    if (notifSecurity !== undefined) updateData.notif_security = notifSecurity
+    if (notifMarketing !== undefined) updateData.notif_marketing = notifMarketing
     if (color1) updateData.color1 = color1
     if (color2) updateData.color2 = color2
     if (color3) updateData.color3 = color3
@@ -97,6 +110,18 @@ export async function updateProfileSettings(formData: FormData) {
 
     revalidatePath('/', 'layout')
 
+    // Optional: Log a notification for the user
+    const { error: notifError } = await supabase.from('notifications').insert({
+        user_id: user.id,
+        title: 'Profile Updated',
+        message: 'Your account settings and notification preferences have been synchronized successfully.',
+        type: 'success'
+    })
+
+    if (notifError) {
+        console.error('Notification insert error:', notifError)
+    }
+
     return { success: true }
 }
 
@@ -111,6 +136,17 @@ export async function requestPasswordReset(email: string) {
         return { error: error.message }
     }
 
+    // Since we don't have a user session for guests, we only log notifications for logged-in users
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+        await supabase.from('notifications').insert({
+            user_id: user.id,
+            title: 'Reset Link Sent',
+            message: 'A password reset link has been sent to your email address.',
+            type: 'info'
+        })
+    }
+
     return { success: true }
 }
 
@@ -123,6 +159,18 @@ export async function updateUserPassword(password: string) {
 
     if (error) {
         return { error: error.message }
+    }
+
+    // Add security notification
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+        const { error: notifError } = await supabase.from('notifications').insert({
+            user_id: user.id,
+            title: 'Security Alert',
+            message: 'Your password has been changed successfully.',
+            type: 'security'
+        })
+        if (notifError) console.error('Notification insert error (password):', notifError)
     }
 
     return { success: true }

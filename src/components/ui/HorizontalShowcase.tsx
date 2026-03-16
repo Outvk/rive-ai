@@ -4,6 +4,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Sparkles, Video, AudioLines, ArrowRight, FileText, Box, Maximize2 } from 'lucide-react';
+import GradualBlur from './GradualBlur';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,6 +15,7 @@ const features = [
         title: "Text Reasoning",
         description: "Advanced Llama 3.2 intelligence for complex reasoning, creative writing, and deep technical assistance.",
         image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200",
+        video: "/text.mp4",
         stats: { accuracy: "97%", speed: "0.1s" }
     },
     {
@@ -46,6 +48,7 @@ const features = [
         title: "3D Generation",
         description: "Convert textual descriptions or 2D images into high-fidelity 3D assets ready for games, AR, and spatial computing.",
         image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=1200",
+        video: "/3d.mp4",
         stats: { accuracy: "94%", speed: "2.4s" }
     },
     {
@@ -53,6 +56,7 @@ const features = [
         title: "Neural Enhance",
         description: "Professional-grade background removal, upscaling, and restorative AI to transform any visual asset into a masterpiece.",
         image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1200",
+        video: "/enhanss.mp4",
         stats: { accuracy: "99%", speed: "0.8s" }
     },
 
@@ -89,7 +93,14 @@ export default function HorizontalShowcase() {
 
 
             {/* Horizontal Pinned Section */}
-            <div id="sectionPin" ref={slider} className="h-screen overflow-hidden flex bg-black">
+            <div id="sectionPin" ref={slider} className="h-screen overflow-hidden flex bg-black relative">
+                {/* Side Fade Gradients with Blur */}
+                <div className="absolute left-0 top-0 bottom-0 w-4 md:w-24 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
+                <GradualBlur position="left" width="6rem" strength={3} zIndex={15} target="parent" />
+
+                <div className="absolute right-0 top-0 bottom-0 w-4 md:w-24 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
+                <GradualBlur position="right" width="6rem" strength={3} zIndex={15} target="parent" />
+                
                 <div className="pin-wrap flex h-full">
                     {features.map((feature, idx) => (
                         <div
@@ -115,9 +126,6 @@ export default function HorizontalShowcase() {
                                     />
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                                <div className="absolute top-8 left-8 w-14 h-14 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center">
-                                    <feature.icon className="w-7 h-7 text-[#C190FF]" />
-                                </div>
                             </div>
 
                             {/* Right Side - Content */}

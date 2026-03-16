@@ -24,7 +24,7 @@ export function CreditBadge({ credits }: { credits: number }) {
     return (
         <div className="flex items-center gap-1.5 mt-0.5">
             <div
-                className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] transition-colors duration-500 ${credits > 5 ? 'bg-indigo-500 text-indigo-500' : credits > 0 ? 'bg-amber-500 text-amber-500' : 'bg-red-500 text-red-500'
+                className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] transition-colors duration-500 ${credits > 5 ? 'bg-green-500 text-green-500' : credits > 0 ? 'bg-amber-500 text-amber-500' : 'bg-red-500 text-red-500'
                     }`}
             ></div>
             <motion.span

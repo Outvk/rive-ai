@@ -337,7 +337,7 @@ export default function RuixenMoonChat({
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.8 }}
                                 >
-                                    <h1 style={{ fontFamily: '"Noto Serif", serif', color: "#ddddddff" }} className="text-5xl font-black text-white mb-4 tracking-tighter font-noto">
+                                    <h1 style={{ fontFamily: '"Noto Serif",sans-serif', color: "#ddddddff" , fontWeight: '500',fontSize: '2.6rem'}} className="text-4xl font-black text-white mb-4 tracking-tighter font-noto">
                                         Bonsoir river ✧
                                     </h1>
                                     <p className="text-zinc-400 text-xl max-w-sm font-light leading-relaxed font-outfit">
