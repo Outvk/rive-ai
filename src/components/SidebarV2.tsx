@@ -37,11 +37,13 @@ import {
     Group,
     Logout,
     Asleep as Moon,
-    Light as Sun
+    Light as Sun,
+    Cube
 } from "@carbon/icons-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/dashboard/actions";
+import { useAuthLoader } from "@/components/AuthLoader";
 
 
 const softSpringEasing = "cubic-bezier(0.25, 1.1, 0.4, 1)";
@@ -89,9 +91,15 @@ export function SidebarV2({
     recentVideos
 }: SidebarV2Props) {
     const { theme, setTheme } = useTheme();
+    const { showLoader } = useAuthLoader();
     const pathname = usePathname();
     const router = useRouter();
     const [activeRail, setActiveRail] = useState("home");
+
+    const handleLogout = async () => {
+        showLoader("Signing out of your session...");
+        await logoutAction();
+    };
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [mounted, setMounted] = useState(false);
@@ -192,8 +200,9 @@ export function SidebarV2({
                                 { icon: <Chat size={16} />, label: "Text Generator", href: "/dashboard/text" },
                                 { icon: <ImageIcon size={16} />, label: "Prompt to Image", href: "/dashboard/image-prompt" },
                                 { icon: <ModelBuilder size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
-                                { icon: <VolumeUp size={16} />, label: "Text to Speech", href: "/dashboard/text-to-speech" },
+                                { icon: <VolumeUp size={16} />, label: "Audio Editor", href: "/dashboard/text-to-speech" },
                                 { icon: <VideoIcon size={16} />, label: "Video Generator", href: "/dashboard/video" },
+                                { icon: <Cube size={16} />, label: "3D Generator", href: "/dashboard/3d" },
                             ]
                         }
                     ]
@@ -239,6 +248,7 @@ export function SidebarV2({
                             title: "User Profile",
                             items: [
                                 { icon: <UserIcon size={16} />, label: "Profile Edit", href: "/dashboard/profile" },
+                                { icon: <Notification size={16} />, label: "Activity Hub", href: "/dashboard/notifications" },
                                 { icon: <Help size={16} />, label: "Support & Help", href: "/dashboard/support" },
                             ]
                         },
@@ -324,7 +334,7 @@ export function SidebarV2({
                     </button>
 
                     <button
-                        onClick={() => logoutAction()}
+                        onClick={handleLogout}
                         className="group relative p-2.5 rounded-xl text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/5 transition-all"
                     >
                         <Logout size={20} />

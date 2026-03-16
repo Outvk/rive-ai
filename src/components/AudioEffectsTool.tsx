@@ -722,6 +722,15 @@ const SFX_CATEGORIES = [
         ]
     },
     { 
+        id: 'urban', label: 'Urban', icon: '🏙️',
+        samples: [
+            { text: "Night New York Vibes: Calm city atmosphere with very distant police sirens and smooth traffic hum", duration: 15 },
+            { text: "Quiet New York Street: Midnight ambience with soft steam hiss and distant echo of sirens", duration: 12 },
+            { text: "Times Square at Night: Muffled crowd murmur and electronic sign hum in the distance", duration: 10 },
+            { text: "Gotham Night: Dark, calm city wind with periodic blue-note police siren echos", duration: 15 }
+        ]
+    },
+    { 
         id: 'strings', label: 'Strings', icon: '🎻',
         samples: [
             { text: "Emotional solo cello melody", duration: 10 },

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { EnhanceForm } from '@/components/EnhanceForm'
+import { Sparkles } from 'lucide-react'
 
 export const metadata = {
     title: 'Photo Enhance Tools - Rive AI',
@@ -42,13 +43,17 @@ export default async function EnhancePage() {
     }
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-start p-4 overflow-x-hidden overflow-y-auto custom-scrollbar">
-            <div className="text-center mt-8 mb-4 space-y-3">
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-br from-white via-zinc-200 to-zinc-500 bg-clip-text text-transparent">
-                    AI Photo Enhance
+        <div className="w-full h-full flex flex-col items-center justify-start p-4 lg:p-8">
+            <div className="text-center mt-12 mb-10 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Experimental Neural Engines</span>
+                </div>
+                <h1 className="text-5xl md:text-6xl font-black tracking-tighter bg-gradient-to-b from-white via-zinc-200 to-zinc-600 bg-clip-text text-transparent">
+                    Visual Workspace
                 </h1>
-                <p className="text-zinc-400 text-lg max-w-xl mx-auto">
-                    Remove backgrounds, generate new backgrounds with AI, and remove watermarks in seconds.
+                <p className="text-zinc-500 text-base font-medium max-w-lg mx-auto leading-relaxed">
+                    Transform your assets with industry-grade AI enhancement tools. Professional results in single clicks.
                 </p>
             </div>
             

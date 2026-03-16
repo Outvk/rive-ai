@@ -88,8 +88,8 @@ export function BuyCreditsModal({ isOpen, onClose }: { isOpen: boolean, onClose:
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
                                         {/* Starter Plan */}
-                                        <PricingCard.Card className="max-w-none bg-zinc-900/40 border-white/5">
-                                            <PricingCard.Header className="bg-white/5 border-white/5">
+                                        <PricingCard.Card className="max-w-none bg-zinc-900/40 border-none shadow-none">
+                                            <PricingCard.Header className="bg-white/[0.03] border-none shadow-none" glassEffect={false}>
                                                 <PricingCard.Plan>
                                                     <PricingCard.PlanName>
                                                         <Zap className="text-indigo-400" />
@@ -124,8 +124,8 @@ export function BuyCreditsModal({ isOpen, onClose }: { isOpen: boolean, onClose:
                                         </PricingCard.Card>
 
                                         {/* Professional Plan */}
-                                        <PricingCard.Card className="max-w-none bg-zinc-900/40 border-indigo-500/20">
-                                            <PricingCard.Header className="bg-indigo-500/5 border-indigo-500/10">
+                                        <PricingCard.Card className="max-w-none bg-zinc-900/40 border-none shadow-none">
+                                            <PricingCard.Header className="bg-indigo-500/[0.03] border-none shadow-none" glassEffect={false}>
                                                 <PricingCard.Plan>
                                                     <PricingCard.PlanName>
                                                         <Star className="text-amber-400" />
@@ -185,7 +185,7 @@ export function BuyCreditsModal({ isOpen, onClose }: { isOpen: boolean, onClose:
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="border border-white/10 bg-zinc-950/50 rounded-xl p-5 hover:border-indigo-500/50 transition-colors group">
+                                        <div className="border-none bg-zinc-950/50 rounded-xl p-5 hover:bg-zinc-900 transition-colors group">
                                             <div className="flex justify-between items-center mb-4">
                                                 <span className="text-2xl font-bold text-white">10<span className="text-sm font-normal text-zinc-400 ml-1">credits</span></span>
                                                 <span className="bg-indigo-500/10 text-indigo-400 text-xs px-2 py-1 rounded-md font-medium border border-indigo-500/20">Starter</span>
@@ -200,7 +200,7 @@ export function BuyCreditsModal({ isOpen, onClose }: { isOpen: boolean, onClose:
                                             </button>
                                         </div>
 
-                                        <div className="border border-purple-500/30 bg-purple-500/5 rounded-xl p-5 relative overflow-hidden group hover:border-purple-500/60 transition-colors">
+                                        <div className="border-none bg-purple-500/5 rounded-xl p-5 relative overflow-hidden group hover:bg-purple-500/10 transition-colors">
                                             <div className="absolute top-0 right-0 px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-bl-lg">Popular</div>
                                             <div className="flex justify-between items-center mb-4">
                                                 <span className="text-2xl font-bold text-white">50<span className="text-sm font-normal text-zinc-400 ml-1">credits</span></span>

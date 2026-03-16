@@ -29,7 +29,8 @@ import {
     ArrowLeft,
     Clock,
     Search,
-    Download
+    Download,
+    Trash2
 } from "lucide-react"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -697,24 +698,49 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                     filteredItems.map((item) => (
                         <div
                             key={item.id}
-                            onClick={() => handleSelectHistoryItem(item.id)}
-                            className="flex items-center gap-3 p-2 rounded-lg bg-zinc-900/30 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 cursor-pointer transition-all"
+                            className="group flex flex-col gap-2 p-2 rounded-lg bg-zinc-900/30 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 cursor-pointer transition-all relative"
                         >
-                            <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-zinc-800">
-                                <Image
-                                    src={isValidImageUrl(item.url) ? item.url : "/placeholder.svg"}
-                                    alt={item.prompt}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs text-zinc-200 truncate">{item.prompt}</p>
-                                <div className="flex items-center gap-1.5 mt-1">
-                                    <span className="text-[10px] text-zinc-500">{formatDate(item.timestamp)}</span>
-                                    <span className="text-[8px] text-zinc-700">•</span>
-                                    <span className="text-[10px] text-zinc-400 capitalize">{item.type}</span>
+                            <div className="flex items-center gap-3" onClick={() => handleSelectHistoryItem(item.id)}>
+                                <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0 bg-zinc-800">
+                                    <Image
+                                        src={isValidImageUrl(item.url) ? item.url : "/placeholder.svg"}
+                                        alt={item.prompt}
+                                        fill
+                                        className="object-cover"
+                                    />
                                 </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-zinc-200 truncate">{item.prompt}</p>
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                        <span className="text-[10px] text-zinc-500">{formatDate(item.timestamp)}</span>
+                                        <span className="text-[8px] text-zinc-700">•</span>
+                                        <span className="text-[10px] text-zinc-400 capitalize">{item.type}</span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={async (e) => {
+                                        e.stopPropagation()
+                                        e.preventDefault()
+                                        const confirmed = window.confirm('Delete this from history?')
+                                        if (!confirmed) return
+
+                                        try {
+                                            const res = await fetch(`/api/history/delete?id=${item.id}&table=ai_images`, { method: 'DELETE' })
+                                            if (!res.ok) throw new Error('Failed to delete')
+                                            
+                                            setGeneratedItems(prev => prev.filter(i => i.id !== item.id))
+                                            toast.success("Item removed")
+                                            router.refresh()
+                                        } catch (err) {
+                                            console.error('Delete error:', err)
+                                            toast.error('Failed to delete item.')
+                                        }
+                                    }}
+                                    className="p-1.5 rounded-md text-zinc-600 hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover:opacity-100 transition-all"
+                                    title="Delete history item"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                             </div>
                         </div>
                     ))

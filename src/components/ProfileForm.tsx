@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
-import { updateProfileSettings } from '@/app/dashboard/profile/actions'
-import { User, Mail, Shield, Bell, Key, Palette, LogOut, CheckCircle2, ChevronRight, Zap, Image as LucideImageIcon } from 'lucide-react'
+import { updateProfileSettings, requestPasswordReset, updateUserPassword } from '@/app/dashboard/profile/actions'
+import { User, Mail, Shield, Bell, Key, Palette, LogOut, CheckCircle2, ChevronRight, Zap, Image as LucideImageIcon, Lock, Fingerprint, RefreshCcw } from 'lucide-react'
 import { Grainient } from '@/components/Grainient'
+import { Switch } from '@/components/ui/switch'
 
 export function ProfileForm({
     initialName,
@@ -32,6 +33,8 @@ export function ProfileForm({
     const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState('general')
+    const searchParams = useSearchParams()
+    const isResetRedirect = searchParams.get('reset') === 'true'
     
     // Preferences State
     const [color1, setColor1] = useState(initialColor1 || '#FF9FFC')
@@ -39,6 +42,22 @@ export function ProfileForm({
     const [color3, setColor3] = useState(initialColor3 || '#B19EEF')
     const [cardImagePreview, setCardImagePreview] = useState<string | null>(initialCardBg || null)
     const [cardBgFile, setCardBgFile] = useState<File | null>(null)
+    const [shouldRemoveCardBg, setShouldRemoveCardBg] = useState(false)
+
+    // Security State
+    const [isResettingPassword, setIsResettingPassword] = useState(false)
+    const [currentPassword, setCurrentPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [retypePassword, setRetypePassword] = useState('')
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+
+    // Notification State
+    const [notifEmail, setNotifEmail] = useState(true)
+    const [notifUpdates, setNotifUpdates] = useState(true)
+    const [notifSecurity, setNotifSecurity] = useState(true)
+    const [notifMarketing, setNotifMarketing] = useState(false)
+
+    const todayDate = new Date().toLocaleDateString('en-GB') // 13/11/2025 style
 
     const menuItems = [
         { id: 'general', label: 'General Info', icon: User },
@@ -61,6 +80,7 @@ export function ProfileForm({
             setCardBgFile(file)
             const url = URL.createObjectURL(file)
             setCardImagePreview(url)
+            setShouldRemoveCardBg(false)
         }
     }
 
@@ -73,6 +93,15 @@ export function ProfileForm({
         if (cardBgFile) {
             formData.append('card_bg', cardBgFile)
         }
+        if (shouldRemoveCardBg) {
+            formData.append('remove_card_bg', 'true')
+        }
+        
+        // Include notifications in preferences save to prevent reset
+        formData.append('notif_email', String(notifEmail))
+        formData.append('notif_updates', String(notifUpdates))
+        formData.append('notif_security', String(notifSecurity))
+        formData.append('notif_marketing', String(notifMarketing))
 
         const { error } = await updateProfileSettings(formData)
 
@@ -86,6 +115,7 @@ export function ProfileForm({
             router.refresh()
             setIsSaving(false)
             setCardBgFile(null)
+            setShouldRemoveCardBg(false)
         }
     }
 
@@ -93,6 +123,15 @@ export function ProfileForm({
         e.preventDefault()
         setIsSaving(true)
         const formData = new FormData(e.currentTarget)
+        if (shouldRemoveCardBg) {
+            formData.append('remove_card_bg', 'true')
+        }
+        
+        formData.append('notif_email', String(notifEmail))
+        formData.append('notif_updates', String(notifUpdates))
+        formData.append('notif_security', String(notifSecurity))
+        formData.append('notif_marketing', String(notifMarketing))
+
         const { error } = await updateProfileSettings(formData)
 
         if (error) {
@@ -108,6 +147,50 @@ export function ProfileForm({
         }
     }
 
+    const handleResetPassword = async () => {
+        setIsResettingPassword(true)
+        const { error } = await requestPasswordReset(email)
+        
+        if (error) {
+            toast.error(error)
+        } else {
+            toast.success('Password reset link sent to your email!', {
+                description: 'Please check your inbox for instructions.',
+                icon: <Mail className="w-5 h-5 text-indigo-400" />
+            })
+        }
+        setIsResettingPassword(false)
+    }
+
+    const handleDirectPasswordUpdate = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
+        // Validation
+        if (newPassword !== retypePassword) {
+            toast.error('New passwords do not match')
+            return
+        }
+
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!$@%])[A-Za-z\d!$@%]{6,}$/
+        if (!passwordRegex.test(newPassword)) {
+            toast.error('Password must be at least 6 characters and include letters, numbers, and special characters (!$@%).')
+            return
+        }
+
+        setIsUpdatingPassword(true)
+        const { error } = await updateUserPassword(newPassword)
+
+        if (error) {
+            toast.error(error)
+        } else {
+            toast.success('Password updated successfully!')
+            setNewPassword('')
+            setRetypePassword('')
+            setCurrentPassword('')
+        }
+        setIsUpdatingPassword(false)
+    }
+
     useEffect(() => {
         setFullName(initialName)
     }, [initialName])
@@ -115,6 +198,18 @@ export function ProfileForm({
     useEffect(() => {
         setAvatarUrl(initialAvatarUrl)
     }, [initialAvatarUrl])
+
+    // Detect reset redirect
+    useEffect(() => {
+        if (isResetRedirect) {
+            setActiveTab('security')
+            toast.info('Please set your new password below.', {
+                description: 'You have been redirected from your secure reset link.',
+                duration: 6000,
+                icon: <Key className="w-5 h-5 text-indigo-400" />
+            })
+        }
+    }, [isResetRedirect])
 
     return (
         <div className="w-full max-w-5xl mx-auto mt-4 h-[700px] bg-[#09090b] border border-zinc-800/80 rounded-2xl flex overflow-hidden shadow-2xl">
@@ -169,7 +264,6 @@ export function ProfileForm({
                                 
                                 {/* Card with glowing background */}
                                 <div className="relative border border-zinc-800/80 rounded-2xl overflow-hidden p-6 md:p-8 shadow-2xl">
-                                    {/* Grainient Background */}
                                     <div className="absolute inset-0 z-0 pointer-events-none">
                                         {cardImagePreview ? (
                                             <img src={cardImagePreview} alt="Background" className="w-full h-full object-cover opacity-60" />
@@ -199,8 +293,6 @@ export function ProfileForm({
                                                 zoom={0.9}
                                             />
                                         )}
-                                        {/* Dark overlay so text is readable */}
-                                       
                                     </div>
 
                                     <div className="relative z-10">
@@ -209,29 +301,28 @@ export function ProfileForm({
                                             <p className="text-sm text-zinc-800">Manage your personal details.</p>
                                         </div>
 
-                                        {/* Avatar Upload */}
                                         <div className="flex items-center gap-6">
-                                <div className="relative group cursor-pointer">
-                                    <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center text-3xl font-bold text-zinc-600 uppercase overflow-hidden border border-zinc-700/50 transition duration-300 group-hover:border-violet-500/50 shadow-xl group-hover:shadow-violet-500/20">
-                                        {previewUrl || avatarUrl ? (
-                                            <img src={previewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover:opacity-75 transition" />
-                                        ) : (
-                                            initials
-                                        )}
-                                    </div>
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition duration-300">
-                                        <div className="bg-black/60 rounded-full px-3 py-1.5 text-[10px] font-semibold tracking-wider uppercase text-white backdrop-blur-md border border-white/10">
-                                            Change
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        name="avatar"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                    />
-                                </div>
+                                            <div className="relative group cursor-pointer">
+                                                <div className="w-24 h-24 rounded-full bg-zinc-900 flex items-center justify-center text-3xl font-bold text-zinc-600 uppercase overflow-hidden border border-zinc-700/50 transition duration-300 group-hover:border-violet-500/50 shadow-xl group-hover:shadow-violet-500/20">
+                                                    {previewUrl || avatarUrl ? (
+                                                        <img src={previewUrl || avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover:opacity-75 transition" />
+                                                    ) : (
+                                                        initials
+                                                    )}
+                                                </div>
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition duration-300">
+                                                    <div className="bg-black/60 rounded-full px-3 py-1.5 text-[10px] font-semibold tracking-wider uppercase text-white backdrop-blur-md border border-white/10">
+                                                        Change
+                                                    </div>
+                                                </div>
+                                                <input
+                                                    type="file"
+                                                    name="avatar"
+                                                    accept="image/*"
+                                                    onChange={handleFileChange}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                />
+                                            </div>
                                             <div className="space-y-1">
                                                 <h4 className="text-sm font-medium text-black">Profile Picture</h4>
                                                 <p className="text-xs text-zinc-800 max-w-sm">Upload a professional photo or avatar. JPG, GIF or PNG. Max size 5MB.</p>
@@ -240,63 +331,60 @@ export function ProfileForm({
                                     </div>
                                 </div>
 
-                            <div className="grid grid-cols-1 gap-6">
-                                <div className="space-y-2">
-                                    <label htmlFor="fullName" className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
-                                        Full Name
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <User className="h-4 w-4 text-zinc-500" />
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="space-y-2">
+                                        <label htmlFor="fullName" className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            Full Name
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <User className="h-4 w-4 text-zinc-500" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                id="fullName"
+                                                name="fullName"
+                                                value={fullName}
+                                                onChange={(e) => setFullName(e.target.value)}
+                                                required
+                                                minLength={2}
+                                                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                                placeholder="John Doe"
+                                            />
                                         </div>
-                                        <input
-                                            type="text"
-                                            id="fullName"
-                                            name="fullName"
-                                            value={fullName}
-                                            onChange={(e) => setFullName(e.target.value)}
-                                            required
-                                            minLength={2}
-                                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
-                                            placeholder="John Doe"
-                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            Email Address
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <Mail className="h-4 w-4 text-zinc-600" />
+                                            </div>
+                                            <input
+                                                type="email"
+                                                defaultValue={email}
+                                                disabled
+                                                className="w-full bg-zinc-900/20 border border-zinc-800/50 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-500 cursor-not-allowed"
+                                            />
+                                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                                <Shield className="h-4 w-4 text-emerald-500/50" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
-                                        Email Address
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Mail className="h-4 w-4 text-zinc-600" />
-                                        </div>
-                                        <input
-                                            type="email"
-                                            defaultValue={email}
-                                            disabled
-                                            className="w-full bg-zinc-900/20 border border-zinc-800/50 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-500 cursor-not-allowed"
-                                        />
-                                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                            <Shield className="h-4 w-4 text-emerald-500/50" />
-                                        </div>
-                                    </div>
-                                    <p className="text-[10px] text-zinc-600 pl-1">
-                                        Email bound to your auth provider.
-                                    </p>
+                                <div className="pt-8">
+                                    <button
+                                        type="submit"
+                                        disabled={isSaving}
+                                        className="w-48 h-12 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(139,92,246,0.2)] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                                    >
+                                        {isSaving ? 'Saving Changes...' : 'Save Changes'}
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div className="pt-8">
-                                <button
-                                    type="submit"
-                                    disabled={isSaving}
-                                    className="w-48 h-12 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:hover:bg-violet-600 text-white text-sm font-semibold rounded-xl transition-all shadow-[0_0_15px_rgba(139,92,246,0.2)] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]"
-                                >
-                                    {isSaving ? 'Saving Changes...' : 'Save Changes'}
-                                </button>
-                            </div>
-                        </form>
+                            </form>
                         </div>
                     </div>
                 )}
@@ -425,6 +513,8 @@ export function ProfileForm({
                                     setColor2('#5227FF')
                                     setColor3('#B19EEF')
                                     setCardImagePreview(null)
+                                    setShouldRemoveCardBg(true)
+                                    setCardBgFile(null)
                                 }}
                                 className="text-xs font-bold text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
                             >
@@ -441,18 +531,225 @@ export function ProfileForm({
                     </div>
                 )}
 
-                {(activeTab === 'security' || activeTab === 'notifications') && (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-500">
-                        <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center text-zinc-600 mb-6 border border-zinc-800">
-                            {activeTab === 'security' && <Shield className="w-8 h-8 opacity-50" />}
-                            {activeTab === 'notifications' && <Bell className="w-8 h-8 opacity-50" />}
+                {activeTab === 'security' && (
+                    <div className="max-w-2xl p-8 lg:p-12 animate-in slide-in-from-right-4 duration-500">
+                        {isResetRedirect ? (
+                            <>
+                                <div className="mb-10">
+                                    <h2 className="text-2xl font-bold text-violet-400 mb-1 tracking-tight">Setup New Password</h2>
+                                    <p className="text-sm text-zinc-500 leading-relaxed">
+                                        Finalize your account recovery. Your new password must contain at least 6 characters, numbers, and special characters (!$@%).
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleDirectPasswordUpdate} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            New password
+                                        </label>
+                                        <input 
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="Enter new password"
+                                            className="w-full bg-zinc-900/50 border border-violet-500/30 rounded-xl px-4 py-3.5 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all shadow-[0_0_15px_rgba(139,92,246,0.05)]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            Retype new password
+                                        </label>
+                                        <input 
+                                            type="password"
+                                            value={retypePassword}
+                                            onChange={(e) => setRetypePassword(e.target.value)}
+                                            placeholder="Confirm new password"
+                                            className="w-full bg-zinc-900/50 border border-violet-500/30 rounded-xl px-4 py-3.5 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all shadow-[0_0_15px_rgba(139,92,246,0.05)]"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4">
+                                        <button 
+                                            type="submit"
+                                            disabled={isUpdatingPassword}
+                                            className="w-full h-12 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg"
+                                        >
+                                            {isUpdatingPassword ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                                            Complete Recovery
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        ) : (
+                            <>
+                                <div className="mb-10">
+                                    <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Change Password</h2>
+                                    <p className="text-sm text-zinc-500 leading-relaxed">
+                                        Your password must contain at least 6 characters as well as a combination of numbers, letters and special characters (!$@%).
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleDirectPasswordUpdate} className="space-y-6">
+                                    {/* Normal Update Form */}
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            Current password (updated on {todayDate})
+                                        </label>
+                                        <input 
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            New password
+                                        </label>
+                                        <input 
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="Enter new password"
+                                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[11px] font-medium text-zinc-500 uppercase tracking-widest pl-1">
+                                            Retype new password
+                                        </label>
+                                        <input 
+                                            type="password"
+                                            value={retypePassword}
+                                            onChange={(e) => setRetypePassword(e.target.value)}
+                                            placeholder="Confirm new password"
+                                            className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3.5 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 flex flex-col gap-3">
+                                        <button 
+                                            type="submit"
+                                            disabled={isUpdatingPassword}
+                                            className="w-full h-12 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+                                        >
+                                            {isUpdatingPassword ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                                            {isUpdatingPassword ? 'Updating...' : 'Save Changes'}
+                                        </button>
+                                        
+                                        <div className="text-center pt-2">
+                                            <p className="text-[10px] text-zinc-600 mb-2 uppercase tracking-tighter">Lost access to current password?</p>
+                                            <button 
+                                                type="button" 
+                                                onClick={handleResetPassword}
+                                                disabled={isResettingPassword}
+                                                className="px-4 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 text-[11px] font-semibold transition-all flex items-center gap-2 mx-auto disabled:opacity-50"
+                                            >
+                                                {isResettingPassword ? <RefreshCcw className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+                                                Send Email Reset Link
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </>
+                        )}
+
+                        <div className="mt-10 p-6 bg-zinc-900/20 border border-dashed border-zinc-800 rounded-2xl flex items-center gap-4 opacity-50">
+                            <Lock className="w-5 h-5 text-zinc-500" />
+                            <div className="text-xs text-zinc-500">
+                                <span className="text-zinc-400 font-semibold">Pro Security Active</span>. Your session is protected by Rive Core protocols.
+                            </div>
                         </div>
-                        <h2 className="text-xl font-bold text-white mb-2">
-                            {menuItems.find(m => m.id === activeTab)?.label}
-                        </h2>
-                        <p className="text-zinc-500 max-w-md text-sm">
-                            This panel is currently being upgraded for the Rive V2 platform. Full controls will be available in the next release.
-                        </p>
+                    </div>
+                )}
+
+                {activeTab === 'notifications' && (
+                    <div className="max-w-2xl p-8 lg:p-12 animate-in slide-in-from-right-4 duration-500">
+                        <div className="mb-10">
+                            <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Notification Settings</h2>
+                            <p className="text-sm text-zinc-500">Manage how you receive updates and alerts.</p>
+                        </div>
+
+                        <div className="space-y-8">
+                            {/* Notification Groups */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 px-1">Email Notifications</h3>
+                                
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Email Digest</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Receive a weekly summary of your AI generations and credits usage.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifEmail} onCheckedChange={setNotifEmail} />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Product Updates</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Get notified when we release new features or AI models.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifUpdates} onCheckedChange={setNotifUpdates} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] uppercase font-bold tracking-widest text-zinc-500 px-1">Security & Account</h3>
+                                
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Security Alerts</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Important notifications about password changes and new logins.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifSecurity} onCheckedChange={setNotifSecurity} />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl transition-all hover:border-zinc-700/50">
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-semibold text-zinc-200">Marketing & Offers</p>
+                                            <p className="text-[11px] text-zinc-500 max-w-[280px]">Receive special offers and promotional content from Rive partners.</p>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch checked={notifMarketing} onCheckedChange={setNotifMarketing} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-12 pt-8 border-t border-zinc-800/50 flex justify-end items-center">
+                            <button
+                                onClick={async () => {
+                                    setIsSaving(true)
+                                    const formData = new FormData()
+                                    formData.append('notif_email', String(notifEmail))
+                                    formData.append('notif_updates', String(notifUpdates))
+                                    formData.append('notif_security', String(notifSecurity))
+                                    formData.append('notif_marketing', String(notifMarketing))
+                                    
+                                    const { error } = await updateProfileSettings(formData)
+                                    if (error) toast.error(error)
+                                    else toast.success('Notification settings saved!')
+                                    setIsSaving(false)
+                                }}
+                                disabled={isSaving}
+                                className="flex items-center gap-2 px-8 py-3 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                            >
+                                {isSaving ? 'Saving...' : 'Save Preferences'}
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

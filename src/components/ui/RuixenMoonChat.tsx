@@ -314,9 +314,7 @@ export default function RuixenMoonChat({
             {/* Main Chat Area */}
             <div className="relative flex-1 h-full flex flex-col items-center">
                 {/* Elegant Dark Background Depth */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1)_0%,rgba(0,0,0,1)_100%)] pointer-events-none -z-10" />
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-10 pointer-events-none -z-10" />
-
+              
                 {/* Modern History Toggle Button */}
                 {!showHistory && (
                     <Button
@@ -339,7 +337,7 @@ export default function RuixenMoonChat({
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.8 }}
                                 >
-                                    <h1 style={{ fontFamily: '"Noto Serif", serif', color: "#ddddddff" }} className="text-5xl font-black text-white drop-shadow-[0_0_25px_rgba(255,255,255,0.1)] mb-4 tracking-tighter font-noto">
+                                    <h1 style={{ fontFamily: '"Noto Serif",sans-serif', color: "#ddddddff" , fontWeight: '500',fontSize: '2.6rem'}} className="text-4xl font-black text-white mb-4 tracking-tighter font-noto">
                                         Bonsoir river ✧
                                     </h1>
                                     <p className="text-zinc-400 text-xl max-w-sm font-light leading-relaxed font-outfit">
@@ -394,7 +392,7 @@ export default function RuixenMoonChat({
                                                         <div className={cn(
                                                             "text-lg leading-relaxed break-words font-outfit",
                                                             m.role === "user" 
-                                                                ? "text-zinc-100 font-medium bg-[#262624] px-5 py-3 rounded-2xl w-fit max-w-[90%] border border-white/5 shadow-sm" 
+                                                                ? "text-zinc-100 font-medium bg-[#161617] px-5 py-3 rounded-2xl w-fit max-w-[90%] border border-white/5 shadow-sm" 
                                                                 : "text-zinc-300 font-light"
                                                         )}>
                                                             {(() => {
@@ -545,7 +543,7 @@ export default function RuixenMoonChat({
                 {/* Fixed Input Bottom Section - Layered on top */}
                 <div className="absolute bottom-0 inset-x-0 w-full flex flex-col items-center pointer-events-none ">
                     {/* Visual fade-out effect for messages scrolling behind */}
-                    <div className="w-full h-32 bg-gradient-to-t from-[#09090B] via-[#09090B]/80 to-transparent" />
+                    <div  className="w-full h-12 bg-gradient-to-t from-[#09090B] via-[#09090B]/70 to-transparent" />
 
                     <div style={{ backgroundColor: "#09090B" , }} className="w-full max-w-3xl px-4 pb-10 bg-black pointer-events-auto">
                         {/* File Badge */}
@@ -566,7 +564,7 @@ export default function RuixenMoonChat({
                             </motion.div>
                         )}
 
-                        <div className="relative bg-zinc-900/50 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.3)] group focus-within:border-indigo-500/50 transition-all duration-300">
+                        <div className="relative bg-zinc-900/50 backdrop-blur-2xl rounded-2xl border border-white/10 focus-within:border-indigo-500/50 transition-all duration-300">
                             <Textarea
                                 ref={textareaRef}
                                 value={input}

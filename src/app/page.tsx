@@ -6,8 +6,21 @@ import FloatingLines from '@/components/FloatingLines';
 import RuixenMoonChat from '@/components/ui/ruixen-moon-chat';
 import HorizontalShowcase from '@/components/ui/HorizontalShowcase';
 import GradualBlur from '@/components/ui/GradualBlur';
+import { FlickeringFooter } from '@/components/ui/flickering-footer';
+import { useAuthLoader } from '@/components/AuthLoader';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
+  const { showLoader } = useAuthLoader();
+  const router = useRouter();
+
+  const handleStartClick = () => {
+    showLoader("Initializing your creative workspace...");
+    setTimeout(() => {
+      router.push('/login');
+    }, 100);
+  };
+
   const navItems = [
     {
       label: "Product",
@@ -91,23 +104,25 @@ export default function LandingPage() {
       {/* Pinned horizontal features showcase */}
       <HorizontalShowcase />
 
-      {/* Footer & CTA Section */}
-      <footer className="relative z-10 w-full bg-black/60 py-20 px-4 flex flex-col items-center border-t border-white/5">
+      {/* CTA Section */}
+      <div className="relative z-10 w-full bg-black/60 py-20 px-4 flex flex-col items-center border-t border-white/5">
         <div className="w-full max-w-4xl text-center">
           <h2 className="text-3xl font-bold text-white mb-6">Ready to launch?</h2>
           <p className="text-zinc-500 mb-8 max-w-lg mx-auto">
             Join thousands of developers building the future of the web with Rive AI.
           </p>
           <div className="flex justify-center gap-4">
-            <button className="px-8 py-3 rounded-xl bg-[#7405FF] text-white font-semibold hover:bg-[#C190FF] transition-colors">
+            <button 
+              onClick={handleStartClick}
+              className="px-8 py-3 rounded-xl bg-[#7405FF] text-white font-semibold hover:bg-[#C190FF] transition-colors"
+            >
               Get Started
             </button>
           </div>
-          <div className="mt-20 pt-8 border-t border-white/5 text-zinc-600 text-sm">
-            © 2026 Rive AI. Built for the modern web.
-          </div>
         </div>
-      </footer>
+      </div>
+
+      <FlickeringFooter />
 
       {/* Modern Gradual Blur Overlay for bottom of viewport */}
       <GradualBlur preset="page-footer" zIndex={50} strength={3} height="3rem" />

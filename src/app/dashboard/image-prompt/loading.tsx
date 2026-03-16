@@ -80,7 +80,7 @@ export default function Loading() {
                         {/* Main Viewport */}
                         <div className="relative w-full aspect-[4/5] max-h-[500px] bg-zinc-900/30 rounded-[2.5rem] overflow-hidden shadow-[0_48px_100px_-24px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center space-y-6 border border-white/5 group">
                             <div className="relative h-24 w-24">
-                                <Skeleton className="absolute inset-0 rounded-full bg-indigo-500/10 animate-ping duration-[3s]" />
+                                <Skeleton className="absolute inset-0 rounded-full bg-indigo-500/10 animate-ping duration-[3000ms]" />
                                 <Skeleton className="absolute inset-2 rounded-3xl bg-white/5" />
                             </div>
                             <div className="space-y-2 text-center">
