@@ -21,9 +21,8 @@ export default function DashboardPage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-10 fade-in pb-20">
-
             {/* Page Header */}
-            <div className="space-y-1">
+            <div className="space-y-1 -mt-4">
                 <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3 font-outfit">
                     <DashboardIcon className="w-7 h-7 text-indigo-500" />
                     Overview

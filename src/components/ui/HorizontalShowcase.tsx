@@ -96,19 +96,19 @@ export default function HorizontalShowcase() {
             <div id="sectionPin" ref={slider} className="h-screen overflow-hidden flex bg-black relative">
                 {/* Side Fade Gradients with Blur */}
                 <div className="absolute left-0 top-0 bottom-0 w-4 md:w-24 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
-                <GradualBlur position="left" width="6rem" strength={3} zIndex={15} target="parent" />
+                <GradualBlur position="left" width="4rem" strength={3} zIndex={15} target="parent" />
 
                 <div className="absolute right-0 top-0 bottom-0 w-4 md:w-24 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
-                <GradualBlur position="right" width="6rem" strength={3} zIndex={15} target="parent" />
+                <GradualBlur position="right" width="4rem" strength={3} zIndex={15} target="parent" />
                 
                 <div className="pin-wrap flex h-full">
                     {features.map((feature, idx) => (
                         <div
                             key={idx}
-                            className="panel flex-shrink-0 w-screen h-full flex flex-col md:flex-row items-center gap-12 p-8 md:p-24 relative"
+                            className="panel flex-shrink-0 w-screen h-full flex flex-col md:flex-row items-center gap-16 p-6 md:p-12 relative"
                         >
                             {/* Left Side - Visual Component */}
-                            <div className="flex-1 w-full h-[40vh] md:h-full rounded-[2.5rem] overflow-hidden relative group border border-white/5 shadow-2xl">
+                            <div className="flex-[1.3] w-full h-[50vh] md:h-[80vh] rounded-[3rem] overflow-hidden relative group border border-white/10 shadow-2xl">
                                 {feature.video ? (
                                     <video
                                         src={feature.video}
@@ -116,20 +116,20 @@ export default function HorizontalShowcase() {
                                         loop
                                         muted
                                         playsInline
-                                        className="w-full h-full object-cover transition-transform duration-1000"
+                                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                     />
                                 ) : (
                                     <img
                                         src={feature.image}
                                         alt={feature.title}
-                                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                     />
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
                             </div>
 
                             {/* Right Side - Content */}
-                            <div className="flex-1 text-left flex flex-col justify-center max-w-xl">
+                            <div className="flex-1 text-left flex flex-col justify-center max-w-2xl">
                                 <div className="flex items-center gap-3 mb-6">
                                     <span className="w-8 h-[1px] bg-[#C190FF]" />
 

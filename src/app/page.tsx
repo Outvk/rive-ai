@@ -4,9 +4,16 @@ import React from 'react';
 import CardNav from '@/components/CardNav';
 import FloatingLines from '@/components/FloatingLines';
 import RuixenMoonChat from '@/components/ui/ruixen-moon-chat';
+import ClippingText from '@/components/ui/ClippingText';
+import GridScroll from '@/components/ui/GridScroll';
+import Comparator from '@/components/ui/Comparator';
+import VideoRevealText from '@/components/ui/VideoRevealText';
+import OnionSkinDepth from '@/components/ui/OnionSkinDepth';
+import ToolsRevealText from '@/components/ui/ToolsRevealText';
 import HorizontalShowcase from '@/components/ui/HorizontalShowcase';
 import GradualBlur from '@/components/ui/GradualBlur';
 import { FlickeringFooter } from '@/components/ui/flickering-footer';
+import '@/components/ui/OfferButton.css';
 import { useAuthLoader } from '@/components/AuthLoader';
 import { useRouter } from 'next/navigation';
 
@@ -101,8 +108,28 @@ export default function LandingPage() {
         </div>
       </main>
 
+
+
+      {/* Dynamic grid reveal effect */}
+      <GridScroll />
+
+      {/* CSS Scroll-Driven Comparator */}
+      <Comparator />
+
+      {/* Video Reveal Text */}
+      <VideoRevealText />
+
+      {/* Interactive 3D Stack */}
+      <OnionSkinDepth />
+
+      {/* Tools Reveal Text */}
+      <ToolsRevealText />
+
       {/* Pinned horizontal features showcase */}
       <HorizontalShowcase />
+
+      {/* Scroll-driven text masking effect */}
+      <ClippingText />
 
       {/* CTA Section */}
       <div className="relative z-10 w-full bg-black/60 py-20 px-4 flex flex-col items-center border-t border-white/5">
@@ -111,13 +138,28 @@ export default function LandingPage() {
           <p className="text-zinc-500 mb-8 max-w-lg mx-auto">
             Join thousands of developers building the future of the web with Rive AI.
           </p>
-          <div className="flex justify-center gap-4">
-            <button 
-              onClick={handleStartClick}
-              className="px-8 py-3 rounded-xl bg-[#7405FF] text-white font-semibold hover:bg-[#C190FF] transition-colors"
-            >
-              Get Started
-            </button>
+          <div className="flex justify-center mt-12">
+            <div className="btn-container" onClick={handleStartClick}>
+              <div className="btn-drawer transition-top">Enjoy</div>
+              <div className="btn-drawer transition-bottom">Your journey</div>
+
+              <button className="btn">
+                <span className="btn-text">Get Started</span>
+              </button>
+
+              {[...Array(4)].map((_, i) => (
+                <svg
+                  key={i}
+                  className="btn-corner"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="-1 1 32 32"
+                >
+                  <path
+                    d="M32,32C14.355,32,0,17.645,0,0h.985c0,17.102,13.913,31.015,31.015,31.015v.985Z"
+                  />
+                </svg>
+              ))}
+            </div>
           </div>
         </div>
       </div>

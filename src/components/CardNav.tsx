@@ -44,8 +44,27 @@ export default function CardNav({
     const navRef = useRef<HTMLElement>(null);
     const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
     const tlRef = useRef<gsap.core.Timeline | null>(null);
+    const lastScrollY = useRef(0);
+    const [isVisible, setIsVisible] = useState(true);
     const { showLoader } = useAuthLoader();
     const router = useRouter();
+
+    useLayoutEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+                // Scrolling down - hide navbar
+                setIsVisible(false);
+            } else {
+                // Scrolling up - show navbar
+                setIsVisible(true);
+            }
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleLoginClick = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -174,34 +193,35 @@ export default function CardNav({
     };
 
     return (
-        <div className={`card-nav-container ${className}`}>
+        <div className={`card-nav-container ${className} ${(!isVisible && !isExpanded) ? 'nav-hidden' : ''}`}>
             <nav
                 ref={navRef}
                 className={`card-nav ${isExpanded ? 'open' : ''}`}
                 style={{ backgroundColor: baseColor }}
             >
                 <div className="card-nav-top">
-                    <div
-                        className={`relative w-20 h-11 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 group flex items-center justify-center ${isHamburgerOpen ? 'open' : ''}`}
-                        onClick={toggleMenu}
-                        role="button"
-                        aria-label={isExpanded ? 'Close menu' : 'Open menu'}
-                        tabIndex={0}
-                    >
-                        <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#7405FF] via-[#15002F] to-[#C190FF]">
-                            <div className="absolute inset-0 bg-[#15002F] rounded-xl opacity-90"></div>
-                        </div>
-                        <div className="absolute inset-[1px] bg-[#15002F] rounded-xl opacity-95"></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-r from-[#15002F] via-[#7405FF] to-[#C190FF] rounded-xl opacity-90 animate-button-gradient"></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-b from-[#7405FF]/30 via-transparent to-[#C190FF]/20 rounded-xl opacity-80"></div>
-                        <div className="absolute inset-[1px] shadow-[inset_0_0_15px_rgba(116,5,255,0.2)] rounded-xl"></div>
+                    <div className="relative">
+                        <div className={`relative w-20 h-11 rounded-xl overflow-hidden cursor-pointer transition-all duration-500 group flex items-center justify-center ${isHamburgerOpen ? 'open' : ''}`}
+                            onClick={toggleMenu}
+                            role="button"
+                            aria-label={isExpanded ? 'Close menu' : 'Open menu'}
+                            tabIndex={0}
+                        >
+                            <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#7405FF] via-[#15002F] to-[#C190FF]">
+                                <div className="absolute inset-0 bg-[#15002F] rounded-xl opacity-90"></div>
+                            </div>
+                            <div className="absolute inset-[1px] bg-[#15002F] rounded-xl opacity-95"></div>
+                            <div className="absolute inset-[1px] bg-gradient-to-r from-[#15002F] via-[#7405FF] to-[#C190FF] rounded-xl opacity-90 animate-button-gradient"></div>
+                            <div className="absolute inset-[1px] bg-gradient-to-b from-[#7405FF]/30 via-transparent to-[#C190FF]/20 rounded-xl opacity-80"></div>
+                            <div className="absolute inset-[1px] shadow-[inset_0_0_15px_rgba(116,5,255,0.2)] rounded-xl"></div>
 
-                        <div className={`relative flex flex-col items-center justify-center w-7 h-5 transition-transform duration-300 ${isHamburgerOpen ? 'scale-90' : ''}`}>
-                            <div className={`absolute w-7 h-0.5 bg-white rounded-full transition-all duration-300 ${isHamburgerOpen ? 'rotate-45' : '-translate-y-1'}`} />
-                            <div className={`absolute w-7 h-0.5 bg-white rounded-full transition-all duration-300 ${isHamburgerOpen ? '-rotate-45' : 'translate-y-1'}`} />
+                            <div className={`relative flex flex-col items-center justify-center w-7 h-5 transition-transform duration-300 ${isHamburgerOpen ? 'scale-90' : ''}`}>
+                                <div className={`absolute w-7 h-0.5 bg-white rounded-full transition-all duration-300 ${isHamburgerOpen ? 'rotate-45' : '-translate-y-1'}`} />
+                                <div className={`absolute w-7 h-0.5 bg-white rounded-full transition-all duration-300 ${isHamburgerOpen ? '-rotate-45' : 'translate-y-1'}`} />
+                            </div>
+                            <div className="absolute inset-[1px] opacity-0 transition-opacity duration-300 bg-gradient-to-r from-[#7405FF]/20 via-[#C190FF]/10 to-[#7405FF]/20 group-hover:opacity-100 rounded-xl"></div>
                         </div>
-
-                        <div className="absolute inset-[1px] opacity-0 transition-opacity duration-300 bg-gradient-to-r from-[#7405FF]/20 via-[#C190FF]/10 to-[#7405FF]/20 group-hover:opacity-100 rounded-xl"></div>
+                        <span className="nav-menu-badge">{`{NEW}`}</span>
                     </div>
 
                     <Link
