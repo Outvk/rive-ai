@@ -77,9 +77,14 @@ export default function RuixenMoonChat() {
             const { data: { user } } = await supabase.auth.getUser();
 
             if (user) {
+                // Already logged in, push prompt to localStorage anyway to auto-fill
+                localStorage.setItem("pendingPrompt", message.trim());
                 router.push("/dashboard/text");
             } else {
-                router.push("/login");
+                // Not logged in, save prompt and redirect to login
+                localStorage.setItem("pendingPrompt", message.trim());
+                // We pass next=/dashboard/text so if the login page supports it, it redirects them here.
+                router.push("/login?next=/dashboard/text");
             }
         } catch (error) {
             console.error("Auth check failed:", error);

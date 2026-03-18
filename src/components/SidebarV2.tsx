@@ -322,17 +322,6 @@ export function SidebarV2({
                 ))}
 
                 <div className="mt-auto flex flex-col gap-3 items-center">
-                    <button
-                        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className="group relative p-2.5 rounded-xl text-zinc-400 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-400/5 transition-all"
-                    >
-                        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-                        {/* Tooltip */}
-                        <div className="absolute left-full ml-4 px-2 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-amber-500 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0 pointer-events-none z-[100] shadow-xl whitespace-nowrap">
-                            Switch to {theme === "dark" ? "Light" : "Dark"} Mode
-                            <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-white dark:bg-zinc-900 border-l border-b border-zinc-200 dark:border-white/10 rotate-45"></div>
-                        </div>
-                    </button>
 
                     <button
                         onClick={handleLogout}

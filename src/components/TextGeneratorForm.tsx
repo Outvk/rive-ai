@@ -60,8 +60,14 @@ export function TextGeneratorForm({
 
     useEffect(() => {
         fetchHistory()
+        
+        // Auto-fill prompt if user was redirected from the landing page
+        const pendingPrompt = localStorage.getItem("pendingPrompt");
+        if (pendingPrompt) {
+            setInput(pendingPrompt);
+            localStorage.removeItem("pendingPrompt");
+        }
     }, [])
-
 
     const getMessageContent = (m: any) => {
         if (typeof m.content === 'string') return m.content;
