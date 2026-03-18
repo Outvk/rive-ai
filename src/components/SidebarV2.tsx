@@ -38,7 +38,8 @@ import {
     Logout,
     Asleep as Moon,
     Light as Sun,
-    Cube
+    Cube,
+    MagicWand
 } from "@carbon/icons-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -199,7 +200,7 @@ export function SidebarV2({
                             items: [
                                 { icon: <Chat size={16} />, label: "Text Generator", href: "/dashboard/text" },
                                 { icon: <ImageIcon size={16} />, label: "Prompt to Image", href: "/dashboard/image-prompt" },
-                                { icon: <ModelBuilder size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
+                                { icon: <MagicWand size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
                                 { icon: <VolumeUp size={16} />, label: "Audio Editor", href: "/dashboard/text-to-speech" },
                                 { icon: <VideoIcon size={16} />, label: "Video Generator", href: "/dashboard/video" },
                                 { icon: <Cube size={16} />, label: "3D Generator", href: "/dashboard/3d" },

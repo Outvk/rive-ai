@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         3. PERSISTENCE: Treat the provided message history as your long-term memory for this session.`,
         messages,
         onFinish: ({ text }) => {
-            console.log(`[CHAT] Server-side onFinish. Length: ${text?.length ?? 0}`);
+
             if (text) console.log(`[CHAT] Snippet: ${text.substring(0, 50)}...`);
         }
     })

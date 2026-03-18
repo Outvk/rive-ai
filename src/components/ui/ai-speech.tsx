@@ -218,7 +218,6 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                 setHistory(prev => [newItem, ...prev])
 
                 await saveGeneration(text.trim(), data.audio, 'speech', { alignment: data.alignment })
-                toast.success("Speech generated successfully!")
                 router.refresh()
             }
         } catch (err: any) {

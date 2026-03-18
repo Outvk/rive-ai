@@ -74,7 +74,6 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
           setIsLoading(false)
           setStatus('')
           router.refresh()
-          toast.success('Video generated!')
         } else if (data.status === 'moderated') {
           setIsLoading(false)
           setStatus('')
@@ -161,7 +160,6 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
         setHistory(prev => [newItem, ...prev])
 
         router.refresh()
-        toast.success('Video generated!')
       } else {
         throw new Error('No video output returned.')
       }

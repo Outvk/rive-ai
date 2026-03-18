@@ -40,9 +40,13 @@ export async function POST(req: Request) {
         if (!prompt) {
             return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
         }
-
-        // Use the working model from the old design
-        const modelId = "google/imagen-4";
+        // Use latest working model on Replicate
+        let modelId = "black-forest-labs/flux-1.1-pro";
+        
+        // We route all image requests to flux-schnell as it is extremely fast, high-quality
+        // and supports the exact aspect_ratio parameter we need.
+        // It provides Midjourney-level quality natively.
+        
         let input: any = { prompt };
 
         // Basic mapping based on frontend values
@@ -52,23 +56,25 @@ export async function POST(req: Request) {
             if (rest.style && rest.style !== "professional") styleModifiers.push(`${rest.style} style`);
             if (rest.backgroundColor && rest.backgroundColor !== "transparent") styleModifiers.push(`${rest.backgroundColor} background`);
             if (rest.lighting && rest.lighting !== "studio") styleModifiers.push(`${rest.lighting} lighting`);
-            if (rest.pose && mode === "image") styleModifiers.push(`${rest.pose} pose`);
+            if (rest.pose && rest.pose !== "auto" && mode === "image") styleModifiers.push(`${rest.pose} pose`);
 
             if (styleModifiers.length > 0) {
                 finalPrompt = `${prompt}, ${styleModifiers.join(', ')}`;
             }
 
-            // Map to supported aspect ratios for google/imagen-4: "1:1", "9:16", "16:9", "3:4", "4:3"
+            // Map to supported aspect ratios for flux: "1:1", "16:9", "21:9", "3:2", "2:3", "4:5", "5:4", "3:4", "4:3", "9:16", "9:21"
             let mappedRatio = "1:1";
             if (aspectRatio === "16:9") mappedRatio = "16:9";
             else if (aspectRatio === "9:16") mappedRatio = "9:16";
-            else if (aspectRatio === "4:3" || aspectRatio === "4:5") mappedRatio = "3:4"; // 4:5 is not supported, using 3:4
+            else if (aspectRatio === "4:3") mappedRatio = "4:3";
             else if (aspectRatio === "3:4") mappedRatio = "3:4";
+            else if (aspectRatio === "4:5") mappedRatio = "4:5";
 
             input = {
                 prompt: finalPrompt,
-                negative_prompt: negativePrompt || "blurry, poor quality",
-                aspect_ratio: mappedRatio
+                aspect_ratio: mappedRatio,
+                output_format: "png",
+                output_quality: 90
             };
         } else {
             return NextResponse.json(
@@ -77,7 +83,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const output = await replicate.run(modelId as `${string}/${string}` | `${string}/${string}:${string}`, { input }) as any;
+        const output = await replicate.run(modelId as `${string}/${string}`, { input }) as any;
 
         // Most Replicate image models return an array of URLs or a FileOutputStream-like object
         const firstOutput = Array.isArray(output) ? output[0] : output;

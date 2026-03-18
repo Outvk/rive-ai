@@ -109,9 +109,6 @@ export function ProfileForm({
             toast.error(error)
             setIsSaving(false)
         } else {
-            toast.success('Preferences saved!', {
-                icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            })
             router.refresh()
             setIsSaving(false)
             setCardBgFile(null)
@@ -138,9 +135,6 @@ export function ProfileForm({
             toast.error(error)
             setIsSaving(false)
         } else {
-            toast.success('Profile updated successfully', {
-                icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            })
             router.refresh()
             setIsSaving(false)
             setPreviewUrl(null)
@@ -183,7 +177,6 @@ export function ProfileForm({
         if (error) {
             toast.error(error)
         } else {
-            toast.success('Password updated successfully!')
             setNewPassword('')
             setRetypePassword('')
             setCurrentPassword('')
@@ -741,7 +734,6 @@ export function ProfileForm({
                                     
                                     const { error } = await updateProfileSettings(formData)
                                     if (error) toast.error(error)
-                                    else toast.success('Notification settings saved!')
                                     setIsSaving(false)
                                 }}
                                 disabled={isSaving}

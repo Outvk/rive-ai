@@ -92,8 +92,7 @@ export function TextGeneratorForm({
             const messageContent = getMessageContent(finalMessage) ||
                 (event.messages && event.messages.length > 0 ? getMessageContent(event.messages[event.messages.length - 1]) : '');
 
-            console.log("FINAL CONTENT:", messageContent);
-            toast.info(`Generated ${messageContent.length} chars`)
+
 
             setCurrentCredits(prev => Math.max(0, prev - 10))
 
