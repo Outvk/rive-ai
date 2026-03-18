@@ -257,7 +257,9 @@ function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { is
 
     return (
         <div className="mx-auto grid w-[320px] gap-2">
-            {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
+            <React.Suspense fallback={<div className="flex justify-center p-4"><Loader2 className="animate-spin w-4 h-4 text-white/50" /></div>}>
+                {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
+            </React.Suspense>
             <div className="text-center text-xs text-white/40">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
                 <Button variant="link" className="h-auto p-0 text-white hover:text-white/80 transition-colors text-xs" onClick={onToggle} disabled={isLoading}>
