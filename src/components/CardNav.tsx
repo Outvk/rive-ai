@@ -226,7 +226,7 @@ export default function CardNav({
 
                     <Link
                         href="/"
-                        className="logo-container group "
+                        className="logo-container group md:absolute md:left-1/2 md:-translate-x-1/2"
                     >
                         <img
                             src="/Comp-2.gif"
@@ -236,40 +236,42 @@ export default function CardNav({
                         <span className="text-white font-bold tracking-wide text-lg hidden sm:block">  </span>
                     </Link>
 
-                    <Link 
-                        href="/login" 
-                        onClick={handleLoginClick}
-                        className="relative h-11 px-7 rounded-xl overflow-hidden transition-all duration-500 group flex items-center justify-center border-none"
-                    >
-                        <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#7405FF] via-[#15002F] to-[#C190FF]">
-                            <div className="absolute inset-0 bg-[#15002F] rounded-xl opacity-90"></div>
-                        </div>
-                        <div className="absolute inset-[1px] bg-[#15002F] rounded-xl opacity-95"></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-r from-[#15002F] via-[#7405FF] to-[#C190FF] rounded-xl opacity-90 animate-button-gradient"></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-b from-[#7405FF]/30 via-transparent to-[#C190FF]/20 rounded-xl opacity-80"></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-br from-[#7405FF]/10 via-transparent to-[#C190FF]/10 rounded-xl"></div>
-                        <div className="absolute inset-[1px] shadow-[inset_0_0_20px_rgba(116,5,255,0.2)] rounded-xl"></div>
-                        <div className="relative flex items-center justify-center gap-2">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2.5}
-                                stroke="currentColor"
-                                className="w-4 h-4 text-[#E9D5FF] drop-shadow-[0_0_12px_rgba(193,144,255,0.9)]"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
-                                />
-                            </svg>
-                            <span className="text-sm font-semibold tracking-tight text-white/90">
-                                Start building now
-                            </span>
-                        </div>
-                        <div className="absolute inset-[1px] opacity-0 transition-opacity duration-300 bg-gradient-to-r from-[#7405FF]/20 via-[#C190FF]/10 to-[#7405FF]/20 group-hover:opacity-100 rounded-xl"></div>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link 
+                            href="/login" 
+                            onClick={handleLoginClick}
+                            className="relative h-11 px-7 rounded-xl overflow-hidden transition-all duration-500 group flex items-center justify-center border-none"
+                        >
+                            <div className="absolute inset-0 rounded-xl p-[1px] bg-gradient-to-b from-[#7405FF] via-[#15002F] to-[#C190FF]">
+                                <div className="absolute inset-0 bg-[#15002F] rounded-xl opacity-90"></div>
+                            </div>
+                            <div className="absolute inset-[1px] bg-[#15002F] rounded-xl opacity-95"></div>
+                            <div className="absolute inset-[1px] bg-gradient-to-r from-[#15002F] via-[#7405FF] to-[#C190FF] rounded-xl opacity-90 animate-button-gradient"></div>
+                            <div className="absolute inset-[1px] bg-gradient-to-b from-[#7405FF]/30 via-transparent to-[#C190FF]/20 rounded-xl opacity-80"></div>
+                            <div className="absolute inset-[1px] bg-gradient-to-br from-[#7405FF]/10 via-transparent to-[#C190FF]/10 rounded-xl"></div>
+                            <div className="absolute inset-[1px] shadow-[inset_0_0_20px_rgba(116,5,255,0.2)] rounded-xl"></div>
+                            <div className="relative flex items-center justify-center gap-2">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2.5}
+                                    stroke="currentColor"
+                                    className="w-4 h-4 text-[#E9D5FF] drop-shadow-[0_0_12px_rgba(193,144,255,0.9)]"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+                                    />
+                                </svg>
+                                <span className="text-sm font-semibold tracking-tight text-white/90">
+                                    Start building now
+                                </span>
+                            </div>
+                            <div className="absolute inset-[1px] opacity-0 transition-opacity duration-300 bg-gradient-to-r from-[#7405FF]/20 via-[#C190FF]/10 to-[#7405FF]/20 group-hover:opacity-100 rounded-xl"></div>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="card-nav-content" aria-hidden={!isExpanded}>
