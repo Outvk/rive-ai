@@ -173,26 +173,38 @@ export default function GridScroll() {
       if (!svg || !path) return;
 
       // Reset styles for GSAP entrance
-      gsap.set(svg, { opacity: 0, scale: 0 });
+      gsap.set(svg, { opacity: 0, scale: 0.8 });
       
-      const length = path.getTotalLength() || 1000;
-      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+      const length = (path as any).getTotalLength() || 600;
+      // Set to solid for the drawing animation, then restore dashed later
+      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 1 });
 
-      // Entrance sequence
-      gsap.to(svg, {
-        opacity: 0.8,
+      const sparkle = group.querySelector(".gs-sparkle");
+      if (sparkle) gsap.set(sparkle, { opacity: 0, scale: 0 });
+
+      // Entrance sequence utilizing a Timeline
+      const tl = gsap.timeline({ delay: 2.2 + i * 0.4 });
+
+      tl.to(svg, {
+        opacity: 1,
         scale: 1,
-        duration: 1.5,
-        delay: 2 + i * 0.2,
+        duration: 1.2,
         ease: "power2.out"
-      });
-
-      gsap.to(path, {
+      })
+      .to(path, {
         strokeDashoffset: 0,
-        duration: 2,
-        delay: 2.3 + i * 0.2,
-        ease: "power1.inOut"
-      });
+        duration: 2.4,
+        ease: "power2.inOut"
+      }, "-=0.6")
+      .to(sparkle, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        ease: "back.out(1.7)"
+      }, "-=1.0");
+
+      // Optional: Re-apply dashed style after drawing
+      tl.set(path, { strokeDasharray: "6 6" });
 
       // Keep rotation tied to scroll
       scroll(
