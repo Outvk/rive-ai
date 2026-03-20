@@ -20,7 +20,7 @@ export default async function TextGeneratorPage({
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, full_name')
         .eq('id', user?.id)
         .single()
 
@@ -65,6 +65,7 @@ export default async function TextGeneratorPage({
                 <TextGeneratorForm
                     key={conversationId || 'new'}
                     initialCredits={credits}
+                    userName={profile?.full_name || 'User'}
                     conversationId={conversationId}
                     initialChatMessages={initialMessages}
                 />

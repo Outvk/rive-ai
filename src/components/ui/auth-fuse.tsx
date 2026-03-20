@@ -10,7 +10,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { loginAction, signupAction, forgotPasswordAction, signInWithGoogleAction } from "@/app/login/actions";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Silk from "@/components/ui/Silk";
 import { useAuthLoader } from "@/components/AuthLoader";
@@ -116,6 +116,7 @@ PasswordInput.displayName = "PasswordInput";
 
 function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoading: (v: boolean) => void }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { showLoader } = useAuthLoader();
     const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -128,7 +129,8 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
                 setIsLoading(false);
             } else {
                 showLoader("Authenticating & loading workspace...");
-                router.push('/dashboard');
+                const nextPath = searchParams.get('next') || '/dashboard';
+                router.push(nextPath);
                 router.refresh();
             }
         } catch (e) {
@@ -195,6 +197,7 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
 
 function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoading: (v: boolean) => void }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { showLoader } = useAuthLoader();
     const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -207,7 +210,8 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
                 setIsLoading(false);
             } else {
                 showLoader("Creating account & preparing studio...");
-                router.push('/dashboard');
+                const nextPath = searchParams.get('next') || '/dashboard';
+                router.push(nextPath);
                 router.refresh();
             }
         } catch (e) {
@@ -253,7 +257,9 @@ function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { is
 
     return (
         <div className="mx-auto grid w-[320px] gap-2">
-            {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
+            <React.Suspense fallback={<div className="flex justify-center p-4"><Loader2 className="animate-spin w-4 h-4 text-white/50" /></div>}>
+                {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
+            </React.Suspense>
             <div className="text-center text-xs text-white/40">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
                 <Button variant="link" className="h-auto p-0 text-white hover:text-white/80 transition-colors text-xs" onClick={onToggle} disabled={isLoading}>

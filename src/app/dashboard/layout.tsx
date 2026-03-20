@@ -27,17 +27,44 @@ export default async function DashboardLayout({
         .eq('id', user.id)
         .single()
 
+    // Sync Google Profile Data (Avatar & Name)
+    const googleAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+    const googleName = user?.user_metadata?.full_name || user?.user_metadata?.name;
+
+    let currentProfile = profile;
+
     // Fail-safe: If the profile doesn't exist, create it immediately.
-    if (!profile) {
-        await supabase.from('profiles').insert({
-            id: user.id,
-            full_name: user.email?.split('@')[0] || 'User',
-            credits: 10,
-            role: 'user'
-        })
+    if (!currentProfile) {
+        const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+                id: user.id,
+                full_name: googleName || user.email?.split('@')[0] || 'User',
+                credits: 10,
+                role: 'user',
+                avatar_url: googleAvatar || null
+            })
+            .select('*')
+            .single()
+
+        if (!insertError) {
+            currentProfile = newProfile;
+        }
+    } else if (googleAvatar && !currentProfile.avatar_url) {
+        // If profile exists but no avatar, sync it from Google automatically
+        const { data: updatedProfile, error: updateError } = await supabase
+            .from('profiles')
+            .update({ avatar_url: googleAvatar })
+            .eq('id', user.id)
+            .select('*')
+            .single()
+
+        if (!updateError) {
+            currentProfile = updatedProfile;
+        }
     }
 
-    const credits = profile?.credits ?? 10
+    const credits = currentProfile?.credits ?? 10
 
     // Fetch last 10 conversations for the sidebar panel
     const { data: conversations } = await supabase
@@ -80,8 +107,8 @@ export default async function DashboardLayout({
 
                 <DynamicSidebar
                     email={user.email || ''}
-                    fullName={profile?.full_name || 'User'}
-                    avatarUrl={profile?.avatar_url}
+                    fullName={currentProfile?.full_name || 'User'}
+                    avatarUrl={currentProfile?.avatar_url}
                     conversations={conversations ?? []}
                     recentImages={recentImages ?? []}
                     recentSpeech={recentSpeech ?? []}
@@ -93,8 +120,8 @@ export default async function DashboardLayout({
                     <TopNavbar
                         credits={credits}
                         userEmail={user.email || ''}
-                        userInitial={profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
-                        avatarUrl={profile?.avatar_url}
+                        userInitial={currentProfile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                        avatarUrl={currentProfile?.avatar_url}
                         userId={user.id}
                     />
 

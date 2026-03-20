@@ -1,12 +1,14 @@
+// Manage credit-related transactions and state on the server.
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+// Action to add credits to a user's account (simulating a purchase).
 export async function addCredits(amount: number) {
     const supabase = await createClient()
 
-    // Call the Postgres function we created earlier
+    // Trigger a Postgres function (RPC) to atomically update the user's credit balance.
     const { data, error } = await supabase.rpc('add_credits', {
         add_amount: amount,
         reason: 'Purchased UI Simulation'
@@ -17,9 +19,10 @@ export async function addCredits(amount: number) {
         return { error: error.message || "Unknown Supabase Error" }
     }
 
+    // Refresh the dashboard data to reflect the new balance.
     revalidatePath('/dashboard', 'layout')
 
-    // Add notification for credit purchase
+    // Record a success notification for the user.
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
         const { error: notifError } = await supabase.from('notifications').insert({
@@ -34,10 +37,11 @@ export async function addCredits(amount: number) {
     return { success: true }
 }
 
+// Action to verify if a user has enough credits and deduct them before an AI task starts.
 export async function checkAndDeductCredits(toolName: string, amount: number = 1): Promise<{ success?: boolean; error?: string }> {
     const supabase = await createClient()
 
-    // Call the Postgres function we created earlier
+    // Call the custom 'deduct_credits' Postgres function for atomic safety.
     const { data: success, error } = await supabase.rpc('deduct_credits', {
         charge_amount: amount,
         tool_name: toolName
@@ -47,17 +51,21 @@ export async function checkAndDeductCredits(toolName: string, amount: number = 1
         return { error: error.message }
     }
 
+    // Return a clear error message if the balance is too low.
     if (!success) {
         return { error: "Insufficient credits. Please top up your account." }
     }
 
+    // Refresh UI components that display the current credit count.
     revalidatePath('/dashboard', 'layout')
     return { success: true }
 }
 
+// Action to delete specific transaction records from the user's history.
 export async function deleteTransactions(ids: string[]) {
     const supabase = await createClient()
 
+    // Perform a bulk delete based on the provided array of IDs.
     const { error } = await supabase
         .from('transactions')
         .delete()
@@ -68,6 +76,8 @@ export async function deleteTransactions(ids: string[]) {
         return { error: error.message }
     }
 
+    // Re-render the credits page to show the updated history list.
     revalidatePath('/dashboard/credits')
     return { success: true }
 }
+

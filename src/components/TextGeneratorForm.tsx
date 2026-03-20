@@ -16,10 +16,12 @@ import { createClient } from '@/utils/supabase/client'
 
 export function TextGeneratorForm({
     initialCredits = 0,
+    userName = 'User',
     conversationId: propConversationId,
     initialChatMessages = [],
 }: {
     initialCredits?: number
+    userName?: string
     conversationId?: string
     initialChatMessages?: UIMessage[]
 }) {
@@ -58,8 +60,14 @@ export function TextGeneratorForm({
 
     useEffect(() => {
         fetchHistory()
+        
+        // Auto-fill prompt if user was redirected from the landing page
+        const pendingPrompt = localStorage.getItem("pendingPrompt");
+        if (pendingPrompt) {
+            setInput(pendingPrompt);
+            localStorage.removeItem("pendingPrompt");
+        }
     }, [])
-
 
     const getMessageContent = (m: any) => {
         if (typeof m.content === 'string') return m.content;
@@ -90,8 +98,7 @@ export function TextGeneratorForm({
             const messageContent = getMessageContent(finalMessage) ||
                 (event.messages && event.messages.length > 0 ? getMessageContent(event.messages[event.messages.length - 1]) : '');
 
-            console.log("FINAL CONTENT:", messageContent);
-            toast.info(`Generated ${messageContent.length} chars`)
+
 
             setCurrentCredits(prev => Math.max(0, prev - 10))
 
@@ -257,6 +264,7 @@ export function TextGeneratorForm({
             <RuixenMoonChat
                 messages={messages}
                 input={input}
+                userName={userName}
                 handleInputChange={(e) => setInput(e.target.value)}
                 handleSubmit={handleFormSubmit}
                 isLoading={isLoading}

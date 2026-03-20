@@ -105,12 +105,12 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
     }, [initialHistory])
 
     const [settings, setSettings] = useState<GenerationSettings>({
-        style: "artistic",
+        style: "professional",
         backgroundColor: "studio",
         lighting: "studio",
-        pose: "profile",
+        pose: "auto",
         aspectRatio: "4:5",
-        aiModel: "stable-diffusion-xl",
+        aiModel: "midjourney-v5",
         resolution: "1024x1024",
         prompt: "",
         negativePrompt: "blurry, low quality, distorted features",
@@ -276,7 +276,6 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                     toast.error(`History save failed: ${saveResult.error}`);
                 } else {
                     console.log("Image saved successfully to dedicated table!");
-                    toast.success("Saved to history");
                     router.refresh();
                 }
             } catch (saveErr) {
@@ -539,6 +538,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                            <SelectItem value="auto" className="text-xs focus:bg-zinc-800">Auto (Follow Prompt)</SelectItem>
                             <SelectItem value="headshot" className="text-xs focus:bg-zinc-800">Headshot</SelectItem>
                             <SelectItem value="half-body" className="text-xs focus:bg-zinc-800">Half Body</SelectItem>
                             <SelectItem value="full-body" className="text-xs focus:bg-zinc-800">Full Body</SelectItem>

@@ -164,7 +164,6 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
             .catch((e) => console.error('Failed to save 3D history:', e))
 
             router.refresh()
-            toast.success('3D Model generated!')
           } else {
             throw new Error('No model URL found in API response.')
           }

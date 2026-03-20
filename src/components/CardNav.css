@@ -7,6 +7,14 @@
   max-width: 900px;
   z-index: 99;
   box-sizing: border-box;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  will-change: transform, opacity;
+}
+
+.card-nav-container.nav-hidden {
+  transform: translate(-50%, -100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .card-nav {
@@ -234,4 +242,25 @@
 .animate-button-gradient {
   background-size: 200% 200% !important;
   animation: button-gradient-move 4s ease infinite !important;
+}
+
+.nav-menu-badge {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  background: #7405FF;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transform: rotate(-12deg);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(116, 5, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  outline: 1px solid rgba(0, 0, 0, 0.5);
+  outline-offset: 1px;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }

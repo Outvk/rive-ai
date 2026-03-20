@@ -68,7 +68,6 @@ export function ImageGeneratorForm({
                         toast.error(`Save failed: ${saveResult.error}`);
                     } else {
                         console.log("V1 Save Success: Added to ai_images dedicated table.");
-                        toast.success("Saved to history");
                         router.refresh();
                     }
                 } catch (saveErr) {
