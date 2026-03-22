@@ -11,6 +11,7 @@ import VideoRevealText from '@/components/ui/VideoRevealText';
 import OnionSkinDepth from '@/components/ui/OnionSkinDepth';
 import ToolsRevealText from '@/components/ui/ToolsRevealText';
 import HorizontalShowcase from '@/components/ui/HorizontalShowcase';
+import CubeGallery from '@/components/ui/CubeGallery';
 import GradualBlur from '@/components/ui/GradualBlur';
 import { FlickeringFooter } from '@/components/ui/flickering-footer';
 import '@/components/ui/OfferButton.css';
@@ -127,6 +128,9 @@ export default function LandingPage() {
 
       {/* Pinned horizontal features showcase */}
       <HorizontalShowcase />
+
+      {/* 3D Cube Gallery with scroll-driven rotation */}
+      <CubeGallery />
 
       {/* Scroll-driven text masking effect */}
       <ClippingText />
