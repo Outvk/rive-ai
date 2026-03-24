@@ -15,6 +15,7 @@ const PLAN_PRICING: Record<string, { amount: number; credits: number }> = {
 }
 
 export async function POST(req: Request) {
+    console.log('--- Checkout API Hit ---');
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
@@ -33,9 +34,7 @@ export async function POST(req: Request) {
         const chargily = getChargilyClient()
         
         // Dynamically determine the base URL for redirects
-        const host = req.headers.get('host')
-        const protocol = req.headers.get('x-forwarded-proto') || 'http'
-        const baseURL = `${protocol}://${host}`
+        const { origin: baseURL } = new URL(req.url);
 
         // 1. Create a Chargily checkout session
 
@@ -58,6 +57,7 @@ export async function POST(req: Request) {
             throw new Error('Failed to generate checkout URL from Chargily')
         }
 
+        console.log('Checkout Success:', checkout.checkout_url);
         // Return the URL for the frontend to redirect the user
         return NextResponse.json({ url: checkout.checkout_url })
 

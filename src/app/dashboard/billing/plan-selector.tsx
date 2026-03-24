@@ -42,7 +42,17 @@ export function PlanSelector({ plans }: PlanSelectorProps) {
                 body: JSON.stringify({ planId: planName }),
             })
 
-            const data = await response.json()
+            const text = await response.text()
+            let data;
+            
+            try {
+                data = JSON.parse(text)
+            } catch (e) {
+                console.error('Failed to parse checkout response:', text)
+                toast.error('The server returned an unexpected response format.')
+                setLoadingPlan(null)
+                return
+            }
 
             if (data.url) {
                 // Redirect user to Chargily checkout page
@@ -53,7 +63,7 @@ export function PlanSelector({ plans }: PlanSelectorProps) {
             }
         } catch (error) {
             console.error('Payment error:', error)
-            toast.error('An unexpected error occurred')
+            toast.error('An unexpected error occurred connection with payment endpoint')
             setLoadingPlan(null)
         }
     }

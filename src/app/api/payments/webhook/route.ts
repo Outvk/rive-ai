@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/utils/supabase/admin'
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import crypto from 'crypto'
 
 /**
@@ -68,6 +69,10 @@ export async function POST(req: Request) {
             })
 
             console.log(`Payment confirmed: User ${userId} received ${creditsToPush} credits.`)
+            
+            // Purge the cache for the dashboard and billing pages to show new credits immediately
+            revalidatePath('/dashboard', 'layout')
+            revalidatePath('/dashboard/billing')
         }
 
         // Always return 200 OK to Chargily so they know the event was received

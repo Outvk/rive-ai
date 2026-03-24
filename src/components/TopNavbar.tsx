@@ -1,15 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { logoutAction } from '@/app/dashboard/actions'
+import { useAuthLoader } from '@/components/AuthLoader'
 import { PlusIcon } from '@radix-ui/react-icons'
 import { CreditBadge } from './CreditBadge'
 import { BuyCreditsModal } from './BuyCreditsModal'
 import Link from 'next/link'
 import { useSidebar } from './SidebarContext'
-import { LayoutList, LayoutGrid, Crown, Globe } from 'lucide-react'
+import { LayoutList, LayoutGrid, Crown, Globe, LogOut, Users } from 'lucide-react'
 import GradualBlur from './ui/GradualBlur'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from './NotificationBell'
+import { SwitchAccountModal } from './SwitchAccountModal'
 
 type TopNavbarProps = {
     credits: number
@@ -21,7 +24,14 @@ type TopNavbarProps = {
 
 export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, userId }: TopNavbarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false)
     const { sidebarVersion, setSidebarVersion } = useSidebar()
+    const { showLoader } = useAuthLoader()
+
+    const handleLogout = async () => {
+        showLoader("Signing out of your session...");
+        await logoutAction();
+    }
 
     const handleLanguageChange = (langCode: string) => {
         // Most reliable way to control Google Translate custom UI is setting the cookie & reloading
@@ -145,12 +155,28 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, us
                                     </div>
                                 </div>
                                 <div className="h-[1px] w-full bg-white/5 my-3" />
-                                <Link
-                                    href="/dashboard/profile"
-                                    className="w-full py-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-sm font-medium rounded-lg transition-colors flex items-center justify-center"
-                                >
-                                    Manage Account
-                                </Link>
+                                <div className="space-y-1">
+                                    <Link
+                                        href="/dashboard/profile"
+                                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-sm font-medium rounded-lg transition-colors flex items-center justify-center"
+                                    >
+                                        Manage Account
+                                    </Link>
+                                    <button
+                                        onClick={() => setIsSwitchModalOpen(true)}
+                                        className="w-full py-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 group"
+                                    >
+                                        <Users className="w-4 h-4 text-zinc-400 group-hover:text-zinc-300" />
+                                        Switch Account
+                                    </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 group"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Sign Out
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -173,6 +199,7 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, us
             </header>
 
             <BuyCreditsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <SwitchAccountModal isOpen={isSwitchModalOpen} onClose={() => setIsSwitchModalOpen(false)} />
         </>
     )
 }

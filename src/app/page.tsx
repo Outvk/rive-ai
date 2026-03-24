@@ -31,9 +31,21 @@ export default function LandingPage() {
 
   const navItems = [
     {
-      label: "Product",
-      bgColor: "#111111",
+      label: "Company",
+      bgColor: "#000",
       textColor: "#fff",
+      videoSrc: "/gif/company.mp4",
+      links: [
+        { label: "About Us", href: "/dashboard", ariaLabel: "About us" },
+        { label: "Privacy Policy", href: "/dashboard/privacy", ariaLabel: "Privacy Privacy" },
+        { label: "Terms of Service", href: "/dashboard/terms", ariaLabel: "Terms of Service" }
+      ]
+    },
+    {
+      label: "Product",
+      bgColor: "#000",
+      textColor: "#fff",
+      videoSrc: "/gif/product.mp4",
       links: [
         { label: "Text Generation", href: "/dashboard/text", ariaLabel: "Text Generator" },
         { label: "Image Generation", href: "/dashboard/image-prompt", ariaLabel: "Image Generator" },
@@ -42,22 +54,13 @@ export default function LandingPage() {
     },
     {
       label: "Developers",
-      bgColor: "#1a1625",
+      bgColor: "#000",
       textColor: "#fff",
+      videoSrc: "/gif/developpers.mp4",
       links: [
         { label: "API Reference", href: "/dashboard/docs", ariaLabel: "API Reference" },
         { label: "SDKs & Tools", href: "/dashboard/docs", ariaLabel: "SDKs" },
         { label: "Pricing", href: "/dashboard/pricing", ariaLabel: "Pricing Plans" },
-      ]
-    },
-    {
-      label: "Company",
-      bgColor: "#1e1e24",
-      textColor: "#fff",
-      links: [
-        { label: "About Us", href: "/dashboard", ariaLabel: "About us" },
-        { label: "Privacy Policy", href: "/dashboard/privacy", ariaLabel: "Privacy Privacy" },
-        { label: "Terms of Service", href: "/dashboard/terms", ariaLabel: "Terms of Service" }
       ]
     }
   ];
@@ -87,7 +90,7 @@ export default function LandingPage() {
       <CardNav
         items={navItems}
         ease="expo.inOut"
-        baseColor="rgba(10, 10, 10, 0.6)"
+        baseColor="rgba(10, 10, 10, 0.75)"
         menuColor="#fff"
       />
 

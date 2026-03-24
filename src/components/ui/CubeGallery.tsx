@@ -7,9 +7,9 @@ const IMAGE_SRCS = [
     "/vk-1.jpg",
     "/vk-2.jpg",
     "/vk-3.jpg",
-    "https://assets.codepen.io/573855/demo-monsters-04.webp",
-    "https://assets.codepen.io/573855/demo-monsters-05.webp",
-    "https://assets.codepen.io/573855/demo-monsters-06.webp"
+    "/tools.webp",
+    "/agent.webp",
+    "/fast.webp"
 ]
 
 const FACE_NAMES = [
@@ -134,7 +134,7 @@ export default function CubeGallery() {
                 <section className="cube-gallery-section">
                     <div className="text-card">
                         <div className="tag">01 — Elite Protection</div>
-                        <h1>HARDENED<br />SECURITY<br />LAYER</h1>
+                        <h1>ELITE<br />SECURITY<br />LAYER</h1>
                         <p className="body-text">
                             Built with enterprise-grade encryption and rigorous safety protocols.
                             Your data stays yours, protected by our uncompromising security architecture.
@@ -146,7 +146,7 @@ export default function CubeGallery() {
                 <section className="cube-gallery-section">
                     <div className="text-card right">
                         <div className="tag">02 — Seamless Design</div>
-                        <h1>INTUITIVE<br />FLUID<br />CONTROL</h1>
+                        <h1>UI/UX<br />FLUID<br />CONTROL</h1>
                         <p className="body-text">
                             High-power AI stripped of complexity. Experience a workspace that
                             adapts to your needs with an interface designed for pure creative flow.
@@ -158,7 +158,7 @@ export default function CubeGallery() {
                 <section className="cube-gallery-section">
                     <div className="text-card">
                         <div className="tag">03 — Smart Efficiency</div>
-                        <h1>HIGH<br />VALUE<br />ECONOMY</h1>
+                        <h1>BEST<br />PAYMENT<br />ECONOMY</h1>
                         <p className="body-text">
                             The most reliable choice for high-volume production. Get premium
                             results for lower credit prices without sacrificing quality or stability.

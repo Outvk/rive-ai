@@ -238,7 +238,7 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     );
 }
 
-function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { isSignIn: boolean; onToggle: () => void; isLoading: boolean; setIsLoading: (v: boolean) => void }) {
+export function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { isSignIn: boolean; onToggle: () => void; isLoading: boolean; setIsLoading: (v: boolean) => void }) {
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
         try {

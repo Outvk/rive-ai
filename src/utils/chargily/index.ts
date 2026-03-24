@@ -54,11 +54,23 @@ export class ChargilyClient {
             },
         });
 
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || `Chargily API error: ${response.statusText}`);
+        // Get the response text first, so we can log it if JSON parsing fails
+        const text = await response.text();
+
+        try {
+            const data = JSON.parse(text);
+            if (!response.ok) {
+                console.error('Chargily API Error:', data);
+                throw new Error(data.message || `Chargily API error: ${response.statusText}`);
+            }
+            return data as T;
+        } catch (e: any) {
+            if (e instanceof SyntaxError) {
+                console.error('Failed to parse Chargily JSON response:', text);
+                throw new Error(`Chargily API returned invalid JSON (${response.status} ${response.statusText})`);
+            }
+            throw e;
         }
-        return data as T;
     }
 
     /**

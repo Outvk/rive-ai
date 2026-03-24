@@ -21,14 +21,28 @@
   display: block;
   height: 60px;
   padding: 0;
-  background-color: #030303;
-  border: 1px solid rgba(21, 32, 61, 0.1);
+  background-color: rgba(9, 0, 20, 0.979); /* Slightly higher opacity to show depth */
+
   border-radius: 1rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  
   position: relative;
   overflow: hidden;
-  will-change: height;
-  backdrop-filter: blur(12px);
+  will-change: height, width;
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+              height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.4s ease;
+}
+
+.card-nav.logo-only {
+  width: 160px;
+  height: 60px !important;
+  border-radius: 1.2rem;
+}
+
+.card-nav-container.minimized {
+  width: auto;
 }
 
 .card-nav-top {
@@ -85,7 +99,7 @@
   width: 110px;
   height: 140px;
   position: absolute;
-  left:48%;
+  left:50%;
   top: 50%;
   transform: translate(-50%, -50%);
   gap: 0.5rem;
@@ -152,6 +166,26 @@
   font-size: 20px;
   letter-spacing: -0.5px;
   color: inherit;
+}
+
+.nav-card-video {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  width: 90px;
+  height: 90px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.952);
+  pointer-events: none;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.nav-card-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .nav-card-links {
@@ -226,6 +260,13 @@
 
   .nav-card-label {
     font-size: 18px;
+  }
+
+  .nav-card-video {
+    width: 60px;
+    height: 60px;
+    top: 8px;
+    right: 8px;
   }
 
   .nav-card-link {

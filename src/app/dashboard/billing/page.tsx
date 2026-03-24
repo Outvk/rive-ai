@@ -1,5 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
+import { getChargilyClient } from '@/utils/chargily'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import {
     CreditCard,
     Zap,
@@ -13,6 +15,7 @@ import {
 } from 'lucide-react'
 import { BillingCards3D } from '@/components/BillingCards3D'
 import { PlanSelector } from './plan-selector'
+import { RefreshOnSuccess } from '@/components/RefreshOnSuccess'
 
 export const metadata = {
     title: 'Billing & Subscriptions - Rive AI',
@@ -77,14 +80,14 @@ const plans = [
     },
 ]
 
-const transactions = [
-    { label: 'Credits Purchased', amount: '+200', date: 'Mar 5, 2026', type: 'credit' },
-    { label: 'Image Generation', amount: '-12', date: 'Mar 4, 2026', type: 'debit' },
-    { label: 'Text to Speech', amount: '-8', date: 'Mar 3, 2026', type: 'debit' },
-    { label: 'Welcome Bonus', amount: '+50', date: 'Mar 1, 2026', type: 'credit' },
-]
-
-export default async function BillingPage() {
+export default async function BillingPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const params = await searchParams
+    const paymentStatus = params.payment
+    const checkoutId = params.checkout_id as string
     const supabase = await createClient()
 
     const {
@@ -101,14 +104,61 @@ export default async function BillingPage() {
         .eq('id', user.id)
         .single()
 
+    // Fetch real transactions
+    const { data: dbTransactions } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5)
+
     const credits = profile?.credits ?? 0
-    const maxCredits = 500
+    // Dynamic max credits for the progress ring
+    const maxCredits = credits > 500 ? (credits > 2500 ? 5000 : 2500) : 500
     const creditPct = Math.min((credits / maxCredits) * 100, 100)
     const circumference = 2 * Math.PI * 52
     const strokeDashoffset = circumference - (creditPct / 100) * circumference
 
+    // Map DB transactions to UI format
+    const displayTransactions = dbTransactions && dbTransactions.length > 0 
+        ? dbTransactions.map(tx => ({
+            label: tx.label,
+            amount: (tx.amount > 0 ? '+' : '') + tx.amount,
+            date: new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            type: tx.type
+        }))
+        : [
+            { label: 'Total Credits', amount: String(credits), date: 'Current Balance', type: 'credit' }
+        ]
+
     return (
         <div className="max-w-6xl mx-auto space-y-16 fade-in pb-24 px-4">
+            <RefreshOnSuccess paymentStatus={paymentStatus} checkoutId={checkoutId} />
+
+            {/* ─── Status Banners ─── */}
+            {paymentStatus === 'success' && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-4 animate-in slide-in-from-top duration-500 mb-[-2rem]">
+                    <div className="p-2 bg-emerald-500/20 rounded-lg">
+                        <Check className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                        <h4 className="text-emerald-400 font-bold text-sm">Payment Successful!</h4>
+                        <p className="text-emerald-500/70 text-xs">Your credits have been updated. Refresh the page if they don&apos;t appear immediately.</p>
+                    </div>
+                </div>
+            )}
+
+            {paymentStatus === 'failed' && (
+                <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 flex items-center gap-4 animate-in slide-in-from-top duration-500 mb-[-2rem]">
+                    <div className="p-2 bg-rose-500/20 rounded-lg">
+                        <Zap className="w-5 h-5 text-rose-400" />
+                    </div>
+                    <div>
+                        <h4 className="text-rose-400 font-bold text-sm">Payment Cancelled</h4>
+                        <p className="text-rose-500/70 text-xs">The transaction was not completed. No credits were deducted.</p>
+                    </div>
+                </div>
+            )}
 
             {/* ─── Header ─── */}
             <div className="space-y-1">
@@ -139,157 +189,92 @@ export default async function BillingPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* Left: Credit Balance */}
-                <div
-                    style={{
-                        background:
-                            'linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.06) 100%)',
-                        border: '1px solid rgba(99,102,241,0.2)',
-                        borderRadius: '20px',
-                        padding: '2rem',
-                        position: 'relative',
-                        overflow: 'hidden',
-                    }}
-                >
-                    {/* Glow */}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '-40px',
-                            right: '-40px',
-                            width: '200px',
-                            height: '200px',
-                            borderRadius: '50%',
-                            background:
-                                'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)',
-                            pointerEvents: 'none',
-                        }}
-                    />
+                {/* Left: Custom Billing Settings */}
+                <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950/60 backdrop-blur-2xl p-8 shadow-2xl flex flex-col">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h3 className="text-2xl font-bold text-white tracking-tight mb-1">Custom Billing Settings</h3>
+                        <p className="text-zinc-500 text-sm">Manage your billing preferences and settings</p>
+                    </div>
 
-                    <div className="flex items-start gap-6 relative z-10">
-                        {/* Ring */}
-                        <div style={{ flexShrink: 0, width: 110, height: 110, position: 'relative' }}>
-                            <svg
-                                width="110"
-                                height="110"
-                                viewBox="0 0 120 120"
-                                style={{ transform: 'rotate(-90deg)' }}
-                            >
-                                <defs>
-                                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#6366f1" />
-                                        <stop offset="100%" stopColor="#a855f7" />
-                                    </linearGradient>
-                                </defs>
-                                <circle
-                                    cx="60" cy="60" r="52"
-                                    fill="none"
-                                    stroke="rgba(99,102,241,0.12)"
-                                    strokeWidth="10"
+                    <div className="space-y-6 flex-1">
+                        {/* Primary Fields */}
+                        <div className="space-y-4">
+                            <div>
+                                <input 
+                                    type="text" 
+                                    defaultValue={profile?.full_name || "user@example.com"} 
+                                    placeholder="Enter your full name"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-600"
                                 />
-                                <circle
-                                    cx="60" cy="60" r="52"
-                                    fill="none"
-                                    stroke="url(#ringGrad)"
-                                    strokeWidth="10"
-                                    strokeLinecap="round"
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={strokeDashoffset}
-                                    style={{
-                                        filter: 'drop-shadow(0 0 8px rgba(99,102,241,0.8))',
-                                        transition: 'stroke-dashoffset 1.2s cubic-bezier(.4,.2,.2,1)',
-                                    }}
+                                <p className="text-[11px] text-zinc-500 mt-2 ml-1">Invoices will be sent to this email address</p>
+                            </div>
+
+                            <div>
+                                <input 
+                                    type="text" 
+                                    defaultValue="EU123456789" 
+                                    placeholder="VAT Number"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-600"
                                 />
-                            </svg>
-                            {/* Center text */}
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: 2,
-                                }}
-                            >
-                                <span
-                                    style={{
-                                        fontSize: '1.6rem',
-                                        fontWeight: 800,
-                                        color: 'white',
-                                        lineHeight: 1,
-                                    }}
-                                >
-                                    {credits}
-                                </span>
-                                <span
-                                    style={{
-                                        fontSize: '0.6rem',
-                                        color: '#a855f7',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.08em',
-                                        fontWeight: 600,
-                                    }}
-                                >
-                                    credits
-                                </span>
+                                <p className="text-[11px] text-zinc-500 mt-2 ml-1">For VAT or other tax purposes</p>
+                            </div>
+
+                            <div>
+                                <select className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500/50 appearance-none cursor-pointer">
+                                    <option className="bg-zinc-900">USD - US Dollar</option>
+                                    <option className="bg-zinc-900">EUR - Euro</option>
+                                    <option className="bg-zinc-900">GBP - British Pound</option>
+                                    <option className="bg-zinc-900">DZD - Algerian Dinar</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                            <p className="text-xs text-indigo-400 font-semibold uppercase tracking-widest mb-1">
-                                Available Balance
-                            </p>
-                            <p className="text-zinc-300 text-sm leading-relaxed mb-5">
-                                Credits power every generation — text, images, audio & video.
-                                Purchase more and never miss a moment of creativity.
-                            </p>
+                        <div className="h-[1px] w-full bg-white/10 my-6" />
 
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <button
-                                    style={{
-                                        background:
-                                            'linear-gradient(135deg,#6366f1,#8b5cf6)',
-                                        color: 'white',
-                                        padding: '0.6rem 1.4rem',
-                                        borderRadius: '12px',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 700,
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 8px 24px rgba(99,102,241,0.35)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 6,
-                                        transition: 'all 0.2s ease',
-                                    }}
-                                    className="hover:opacity-90 hover:-translate-y-0.5"
-                                >
-                                    <Gift className="w-3.5 h-3.5" />
-                                    Purchase Credits
-                                </button>
-                                <button
-                                    style={{
-                                        background: 'rgba(255,255,255,0.05)',
-                                        color: '#a1a1aa',
-                                        padding: '0.6rem 1.2rem',
-                                        borderRadius: '12px',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 600,
-                                        border: '1px solid rgba(255,255,255,0.08)',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 6,
-                                        transition: 'all 0.2s ease',
-                                    }}
-                                    className="hover:bg-white/10 hover:text-white"
-                                >
-                                    <TrendingUp className="w-3.5 h-3.5" />
-                                    History
-                                </button>
+                        {/* Toggles */}
+                        <div className="space-y-5">
+                            <div className="flex items-center justify-between group cursor-pointer">
+                                <div>
+                                    <p className="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">Auto-Renewal</p>
+                                    <p className="text-[11px] text-zinc-500">Automatically renew your subscription</p>
+                                </div>
+                                <div className="w-10 h-5 bg-indigo-500 rounded-full relative flex items-center px-0.5 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-all">
+                                    <div className="w-4 h-4 bg-white rounded-full translate-x-5 transition-transform" />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between group cursor-pointer">
+                                <div>
+                                    <p className="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">Invoice Emails</p>
+                                    <p className="text-[11px] text-zinc-500">Receive emails when invoices are generated</p>
+                                </div>
+                                <div className="w-10 h-5 bg-indigo-500 rounded-full relative flex items-center px-0.5 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-all">
+                                    <div className="w-4 h-4 bg-white rounded-full translate-x-5 transition-transform" />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between group cursor-pointer">
+                                <div>
+                                    <p className="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">Promotional Emails</p>
+                                    <p className="text-[11px] text-zinc-500">Receive occasional updates about new features and offers</p>
+                                </div>
+                                <div className="w-10 h-5 bg-zinc-800 border border-white/10 rounded-full relative flex items-center px-0.5 transition-all">
+                                    <div className="w-4 h-4 bg-zinc-400 rounded-full translate-x-0 transition-transform" />
+                                </div>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-white/10">
+                        <button className="px-5 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                            Discard Changes
+                        </button>
+                        <button className="relative group px-5 py-2.5 rounded-xl text-sm font-bold text-white overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_20px_-5px_rgba(99,102,241,0.5)]">
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 top-0 left-0 w-full h-full" />
+                            <span className="relative z-10">Save Preferences</span>
+                        </button>
                     </div>
                 </div>
 
@@ -358,7 +343,7 @@ export default async function BillingPage() {
                         overflow: 'hidden',
                     }}
                 >
-                    {transactions.map((tx, i) => (
+                    {displayTransactions.map((tx, i) => (
                         <div
                             key={i}
                             style={{
@@ -367,7 +352,7 @@ export default async function BillingPage() {
                                 gap: '1rem',
                                 padding: '1rem 1.25rem',
                                 borderBottom:
-                                    i < transactions.length - 1
+                                    i < displayTransactions.length - 1
                                         ? '1px solid rgba(255,255,255,0.04)'
                                         : 'none',
                                 transition: 'background 0.2s ease',

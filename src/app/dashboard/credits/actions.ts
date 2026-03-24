@@ -3,6 +3,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getChargilyClient } from '@/utils/chargily'
 
 // Action to add credits to a user's account (simulating a purchase).
 export async function addCredits(amount: number) {
@@ -78,6 +79,47 @@ export async function deleteTransactions(ids: string[]) {
 
     // Re-render the credits page to show the updated history list.
     revalidatePath('/dashboard/credits')
+    return { success: true }
+}
+
+export async function verifyChargilyCheckout(checkoutId: string) {
+    if (!checkoutId) return { success: false }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { success: false }
+
+    const { data: existingTx } = await supabase
+        .from('transactions')
+        .select('id')
+        .eq('user_id', user.id)
+        .ilike('label', `%${checkoutId}%`)
+        .single()
+
+    if (!existingTx) {
+        try {
+            const chargily = getChargilyClient()
+            const checkout = await chargily.retrieveCheckout(checkoutId)
+
+            if (checkout.status === 'paid') {
+                const creditsToPush = parseInt(checkout.metadata?.credits || '0')
+                const planId = checkout.metadata?.planId || 'Plan'
+
+                await supabase.rpc('add_credits', {
+                    add_amount: creditsToPush,
+                    reason: `Payment Confirmed - ${planId} (ID: ${checkoutId})`
+                })
+
+                revalidatePath('/dashboard', 'layout')
+                revalidatePath('/dashboard/billing')
+                return { success: true }
+            }
+        } catch (err) {
+            console.error('Manual checkout verification error:', err)
+        }
+    }
+
     return { success: true }
 }
 
