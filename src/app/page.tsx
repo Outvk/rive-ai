@@ -12,6 +12,7 @@ import OnionSkinDepth from '@/components/ui/OnionSkinDepth';
 import ToolsRevealText from '@/components/ui/ToolsRevealText';
 import HorizontalShowcase from '@/components/ui/HorizontalShowcase';
 import CubeGallery from '@/components/ui/CubeGallery';
+import ShowcaseOutro from '@/components/ui/ShowcaseOutro';
 import GradualBlur from '@/components/ui/GradualBlur';
 import { FlickeringFooter } from '@/components/ui/flickering-footer';
 import '@/components/ui/OfferButton.css';
@@ -137,6 +138,9 @@ export default function LandingPage() {
 
       {/* Scroll-driven text masking effect */}
       <ClippingText />
+
+      {/* Outro marketing section (previously part of HorizontalShowcase) */}
+      <ShowcaseOutro />
 
       {/* CTA Section */}
       <div className="relative z-10 w-full bg-black/60 py-20 px-4 flex flex-col items-center border-t border-white/5">

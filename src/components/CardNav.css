@@ -1,14 +1,15 @@
 .card-nav-container {
   position: fixed;
-  top: 1em;
+  top: 0.5em;
   left: 50%;
   transform: translateX(-50%);
-  width:70%;
+  width: 70%;
   max-width: 900px;
   z-index: 99;
   box-sizing: border-box;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
-  will-change: transform, opacity;
+  /* Removed will-change: transform, opacity — this was creating a stacking context
+     that trapped the backdrop-filter inside .card-nav */
 }
 
 .card-nav-container.nav-hidden {
@@ -21,19 +22,23 @@
   display: block;
   height: 60px;
   padding: 0;
-  background-color: rgba(9, 0, 20, 0.979); /* Slightly higher opacity to show depth */
-
+  background-color: rgba(0, 0, 0, 0.511); /* move bg to pseudo-element */
   border-radius: 1rem;
-  
   position: relative;
-  overflow: hidden;
-  will-change: height, width;
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-              height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 0.4s ease;
+  backdrop-filter: blur(8px);
 }
+
+/* This clips children without breaking backdrop-filter */
+.card-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.728);
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+}
+
 
 .card-nav.logo-only {
   width: 160px;
@@ -291,7 +296,7 @@
   left: -4px;
   background: #7405FF;
   color: white;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   padding: 2px 6px;
   border-radius: 6px;
