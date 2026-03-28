@@ -19,7 +19,7 @@ import {
     CardStackIcon,
     LockClosedIcon,
 } from '@radix-ui/react-icons'
-import { LayoutList, Bell } from 'lucide-react'
+import { LayoutList, Bell, Compass } from 'lucide-react'
 import { ClientSidebarProfile } from '@/components/ClientSidebarProfile'
 import { deleteConversation } from '@/app/dashboard/text/actions'
 
@@ -467,6 +467,15 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         <DashboardIcon className={`w-4 h-4 ${pathname === '/dashboard' ? 'text-indigo-400' : 'text-zinc-400'}`} />
                         Overview
                     </Link>
+
+                    <Link
+                        href="/dashboard/community"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/community' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <Compass className={`w-4 h-4 ${pathname === '/dashboard/community' ? 'text-indigo-400' : 'text-zinc-400'}`} />
+                        Explore Community
+                    </Link>
+
 
                     <div className="pt-6 pb-2">
                         <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">AI Tools</p>

@@ -43,7 +43,7 @@ export default function LandingPage() {
       ]
     },
     {
-      label: "Product",
+      label: "Playground",
       bgColor: "#000",
       textColor: "#fff",
       videoSrc: "/gif/product.mp4",

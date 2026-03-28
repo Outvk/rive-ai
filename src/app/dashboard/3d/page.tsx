@@ -47,7 +47,7 @@ export default async function ThreeDGeneratorPage() {
                 </p>
             </div>
 
-            <div className="flex-1 min-h-0 relative">
+            <div className="flex-1 min-h-[650px] md:min-h-[750px] relative">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-500/5 rounded-full blur-3xl pointer-events-none -z-10" />
                 <ThreeDGeneratorForm initialCredits={credits} initialHistory={history} />
             </div>

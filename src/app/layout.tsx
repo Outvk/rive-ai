@@ -1,4 +1,4 @@
-import { Outfit, IBM_Plex_Mono, Inter, Noto_Serif } from "next/font/google";
+import { Outfit, IBM_Plex_Mono, Inter, Noto_Serif, Audiowide } from "next/font/google";
 import localFont from "next/font/local";
 import type { Metadata } from "next";
 import Script from "next/script";
@@ -28,6 +28,11 @@ const notoSerif = Noto_Serif({
   subsets: ["latin"],
   variable: "--font-noto-serif",
 });
+const audiowide = Audiowide({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-audiowide",
+});
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -41,8 +46,34 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Rive AI - Dashboard",
-  description: "Next Generation AI SaaS",
+  title: {
+    default: "Rive AI - Next Generation Creative Platform",
+    template: "%s | Rive AI"
+  },
+  description: "The most powerful AI creative suite. Generate images, videos, 3D models, and high-quality speech in seconds with the power of Rive AI.",
+  keywords: ["AI Art", "Video Generation", "3D AI", "Text to Speech", "AI Creativity", "Rive AI"],
+  authors: [{ name: "Rive AI Team" }],
+  openGraph: {
+    title: "Rive AI - Your Creative Co-Pilot",
+    description: "Generate professional-grade AI content across all mediums.",
+    url: "https://rive-ai.com",
+    siteName: "Rive AI",
+    images: [
+      {
+        url: "/og-image.png", // Ensure this exists or provide a full URL
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rive AI - The Future of Content Creation",
+    description: "Transform your ideas into 3D, Video, and Art with one click.",
+    images: ["/og-image.png"],
+  },
   icons: {
     icon: "/minilogo.svg",
   },
@@ -56,7 +87,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${ibmPlexMono.variable} ${inter.variable} ${notoSerif.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${ibmPlexMono.variable} ${inter.variable} ${notoSerif.variable} ${audiowide.variable} antialiased`}
         suppressHydrationWarning
       >
         <Script id="google-translate-init" strategy="afterInteractive">
@@ -73,6 +104,11 @@ export default function RootLayout({
         <Script 
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" 
           strategy="afterInteractive" 
+        />
+        <Script
+          type="module"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"
+          strategy="lazyOnload"
         />
 
         <ThemeProvider

@@ -6,6 +6,12 @@ import { AnimatePresence, motion } from "framer-motion"
 import { Send, Loader2, Sparkles, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { askRuixen } from "@/app/actions/ruixen"
+
+type Message = {
+    role: 'user' | 'assistant'
+    content: string
+}
 
 interface OrbProps {
     dimension?: string
@@ -101,8 +107,37 @@ export function MorphPanel() {
     const { theme } = useTheme()
     const wrapperRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const scrollRef = useRef<HTMLDivElement>(null)
     const [showForm, setShowForm] = useState(false)
     const [input, setInput] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+    const [messages, setMessages] = useState<Message[]>([
+        { role: 'assistant', content: "Greetings! I am Ruixen AI, your creative co-pilot. How can I help you navigate the Rive AI ecosystem today?" }
+    ])
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+        }
+    }, [messages, showForm])
+
+    const handleSend = async () => {
+        if (!input.trim() || isLoading) return
+
+        const userMsg = input.trim()
+        setInput('')
+        setMessages(prev => [...prev, { role: 'user', content: userMsg }])
+        setIsLoading(true)
+
+        try {
+            const response = await askRuixen(userMsg, messages)
+            setMessages(prev => [...prev, { role: 'assistant', content: response.content }])
+        } catch (error) {
+            setMessages(prev => [...prev, { role: 'assistant', content: "I've encountered a neural sync error. Please try asking again." }])
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     const triggerClose = useCallback(() => setShowForm(false), [])
     const triggerOpen = useCallback(() => {
@@ -111,7 +146,7 @@ export function MorphPanel() {
     }, [])
 
     return (
-        <div className="fixed bottom-8 right-8 z-[10000]">
+        <div className="fixed bottom-6 right-4 z-[10000]">
             <motion.div
                 ref={wrapperRef}
                 className={cn(
@@ -120,9 +155,9 @@ export function MorphPanel() {
                 )}
                 initial={false}
                 animate={{
-                    width: showForm ? FORM_WIDTH : 56,
-                    height: showForm ? FORM_HEIGHT : 56,
-                    borderRadius: showForm ? 24 : 28,
+                    width: showForm ? FORM_WIDTH : 55,
+                    height: showForm ? FORM_HEIGHT : 55,
+                    borderRadius: showForm ? 50 : 50,
                 }}
                 transition={{
                     type: "spring",
@@ -139,9 +174,9 @@ export function MorphPanel() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={triggerOpen}
-                            className="flex h-full w-full items-center justify-center hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+                            className="flex h-full w-full items-center justify-center "
                         >
-                            <ColorOrb dimension="28px" tones={{ base: "oklch(22.64% 0 0)" }} />
+                            <ColorOrb dimension="33px" tones={{ base: "oklch(22.64% 0 0)" }} />
                         </motion.button>
                     ) : (
                         <motion.div
@@ -156,7 +191,7 @@ export function MorphPanel() {
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
                                         <ColorOrb dimension="24px" tones={{ base: theme === "dark" ? "oklch(22.64% 0 0)" : "oklch(95% 0 0)" }} />
-                                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950 animate-pulse" />
+                                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-950" />
                                     </div>
                                     <div>
                                         <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-widest leading-none mb-0.5 font-outfit">Ruixen AI</h3>
@@ -168,32 +203,57 @@ export function MorphPanel() {
                                 </Button>
                             </div>
 
-                            {/* Empty state */}
-                            <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-4 border border-indigo-100 dark:border-indigo-500/20">
-                                    <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                                </div>
-                                <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed font-outfit">
-                                    Hello! I'm Ruixen. <br /> Coming soon.
-                                </p>
-                            </div>
+                            {/* Chat Area */}
+                            <div 
+                               ref={scrollRef} 
+                               className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide bg-zinc-950/20"
+                            >
+                               {messages.map((m, i) => (
+                                   <div key={i} className={cn(
+                                       "flex w-full",
+                                       m.role === 'user' ? "justify-end" : "justify-start"
+                                   )}>
+                                       <div className={cn(
+                                           "max-w-[85%] p-3 rounded-2xl text-xs font-outfit leading-relaxed whitespace-pre-wrap",
+                                           m.role === 'user' 
+                                               ? "bg-indigo-600 text-white rounded-br-none shadow-lg shadow-indigo-600/10" 
+                                               : "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 border border-zinc-200 dark:border-white/5 rounded-bl-none"
+                                       )}>
+                                           {m.content}
+                                       </div>
+                                   </div>
+                               ))}
+                               {isLoading && (
+                                   <div className="flex justify-start">
+                                       <div className="bg-zinc-100 dark:bg-zinc-900 p-3 rounded-2xl rounded-bl-none border border-zinc-200 dark:border-white/5 flex gap-1">
+                                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" />
+                                       </div>
+                                   </div>
+                               )}
+                           </div>
 
-                            {/* Input — disabled, UI only */}
+                            {/* Input — enabled */}
                             <div className="p-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-white/5">
                                 <div className="relative">
                                     <textarea
                                         ref={textareaRef}
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
-                                        placeholder="Coming soon..."
-                                        disabled
-                                        className="w-full bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all resize-none h-[48px] shadow-sm dark:shadow-none no-scrollbar disabled:opacity-50 disabled:cursor-not-allowed"
+                                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+                                        placeholder="Message Ruixen AI..."
+                                        className="w-full bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-xs text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all resize-none h-[48px] shadow-sm dark:shadow-none no-scrollbar"
                                     />
                                     <button
-                                        disabled
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
+                                        onClick={handleSend}
+                                        disabled={isLoading || !input.trim()}
+                                        className={cn(
+                                           "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg transition-all",
+                                           input.trim() ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600"
+                                        )}
                                     >
-                                        <Send className="w-3.5 h-3.5" />
+                                       {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                     </button>
                                 </div>
                                 <div className="mt-2 flex items-center justify-center px-1">

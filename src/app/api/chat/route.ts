@@ -3,11 +3,6 @@ import { streamText } from 'ai'
 import { createHuggingFace } from '@ai-sdk/huggingface'
 import { createClient } from '@/utils/supabase/server'
 
-// Initialize the HuggingFace client using an API key from environment variables.
-const huggingface = createHuggingFace({
-    apiKey: process.env.HUGGINGFACE_API_KEY!,
-})
-
 // Set the runtime to 'nodejs' to ensure compatibility with standard Node.js features.
 export const runtime = 'nodejs'
 
@@ -83,9 +78,18 @@ export async function POST(req: Request) {
     // Log the messages being sent to the AI for debugging purposes.
     console.log("[CHAT] Sending messages to HuggingFace:", JSON.stringify(messages, null, 2));
 
+    // Secure the primary API Key specifically reserved for Text Generation.
+    const apiKey = process.env.HUGGINGFACE_API_KEY;
+
+    if (!apiKey) {
+        return new Response(JSON.stringify({ error: 'System connection error: No Primary API key configured.' }), { status: 500 });
+    }
+
+    const textClient = createHuggingFace({ apiKey: apiKey });
+
     // Use the 'streamText' utility to get a streaming response from the Qwen AI model.
     const result = streamText({
-        model: huggingface('Qwen/Qwen2.5-7B-Instruct'),
+        model: textClient('Qwen/Qwen2.5-7B-Instruct'),
         // Define the AI's personality, rules, and identity via the system prompt.
         system: `You are Rive Intelligence, a sophisticated AI assistant and EXPERT SOFTWARE ENGINEER.
         

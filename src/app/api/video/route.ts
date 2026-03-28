@@ -73,10 +73,18 @@ export async function POST(req: Request) {
   }
 
   try {
-    // Ensure the required API key for Hugging Face is configured.
-    if (!process.env.HUGGINGFACE_API_KEY) {
-      return json({ error: 'Missing HUGGINGFACE_API_KEY' }, 500)
+    // Ensure the secondary API keys specifically for Hugging Face video generation are configured.
+    const apiKeys = [
+        process.env.HUGGINGFACE_API_KEY_2,
+        process.env.HUGGINGFACE_API_KEY_3,
+        process.env.HUGGINGFACE_API_KEY_4
+    ].filter(Boolean) as string[];
+
+    if (apiKeys.length === 0) {
+      return json({ error: 'Missing Secondary HUGGINGFACE_API_KEY bindings for Video Generator' }, 500)
     }
+
+    const videoApiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
 
     // Authenticate the user.
     const {
@@ -121,8 +129,8 @@ export async function POST(req: Request) {
     }
     creditsCharged = true
 
-    // Initialize the Hugging Face client and get preferred providers.
-    const client = new InferenceClient(process.env.HUGGINGFACE_API_KEY)
+    // Initialize the Hugging Face client with the selected load-balanced key exclusively for video.
+    const client = new InferenceClient(videoApiKey)
     const configuredProvider = process.env.HUGGINGFACE_VIDEO_PROVIDER
 
     let videoBlob: Blob | null = null

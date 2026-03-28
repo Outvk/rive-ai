@@ -4,10 +4,12 @@ import React, { useEffect, useState, useRef } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { UpdateIcon, CubeIcon } from '@radix-ui/react-icons'
-import { ArrowLeft, Clock, History, Search, Download, Image as LucideImageIcon, Wand2 } from 'lucide-react'
+import { ArrowLeft, Clock, History, Search, Download, Image as LucideImageIcon, Wand2, Share2, Loader2, Check } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { shareToCommunity } from '@/app/dashboard/community/actions'
+import { cn } from '@/lib/utils'
 
 // ✅ FIX 1: Declare model-viewer as a valid JSX element for TypeScript
 declare global {
@@ -55,6 +57,8 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
   const [prompt, setPrompt] = useState('')
   const [currentCredits, setCurrentCredits] = useState(initialCredits)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+  const [isShared, setIsShared] = useState(false)
   const [modelUrl, setModelUrl] = useState<string | null>(null)
   const [mode, setMode] = useState<'text' | 'image'>('text')
   const [imageBase64, setImageBase64] = useState<string | null>(null)
@@ -73,23 +77,17 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const modelViewerRef = useRef<HTMLElement | null>(null)
 
-  // ✅ FIX 2: Load model-viewer script properly on client only
+  // Wait for the global model-viewer (injected via layout.tsx) to mount
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (customElements.get('model-viewer')) {
-      setViewerReady(true)
-      return
-    }
-    const script = document.createElement('script')
-    script.type = 'module'
-    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/4.2.0/model-viewer.min.js'
-    script.onload = () => setViewerReady(true)
-    script.onerror = () => console.error('Failed to load model-viewer')
-    document.head.appendChild(script)
     setIsMounted(true)
-    return () => {
-      // Don't remove — model-viewer needs to stay loaded
+    const checkViewer = () => {
+      if (typeof window !== 'undefined' && customElements.get('model-viewer')) {
+        setViewerReady(true)
+      } else {
+        setTimeout(checkViewer, 100)
+      }
     }
+    checkViewer()
   }, [])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,6 +216,7 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
 
     setIsLoading(true)
     setModelUrl(null)
+    setIsShared(false)
     setStatus('Starting 3D generation...')
 
     try {
@@ -247,6 +246,30 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
       setIsLoading(false)
       setStatus('')
       toast.error(err instanceof Error ? err.message : 'Failed to generate model.')
+    }
+  }
+
+  const handleShare = async () => {
+    if (!modelUrl || (!prompt && mode === 'text')) return
+    setIsSharing(true)
+    try {
+        const finalPrompt = mode === 'image' ? 'Image to 3D Model' : prompt.trim()
+        const formData = new FormData()
+        formData.append('prompt', finalPrompt)
+        formData.append('previewUrl', modelUrl)
+        formData.append('toolType', '3D')
+
+        const res = await shareToCommunity(formData)
+        if (res.success) {
+            setIsShared(true)
+            toast.success('Shared to community!')
+        } else {
+            toast.error(res.error || 'Failed to share')
+        }
+    } catch (err) {
+        toast.error('Error sharing work')
+    } finally {
+        setIsSharing(false)
     }
   }
 
@@ -383,7 +406,7 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
         {filteredHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
             <Clock className="w-6 h-6 text-zinc-700 mb-2" />
@@ -396,6 +419,7 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
               onClick={async () => {
                 if (item.prompt !== 'Image to 3D Model') setPrompt(item.prompt)
                 setShowHistory(false)
+                setIsShared(false)
                 
                 if (item.url && item.url.startsWith('tripo://')) {
                   const savedTaskId = item.url.replace('tripo://', '')
@@ -546,26 +570,22 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
         <div className="flex items-center gap-2 px-1">
           <Label className="text-xs font-medium text-zinc-300">Texture Quality</Label>
         </div>
-        {isMounted ? (
-          <Select 
-            value={texture ? 'pbr' : 'vertex'} 
-            onValueChange={(val) => setTexture(val === 'pbr')}
-          >
-            <SelectTrigger className="w-full bg-zinc-900/50 border-zinc-800 rounded-xl h-10 text-xs text-zinc-200 focus:ring-pink-500">
-              <SelectValue placeholder="Select texture mode" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-950 border-zinc-800 text-zinc-200">
-              <SelectItem value="vertex" className="text-xs focus:bg-zinc-800 focus:text-white">
-                Vertex Color (Fastest)
-              </SelectItem>
-              <SelectItem value="pbr" className="text-xs focus:bg-zinc-800 focus:text-white">
-                PBR Texture (High Quality)
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        ) : (
-          <div className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl h-10 animate-pulse" />
-        )}
+        <Select 
+          value={texture ? 'pbr' : 'vertex'} 
+          onValueChange={(val) => setTexture(val === 'pbr')}
+        >
+          <SelectTrigger className="w-full bg-zinc-900/50 border-zinc-800 rounded-xl h-10 text-xs text-zinc-200 focus:ring-pink-500">
+            <SelectValue placeholder="Select texture mode" />
+          </SelectTrigger>
+          <SelectContent className="bg-zinc-950 border-zinc-800 text-zinc-200">
+            <SelectItem value="vertex" className="text-xs focus:bg-zinc-800 focus:text-white">
+              Vertex Color (Fastest)
+            </SelectItem>
+            <SelectItem value="pbr" className="text-xs focus:bg-zinc-800 focus:text-white">
+              PBR Texture (High Quality)
+            </SelectItem>
+          </SelectContent>
+        </Select>
         <p className="text-[10px] text-zinc-500 px-1 italic">
           PBR includes metallic, roughness, and normal maps for realistic lighting.
         </p>
@@ -759,16 +779,32 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
                      modelUrl.toLowerCase().includes('.stl') ? 'STL FORMAT' : '3D MODEL'}
                   </span>
                 </div>
-                <a
-                  href={modelUrl}
-                  download={`3d-model-${Date.now()}.${modelUrl.split('.').pop() || 'glb'}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-2.5 bg-zinc-100 hover:bg-white text-zinc-900 text-xs font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] active:scale-95"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Model
-                </a>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={handleShare}
+                        disabled={isSharing || isShared}
+                        className={cn(
+                            "flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-bold transition-all border",
+                            isShared 
+                                ? "bg-green-500/20 border-green-500/40 text-green-400" 
+                                : "bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300"
+                        )}
+                    >
+                        {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                        {isShared ? 'Shared' : 'Share to Community'}
+                    </button>
+                    <a
+                    href={modelUrl}
+                    download={`3d-model-${Date.now()}.${modelUrl.split('.').pop() || 'glb'}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-zinc-100 hover:bg-white text-zinc-900 text-xs font-bold rounded-lg transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] active:scale-95"
+                    >
+                        <Download className="w-4 h-4" />
+                        Download Model
+                    </a>
+                </div>
               </div>
             </div>
           </div>
@@ -797,23 +833,22 @@ export function ThreeDGeneratorForm({ initialCredits = 0, initialHistory = [] }:
     )
   }
 
-  // ─── ROOT ────────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-[1200px] mx-auto h-[750px] bg-[#09090b] border border-zinc-800/80 rounded-2xl flex overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] mt-10 p-0 relative">
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-pink-500/5 to-transparent z-0 w-[400px]" />
-
-      {/* LEFT: Settings & History */}
-      <div className="w-[340px] flex flex-col border-r border-zinc-800/80 bg-[#0c0c0e]/80 backdrop-blur z-10 shrink-0">
-        {renderHeader()}
-        <div className="flex-1 overflow-y-auto relative">
-          {showHistory ? renderHistory() : renderForm()}
+    <div className="w-full h-full bg-[#09090b] border border-zinc-800/80 rounded-2xl flex overflow-hidden shadow-2xl">
+        
+        {/* LEFT COLUMN: Settings & History */}
+        <div className="w-[340px] flex flex-col border-r border-zinc-800/80 bg-[#0c0c0e] shrink-0">
+            {renderHeader()}
+            <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+                {showHistory ? renderHistory() : renderForm()}
+            </div>
         </div>
-      </div>
 
-      {/* RIGHT: Preview */}
-      <div className="flex-1 bg-black relative overflow-hidden flex flex-col z-0">
-        {renderPreview()}
-      </div>
+        {/* RIGHT COLUMN: Preview & Output */}
+        <div className="flex-1 bg-black relative overflow-hidden flex flex-col">
+            {renderPreview()}
+        </div>
+
     </div>
   )
 }

@@ -39,7 +39,9 @@ import {
     Asleep as Moon,
     Light as Sun,
     Cube,
-    MagicWand
+    MagicWand,
+    Compass,
+    Application
 } from "@carbon/icons-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -127,6 +129,7 @@ export function SidebarV2({
         else if (pathname.startsWith("/dashboard/profile") ||
             pathname.startsWith("/dashboard/support") ||
             pathname.startsWith("/dashboard/api")) setActiveRail("settings");
+        else if (pathname.startsWith("/dashboard/community")) setActiveRail("explore");
     }, [pathname]);
 
     const toggleExpanded = (itemKey: string) => {
@@ -154,6 +157,13 @@ export function SidebarV2({
             activeClass: "bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]"
         },
         {
+            id: "explore",
+            icon: <Compass size={20} />,
+            label: "Explore",
+            href: "/dashboard/community",
+            activeClass: "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
+        },
+        {
             id: "account",
             icon: <Money size={20} />,
             label: "Account",
@@ -178,6 +188,26 @@ export function SidebarV2({
 
     const getSubContent = () => {
         switch (activeRail) {
+            case "explore":
+                return {
+                    title: "Rive Discovery",
+                    sections: [
+                        {
+                            title: "Community",
+                            items: [
+                                { icon: <Compass size={16} />, label: "Public Feed", href: "/dashboard/community" },
+                                { icon: <Idea size={16} />, label: "Inspiration", href: "/dashboard/community" },
+                            ]
+                        },
+                        {
+                            title: "Templates",
+                            items: [
+                                { icon: <Application size={16} />, label: "Tool Templates", href: "/dashboard/community" },
+                                { icon: <Flash size={16} />, label: "Quick Start", href: "/dashboard/community" },
+                            ]
+                        }
+                    ]
+                };
             case "home":
                 return {
                     title: "Dashboard",
