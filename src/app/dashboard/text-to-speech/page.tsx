@@ -24,11 +24,11 @@ export default async function TextToSpeechPage() {
     // Fetch last 50 speech generations for history
     const { data: history } = await supabase
         .from('ai_generations')
-        .select('*')
+        .select('id, prompt, result, created_at')
         .eq('user_id', user.id)
         .eq('tool_type', 'speech')
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(15)
 
     return (
         <TextToSpeechContainer

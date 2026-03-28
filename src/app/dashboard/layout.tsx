@@ -23,7 +23,7 @@ export default async function DashboardLayout({
     // Fetch user profile for credits
     const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, full_name, credits, role, avatar_url')
         .eq('id', user.id)
         .single()
 
@@ -44,7 +44,7 @@ export default async function DashboardLayout({
                 role: 'user',
                 avatar_url: googleAvatar || null
             })
-            .select('*')
+            .select('id, full_name, credits, role, avatar_url')
             .single()
 
         if (!insertError) {
@@ -56,7 +56,7 @@ export default async function DashboardLayout({
             .from('profiles')
             .update({ avatar_url: googleAvatar })
             .eq('id', user.id)
-            .select('*')
+            .select('id, full_name, credits, role, avatar_url')
             .single()
 
         if (!updateError) {

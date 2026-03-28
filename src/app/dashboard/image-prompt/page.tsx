@@ -25,7 +25,7 @@ export default async function ImagePromptPage() {
         // Fetch history from the NEW DEDICATED table
         const { data: images, error: historyError } = await supabase
             .from('ai_images')
-            .select('*')
+            .select('id, image_url, prompt, created_at')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(20)

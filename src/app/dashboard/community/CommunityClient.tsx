@@ -134,6 +134,7 @@ const InteractiveVideoCard = ({ src, title, prompt, author }: { src: string, tit
             muted
             loop
             playsInline
+            preload="none"
           />
           
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity">
@@ -568,6 +569,7 @@ export function CommunityClient() {
                                     muted
                                     loop
                                     playsInline
+                                    preload="none"
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity">
                                     <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-white">
@@ -600,6 +602,7 @@ export function CommunityClient() {
                             </div>
                         ) : (
                             <img 
+                                loading="lazy"
                                 src={work.preview_url} 
                                 alt="AI Preview" 
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
