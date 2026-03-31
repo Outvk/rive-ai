@@ -2,6 +2,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSecondaryAdminClient } from '@/utils/supabase/secondary'
 import { revalidatePath } from 'next/cache'
 
 // Action to update the user's personal settings, avatar, and notification preferences.
@@ -122,7 +123,8 @@ export async function updateProfileSettings(formData: FormData) {
     revalidatePath('/', 'layout')
 
     // Automatically generate an in-app notification confirming the update.
-    const { error: notifError } = await supabase.from('notifications').insert({
+    const secondary = createSecondaryAdminClient()
+    const { error: notifError } = await secondary.from('notifications').insert({
         user_id: user.id,
         title: 'Profile Updated',
         message: 'Your account settings and notification preferences have been synchronized successfully.',
@@ -152,7 +154,8 @@ export async function requestPasswordReset(email: string) {
     // Log a notification to the user's dashboard.
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-        await supabase.from('notifications').insert({
+        const secondary = createSecondaryAdminClient()
+        await secondary.from('notifications').insert({
             user_id: user.id,
             title: 'Reset Link Sent',
             message: 'A password reset link has been sent to your email address.',
@@ -179,7 +182,8 @@ export async function updateUserPassword(password: string) {
     // Record a security alert in the user's notification history.
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-        const { error: notifError } = await supabase.from('notifications').insert({
+        const secondary = createSecondaryAdminClient()
+        const { error: notifError } = await secondary.from('notifications').insert({
             user_id: user.id,
             title: 'Security Alert',
             message: 'Your password has been changed successfully.',

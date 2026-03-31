@@ -19,11 +19,13 @@ export function TextGeneratorForm({
     userName = 'User',
     conversationId: propConversationId,
     initialChatMessages = [],
+    initialHistory = [],
 }: {
     initialCredits?: number
     userName?: string
     conversationId?: string
     initialChatMessages?: UIMessage[]
+    initialHistory?: any[]
 }) {
     const router = useRouter()
     const { sidebarVersion } = useSidebar()
@@ -31,10 +33,10 @@ export function TextGeneratorForm({
     const [isSaving, setIsSaving] = useState(false)
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const [input, setInput] = useState('')
+    const [input, setInput] = useState(() => typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('prompt') || '' : '')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [convId] = useState<string>(() => propConversationId ?? crypto.randomUUID())
-    const [history, setHistory] = useState<any[]>([])
+    const [history, setHistory] = useState<any[]>(initialHistory)
 
     const fetchHistory = async () => {
         const supabase = createClient()
@@ -59,7 +61,9 @@ export function TextGeneratorForm({
     }
 
     useEffect(() => {
-        fetchHistory()
+        if (initialHistory.length === 0) {
+            fetchHistory()
+        }
         
         // Auto-fill prompt if user was redirected from the landing page
         const pendingPrompt = localStorage.getItem("pendingPrompt");

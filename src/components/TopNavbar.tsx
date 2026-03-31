@@ -20,9 +20,10 @@ type TopNavbarProps = {
     userInitial?: string
     avatarUrl?: string
     userId: string
+    fullName?: string
 }
 
-export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, userId }: TopNavbarProps) {
+export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, userId, fullName = 'User' }: TopNavbarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isSwitchModalOpen, setIsSwitchModalOpen] = useState(false)
     const { sidebarVersion, setSidebarVersion } = useSidebar()
@@ -142,12 +143,12 @@ export function TopNavbar({ credits, userEmail, userInitial = 'U', avatarUrl, us
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-xl font-bold text-zinc-300 uppercase">River</span>
+                                            <span className="text-xl font-bold text-zinc-300 uppercase">{userInitial}</span>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-bold text-white truncate">
-                                            River
+                                            {fullName}
                                         </p>
                                         <p className="text-xs text-zinc-500 truncate">
                                             {userEmail}

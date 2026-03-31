@@ -40,6 +40,7 @@ import {
 import { useAuthLoader } from '@/components/AuthLoader'
 import { useRouter } from 'next/navigation'
 import { ShareWorkModal } from './ShareWorkModal'
+import './community-card.css'
 
 // --- Constants ---
 
@@ -308,7 +309,7 @@ export function CommunityClient() {
     showLoader(`Setting up ${template.title}...`)
     await useTemplateAction(template.id)
     const toolRoute = template.tool_type.toLowerCase() === 'image' ? '/dashboard/image-prompt' : `/dashboard/${template.tool_type.toLowerCase()}`
-    setTimeout(() => router.push(toolRoute), 800)
+    setTimeout(() => router.push(`${toolRoute}?prompt=${encodeURIComponent(template.prompt)}`), 800)
   }
 
   const [mounted, setMounted] = useState(false)
@@ -318,86 +319,119 @@ export function CommunityClient() {
 
   return (
     <div className="flex flex-col gap-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Hero Banner Section */}
+      {/* Hero Banner Section - content changes per tab */}
       <div className="relative group overflow-hidden rounded-[2.5rem] border border-white/10 min-h-[400px] flex flex-col items-center justify-center gap-6 shadow-2xl transition-all">
         <img 
-          src="/banner.png" 
-          alt="Community Hero" 
-          className="absolute w-full h-full object-cover scale-x-[-1]"
+          src={activeTab === 'templates' ? '/banner-2.jpg' : '/banner.png'}
+          alt={activeTab === 'templates' ? 'Templates Hero' : 'Community Hero'}
+          className={`absolute w-full h-full object-cover transition-all duration-700 ${activeTab === 'community' ? 'scale-x-[-1]' : ''}`}
         />
         <div className="absolute inset-0 bg-black/5 backdrop-blur-[2px]" />
         
+        {/* Top Right tagline - changes per tab */}
         <div className="absolute top-8 right-10 z-20 flex flex-col items-start leading-none gap-0.5">
             <span className="text-xl font-bold text-zinc-900/60 uppercase tracking-widest font-[family-name:var(--font-audiowide)]">
-                beyond
+                {activeTab === 'templates' ? 'instant' : 'beyond'}
             </span>
             <span className="text-[10px] font-medium text-zinc-800/40 uppercase tracking-[0.5em] font-[family-name:var(--font-audiowide)]">
-                creativity.
+                {activeTab === 'templates' ? 'workflows.' : 'creativity.'}
             </span>
         </div>
 
-        {/* Top Left "Rive Community" Identifier */}
+        {/* Top Left Identifier - changes per tab */}
         <div className="absolute top-12 left-12 z-20">
             <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] font-[family-name:var(--font-audiowide)]">
-                rive community
+                {activeTab === 'templates' ? 'rive templates' : 'rive community'}
             </span>
         </div>
         
-        {/* Animated Orbs for Premium feel */}
+        {/* Animated Orbs */}
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-600/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse delay-700" />
 
-        {/* Narrative Text (Left Center) */}
+        {/* Narrative Text - changes per tab */}
         <div className="absolute top-1/2 -translate-y-1/2 left-12 z-10 max-w-2xl text-left">
-          <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.1] tracking-tighter mb-6">
-            Join the elite circle <br /> of AI creators.
-          </h2>
-          <p className="text-lg md:text-xl font-medium text-zinc-400 leading-relaxed max-w-lg">
-            Share your <span className="bg-black/80 px-2 py-0.5 rounded-lg text-white font-bold">masterpieces, inspire</span> the world, <br className="hidden md:block" />
-            and build the future of digital art.
-          </p>
+          {activeTab === 'templates' ? (
+            <>
+              <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.1] tracking-tighter mb-6">
+                Start from a <br /> <span className="text-purple-400">master template.</span>
+              </h2>
+              <p className="text-lg md:text-xl font-medium text-zinc-400 leading-relaxed max-w-lg">
+                Curated AI prompts built by the Rive team.{' '}
+                <span className="bg-black/80 px-2 py-0.5 rounded-lg text-white font-bold">Pick one, customize</span>{' '}
+                and generate in seconds.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.1] tracking-tighter mb-6">
+                Join the elite circle <br /> of AI creators.
+              </h2>
+              <p className="text-lg md:text-xl font-medium text-zinc-400 leading-relaxed max-w-lg">
+                Share your <span className="bg-black/80 px-2 py-0.5 rounded-lg text-white font-bold">masterpieces, inspire</span> the world, <br className="hidden md:block" />
+                and build the future of digital art.
+              </p>
+            </>
+          )}
         </div>
 
-        {/* Company Logos / Trusted By (Bottom Left) */}
-        <div className="absolute bottom-12 left-12 z-20 flex items-center gap-6 opacity-40">
-           <div className="flex flex-col gap-1">
-             <span className="text-[8px] font-bold text-white uppercase tracking-widest mb-1">Empowering</span>
-             <div className="flex items-center gap-4">
-               <div className="flex items-center gap-1.5 grayscale hover:grayscale-0 transition-all cursor-default">
-                  <Zap className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-bold text-white">GEN-AI</span>
-               </div>
-               <div className="flex items-center gap-1.5 grayscale hover:grayscale-0 transition-all cursor-default">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-bold text-white">CREATIVE</span>
-               </div>
-               <div className="flex items-center gap-1.5 grayscale hover:grayscale-0 transition-all cursor-default">
-                  <Layout className="w-4 h-4 text-indigo-400" />
-                  <span className="text-xs font-bold text-white">STUDIO</span>
+        {/* Bottom Left logos/info - only on community */}
+        {activeTab === 'community' && (
+          <div className="absolute bottom-12 left-12 z-20 flex items-center gap-6 opacity-40">
+             <div className="flex flex-col gap-1">
+               <span className="text-[8px] font-bold text-white uppercase tracking-widest mb-1">Empowering</span>
+               <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-1.5 grayscale hover:grayscale-0 transition-all cursor-default">
+                    <Zap className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs font-bold text-white">GEN-AI</span>
+                 </div>
+                 <div className="flex items-center gap-1.5 grayscale hover:grayscale-0 transition-all cursor-default">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span className="text-xs font-bold text-white">CREATIVE</span>
+                 </div>
+                 <div className="flex items-center gap-1.5 grayscale hover:grayscale-0 transition-all cursor-default">
+                    <Layout className="w-4 h-4 text-indigo-400" />
+                    <span className="text-xs font-bold text-white">STUDIO</span>
+                 </div>
                </div>
              </div>
-           </div>
-        </div>
+          </div>
+        )}
 
-        {/* Action Buttons (Bottom Right) */}
+        {/* Bottom Right Buttons - changes per tab */}
         <div className="absolute bottom-12 right-12 z-20 flex flex-wrap items-center gap-4">
-          <button 
-              onClick={() => setIsShareModalOpen(true)}
-              className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-110 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95"
-          >
-              <Plus className="w-5 h-5 font-black" />
-              Share Work
-          </button>
-          <button 
-              onClick={() => {
-                  const scrollTarget = document.getElementById('browse-section');
-                  scrollTarget?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex items-center gap-3 bg-zinc-900/80 backdrop-blur-md text-white border border-white/10 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
-          >
-              <Compass className="w-5 h-5" />
-              Browse Feed
-          </button>
+          {activeTab === 'community' ? (
+            <>
+              <button 
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-110 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95"
+              >
+                  <Plus className="w-5 h-5 font-black" />
+                  Share Work
+              </button>
+              <button 
+                  onClick={() => {
+                      const scrollTarget = document.getElementById('browse-section');
+                      scrollTarget?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="flex items-center gap-3 bg-zinc-900/80 backdrop-blur-md text-white border border-white/10 px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+              >
+                  <Compass className="w-5 h-5" />
+                  Browse Feed
+              </button>
+            </>
+          ) : (
+            <button 
+                onClick={() => {
+                    const scrollTarget = document.getElementById('browse-section');
+                    scrollTarget?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex items-center gap-3 bg-white text-black px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-110 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95"
+            >
+                <Layout className="w-5 h-5" />
+                Browse Templates
+            </button>
+          )}
         </div>
       </div>
 
@@ -553,9 +587,11 @@ export function CommunityClient() {
 
 
                 {filteredWorks.map((work) => (
-                <div key={work.id} className="group relative flex flex-col bg-zinc-900/40 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all duration-500 backdrop-blur-sm">
+                <div key={work.id} className="com-card group isolate">
+                    <div className="com-card__border"></div>
+                    
                     {/* Preview Image */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-zinc-950 rounded-t-[calc(1.5rem-1px)]">
                         {work.tool_type === 'Video' ? (
                             <div className="w-full h-full relative group/vid">
                                 <video 
@@ -594,7 +630,7 @@ export function CommunityClient() {
                                 </div>
                             </div>
                         ) : work.tool_type === '3D' ? (
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900 group/3d">
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900 group/3d -z-10">
                                 <Box className="w-16 h-16 text-zinc-700 group-hover:text-pink-500 transition-all group-hover:scale-110" />
                                 <div className="absolute bottom-3 right-3 px-2 py-1 bg-pink-500/20 border border-pink-500/40 text-pink-400 text-[8px] font-bold rounded uppercase">
                                     Interactive 3D
@@ -620,146 +656,153 @@ export function CommunityClient() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-5 flex flex-col flex-1 gap-4">
-                    <p className="text-sm text-zinc-300 line-clamp-2 italic font-medium">
-                        "{work.prompt}"
-                    </p>
+                    <div className="p-6 flex flex-col flex-1 gap-5 relative z-10 transition-all">
+                        <p className="text-[13px] text-zinc-300 line-clamp-2 leading-relaxed font-medium">
+                            "{work.prompt}"
+                        </p>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-auto">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center">
-                                {work.profiles?.avatar_url ? (
-                                    <img src={work.profiles.avatar_url} alt="Ava" className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-[10px] font-bold text-zinc-500">{work.profiles?.full_name?.charAt(0) || 'U'}</span>
-                                )}
+                        <div className="flex items-center justify-between mt-auto">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-9 h-9 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center shadow-lg">
+                                    {work.profiles?.avatar_url ? (
+                                        <img src={work.profiles.avatar_url} alt="Ava" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-[10px] font-bold text-zinc-500">{work.profiles?.full_name?.charAt(0) || 'U'}</span>
+                                    )}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-white tracking-wide">{work.profiles?.full_name || 'Anonymous User'}</span>
+                                    <span className="text-[10px] text-zinc-500 font-medium whitespace-nowrap">
+                                        {new Date(work.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="text-[11px] font-bold text-white leading-tight">{work.profiles?.full_name || 'Anonymous User'}</span>
-                                <span className="text-[10px] text-zinc-500">
-                                    {new Date(work.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                </span>
+
+                            <div className="flex items-center gap-1 bg-black/40 p-1.5 rounded-full border border-white/5 backdrop-blur-md">
+                                <button 
+                                    onClick={() => handleLike(work.id)}
+                                    className={cn(
+                                        "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-bold",
+                                        work.has_liked ? "bg-red-500/20 text-red-500" : "hover:bg-white/10 text-zinc-400 hover:text-red-400"
+                                    )}
+                                >
+                                    <Heart className={cn("w-3.5 h-3.5", work.has_liked && "fill-current")} />
+                                    {work.likes_count}
+                                </button>
+                                <button 
+                                    onClick={() => handleToggleComments(work.id)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-bold",
+                                        expandedComments[work.id] ? "bg-purple-500/20 text-purple-400" : "hover:bg-white/10 text-zinc-400 hover:text-purple-400"
+                                    )}
+                                >
+                                    <MessageSquare className={cn("w-3.5 h-3.5", expandedComments[work.id] && "fill-current")} />
+                                    {work.comments_count}
+                                </button>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <hr className="w-full h-px bg-white/10 border-none my-1" />
+
+                        <div className="flex items-center gap-3">
                             <button 
-                                onClick={() => handleLike(work.id)}
-                                className={cn(
-                                    "flex items-center gap-1.5 transition-colors",
-                                    work.has_liked ? "text-red-500" : "text-zinc-400 hover:text-red-400"
-                                )}
+                                onClick={async () => {
+                                    showLoader("Preparing download...");
+                                    try {
+                                        const response = await fetch(work.preview_url);
+                                        const blob = await response.blob();
+                                        const url = window.URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `rive-ai-work-${work.id}.${blob.type.split('/')[1] || 'png'}`;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        window.URL.revokeObjectURL(url);
+                                        document.body.removeChild(a);
+                                    } catch (e) {
+                                        alert("Download failed. Please try again.");
+                                    }
+                                }}
+                                className="flex-1 bg-zinc-800/50 hover:bg-zinc-700/50 text-white font-semibold text-[11px] py-2.5 rounded-xl border border-white/5 transition-all flex items-center justify-center gap-2 group/dl"
                             >
-                                <Heart className={cn("w-4 h-4", work.has_liked && "fill-red-500")} />
-                                <span className="text-xs font-medium">{work.likes_count}</span>
+                                <Download className="w-3.5 h-3.5 group-hover/dl:scale-110 transition-transform" /> Download
                             </button>
                             <button 
-                                onClick={() => handleToggleComments(work.id)}
-                                className="flex items-center gap-1.5 text-zinc-400 hover:text-purple-400 transition-colors"
+                                onClick={() => {
+                                    showLoader("Copying prompt...")
+                                    navigator.clipboard.writeText(work.prompt)
+                                    setTimeout(() => {
+                                        const tt = work.tool_type.toLowerCase()
+                                        let toolRoute = `/dashboard/${tt}`
+                                        if (tt === 'image') toolRoute = '/dashboard/image-prompt'
+                                        if (tt === 'video') toolRoute = '/dashboard/video'
+                                        if (tt === 'audio') toolRoute = '/dashboard/text-to-speech'
+                                        if (tt === '3d') toolRoute = '/dashboard/3d'
+                                        
+                                        router.push(`${toolRoute}?prompt=${encodeURIComponent(work.prompt)}`)
+                                    }, 500)
+                                }}
+                                className="flex-1 bg-gradient-to-t from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold text-[11px] py-2.5 rounded-xl shadow-[inset_0_-2px_10px_rgba(255,255,255,0.3)] transition-all flex items-center justify-center gap-2 relative overflow-hidden"
                             >
-                                <MessageSquare className="w-4 h-4" />
-                                <span className="text-xs font-medium">{work.comments_count}</span>
+                                <div className="absolute inset-0 bg-transparent blur-md hover:bg-white/10 transition-colors" />
+                                Use Prompt <ArrowUpRight className="w-3.5 h-3.5" />
                             </button>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button 
-                            onClick={async () => {
-                                showLoader("Preparing download...");
-                                try {
-                                    const response = await fetch(work.preview_url);
-                                    const blob = await response.blob();
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `rive-ai-work-${work.id}.${blob.type.split('/')[1] || 'png'}`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    document.body.removeChild(a);
-                                } catch (e) {
-                                    alert("Download failed. Please try again.");
-                                }
-                            }}
-                            className="bg-white/5 hover:bg-white/10 border border-white/10 p-3 rounded-xl text-zinc-400 hover:text-white transition-all flex items-center gap-2 group/dl"
-                        >
-                            <Download className="w-4 h-4 group-hover/dl:scale-110 transition-transform" />
-                            <span className="text-[10px] font-bold uppercase tracking-tighter hidden md:block">Download</span>
-                        </button>
-                        <button 
-                            onClick={() => {
-                                showLoader("Copying prompt...")
-                                navigator.clipboard.writeText(work.prompt)
-                                setTimeout(() => {
-                                    const tt = work.tool_type.toLowerCase()
-                                    let toolRoute = `/dashboard/${tt}`
-                                    if (tt === 'image') toolRoute = '/dashboard/image-prompt'
-                                    if (tt === 'video') toolRoute = '/dashboard/video'
-                                    if (tt === 'audio') toolRoute = '/dashboard/text-to-speech'
-                                    if (tt === '3d') toolRoute = '/dashboard/3d'
-                                    
-                                    router.push(toolRoute)
-                                }, 500)
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/20 py-3 rounded-xl text-xs font-bold text-purple-400 transition-all hover:gap-3"
-                        >
-                            Use this prompt
-                            <ArrowUpRight className="w-4 h-4" />
-                        </button>
+                    {/* Expandable Comments Section - Smooth transition & perfectly inside */}
+                    <div className={cn(
+                        "relative z-10 bg-black/40 overflow-hidden transition-all duration-300 ease-in-out border-t border-white/5",
+                        expandedComments[work.id] ? "opacity-100 max-h-[500px] rounded-b-[calc(1.5rem-1px)]" : "opacity-0 max-h-0 border-transparent"
+                    )}>
+                        <div className="p-5 flex flex-col gap-4">
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    placeholder="Write a comment..." 
+                                    value={commentInputs[work.id] || ''}
+                                    onChange={(e) => setCommentInputs(prev => ({...prev, [work.id]: e.target.value}))}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitComment(work.id) }}
+                                    className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-purple-500/50"
+                                />
+                                <button 
+                                    onClick={() => handleSubmitComment(work.id)} 
+                                    disabled={isSubmittingComment || !commentInputs[work.id]?.trim()}
+                                    className="bg-purple-600 hover:bg-purple-500 text-white rounded-xl px-4 py-2 text-[11px] font-extrabold uppercase tracking-wide disabled:opacity-50 transition-colors flex items-center justify-center min-w-[60px] shadow-lg"
+                                >
+                                    {isSubmittingComment && activeCommentId === work.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'POST'}
+                                </button>
+                            </div>
+                            
+                            <div className="flex flex-col gap-3 max-h-56 overflow-y-auto custom-scrollbar pr-2 mt-2 pb-2">
+                                {!commentsData[work.id] ? (
+                                    <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-zinc-600" /></div>
+                                ) : commentsData[work.id].length === 0 ? (
+                                    <p className="text-[10px] text-zinc-500/60 uppercase tracking-widest text-center py-4 font-bold border border-dashed border-white/5 rounded-xl">No comments yet</p>
+                                ) : (
+                                    commentsData[work.id].map((c: any) => (
+                                        <div key={c.id} className="flex gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                                            <div className="w-6 h-6 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/10 mt-1 flex items-center justify-center">
+                                                {c.profiles?.avatar_url ? (
+                                                    <img src={c.profiles.avatar_url} className="w-full h-full object-cover"/>
+                                                ) : (
+                                                    <span className="text-[9px] font-black text-zinc-500 text-center uppercase">{c.profiles?.full_name?.charAt(0) || 'U'}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col bg-zinc-900/60 px-3 py-2 rounded-2xl rounded-tl-sm border border-white/5 relative group/cmt">
+                                                <div className="flex items-center gap-2 mb-0.5">
+                                                    <span className="text-[10px] font-bold text-zinc-300">{c.profiles?.full_name || 'Anonymous User'}</span>
+                                                    <span className="text-[8px] text-zinc-600 font-medium">{new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                <span className="text-xs text-zinc-400 leading-snug break-words">{c.content}</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                {/* Expandable Comments Section */}
-                {expandedComments[work.id] && (
-                    <div className="border-t border-white/5 bg-zinc-950/80 p-5 flex flex-col gap-4">
-                        <div className="flex gap-2">
-                            <input 
-                                type="text" 
-                                placeholder="Write a comment..." 
-                                value={commentInputs[work.id] || ''}
-                                onChange={(e) => setCommentInputs(prev => ({...prev, [work.id]: e.target.value}))}
-                                onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitComment(work.id) }}
-                                className="flex-1 bg-zinc-900 border border-white/10 rounded-xl px-4 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-purple-500/50"
-                            />
-                            <button 
-                                onClick={() => handleSubmitComment(work.id)} 
-                                disabled={isSubmittingComment || !commentInputs[work.id]?.trim()}
-                                className="bg-purple-600 hover:bg-purple-500 text-white rounded-xl px-4 py-2 text-[11px] font-extrabold uppercase tracking-wide disabled:opacity-50 transition-colors flex items-center justify-center min-w-[60px]"
-                            >
-                                {isSubmittingComment && activeCommentId === work.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'POST'}
-                            </button>
-                        </div>
-                        
-                        <div className="flex flex-col gap-3 max-h-56 overflow-y-auto custom-scrollbar pr-2 mt-2">
-                            {!commentsData[work.id] ? (
-                                <div className="flex justify-center py-4"><Loader2 className="w-4 h-4 animate-spin text-zinc-600" /></div>
-                            ) : commentsData[work.id].length === 0 ? (
-                                <p className="text-[10px] text-zinc-500/60 uppercase tracking-widest text-center py-4 font-bold border border-dashed border-white/5 rounded-xl">No comments yet</p>
-                            ) : (
-                                commentsData[work.id].map((c: any) => (
-                                    <div key={c.id} className="flex gap-3 animate-in fade-in slide-in-from-top-1 duration-300">
-                                        <div className="w-6 h-6 rounded-full overflow-hidden bg-zinc-800 shrink-0 border border-white/10 mt-1 flex items-center justify-center">
-                                            {c.profiles?.avatar_url ? (
-                                                <img src={c.profiles.avatar_url} className="w-full h-full object-cover"/>
-                                            ) : (
-                                                <span className="text-[9px] font-black text-zinc-500 text-center uppercase">{c.profiles?.full_name?.charAt(0) || 'U'}</span>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col bg-zinc-900/60 px-3 py-2 rounded-2xl rounded-tl-sm border border-white/5 relative group/cmt">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <span className="text-[10px] font-bold text-zinc-300">{c.profiles?.full_name || 'Anonymous User'}</span>
-                                                <span className="text-[8px] text-zinc-600 font-medium">{new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                                            </div>
-                                            <span className="text-xs text-zinc-400 leading-snug break-words">{c.content}</span>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
                 ))}
             </div>
           )}
@@ -777,7 +820,7 @@ export function CommunityClient() {
         <>
           {/* Templates Section */}
           <div className="flex flex-col gap-6">
-            
+
             {/* Spotlight Banner Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {templates.filter(t => t.is_featured).slice(0, 2).map(template => (

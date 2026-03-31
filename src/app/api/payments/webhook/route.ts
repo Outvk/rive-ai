@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/utils/supabase/admin'
+import { createSecondaryAdminClient } from '@/utils/supabase/secondary'
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import crypto from 'crypto'
@@ -61,7 +62,8 @@ export async function POST(req: Request) {
             }
 
             // Successfully record a notification so user sees the update in their dashboard
-            await supabaseAdmin.from('notifications').insert({
+            const secondary = createSecondaryAdminClient()
+            await secondary.from('notifications').insert({
                 user_id: userId,
                 title: 'Credits Added! 🪙',
                 message: `Payment successful. ${creditsToPush} credits have been added for the ${planId} plan.`,

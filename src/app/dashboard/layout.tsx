@@ -32,6 +32,13 @@ export default async function DashboardLayout({
     const googleName = user?.user_metadata?.full_name || user?.user_metadata?.name;
 
     let currentProfile = profile;
+    
+    console.log('Avatar Debug:', { 
+        hasGoogleAvatar: !!googleAvatar,
+        googleAvatarUrl: googleAvatar,
+        currentProfileAvatar: currentProfile?.avatar_url,
+        userId: user.id
+    });
 
     // Fail-safe: If the profile doesn't exist, create it immediately.
     if (!currentProfile) {
@@ -60,46 +67,16 @@ export default async function DashboardLayout({
             .single()
 
         if (!updateError) {
+            console.log('Avatar successfully synced to DB');
             currentProfile = updatedProfile;
+        } else {
+            console.error('Avatar DB sync error:', updateError);
         }
     }
 
     const credits = currentProfile?.credits ?? 10
 
-    // Fetch last 10 conversations for the sidebar panel
-    const { data: conversations } = await supabase
-        .from('chat_conversations')
-        .select('id, title, updated_at')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(10)
 
-    // fetch last 10 image generations for the sidebar when on image tool
-    const { data: recentImages } = await supabase
-        .from('ai_generations')
-        .select('id, prompt, result, created_at, tool_type')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'image')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-    // fetch last 10 speech generations for the sidebar when on text-to-speech tool
-    const { data: recentSpeech } = await supabase
-        .from('ai_generations')
-        .select('id, prompt, result, created_at, tool_type')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'speech')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-    // fetch last 10 video generations for the sidebar when on video tool
-    const { data: recentVideos } = await supabase
-        .from('ai_generations')
-        .select('id, prompt, result, created_at, tool_type')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'video')
-        .order('created_at', { ascending: false })
-        .limit(10)
 
     return (
         <SidebarProvider>
@@ -109,10 +86,10 @@ export default async function DashboardLayout({
                     email={user.email || ''}
                     fullName={currentProfile?.full_name || 'User'}
                     avatarUrl={currentProfile?.avatar_url}
-                    conversations={conversations ?? []}
-                    recentImages={recentImages ?? []}
-                    recentSpeech={recentSpeech ?? []}
-                    recentVideos={recentVideos ?? []}
+                    conversations={[]}
+                    recentImages={[]}
+                    recentSpeech={[]}
+                    recentVideos={[]}
                 />
 
                 {/* Main Content Area */}
@@ -123,6 +100,7 @@ export default async function DashboardLayout({
                         userInitial={currentProfile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                         avatarUrl={currentProfile?.avatar_url}
                         userId={user.id}
+                        fullName={currentProfile?.full_name || 'User'}
                     />
 
                     {/* Subtle Background Glows */}

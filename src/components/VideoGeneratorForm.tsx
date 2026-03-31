@@ -19,7 +19,7 @@ type Props = {
 export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: Props) {
   const router = useRouter()
 
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState(() => typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('prompt') || '' : '')
   const [currentCredits, setCurrentCredits] = useState(initialCredits)
   const [isLoading, setIsLoading] = useState(false)
   const [isSharing, setIsSharing] = useState(false)

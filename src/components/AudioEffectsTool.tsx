@@ -837,20 +837,32 @@ export function AudioEffectsTool() {
         }
     }, [])
 
-    // Persist to localStorage
+    // Persist to localStorage safely to prevent QuotaExceededError
     useEffect(() => {
         if (!isMounted) return
-        localStorage.setItem('user_sfx_history', JSON.stringify(userGeneratedSfx))
+        try {
+            localStorage.setItem('user_sfx_history', JSON.stringify(userGeneratedSfx))
+        } catch (e) {
+            console.warn("Storage quota exceeded for user_sfx_history")
+        }
     }, [userGeneratedSfx, isMounted])
 
     useEffect(() => {
         if (!isMounted) return
-        localStorage.setItem('library_previews_base64', JSON.stringify(libraryBase64))
+        try {
+            localStorage.setItem('library_previews_base64', JSON.stringify(libraryBase64))
+        } catch (e) {
+            console.warn("Storage quota exceeded for library_previews_base64. Skipping cache.")
+        }
     }, [libraryBase64, isMounted])
 
     useEffect(() => {
         if (!isMounted) return
-        localStorage.setItem('mixed_audio_history', JSON.stringify(mixedAudioHistory))
+        try {
+            localStorage.setItem('mixed_audio_history', JSON.stringify(mixedAudioHistory))
+        } catch (e) {
+            console.warn("Storage quota exceeded for mixed_audio_history")
+        }
     }, [mixedAudioHistory, isMounted])
 
     const initAudioContext = () => {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion, useSpring, useTransform } from 'framer-motion'
+import { Zap } from 'lucide-react'
 
 export function CreditBadge({ credits }: { credits: number }) {
     const [prevCredits, setPrevCredits] = useState(credits)
@@ -23,10 +24,12 @@ export function CreditBadge({ credits }: { credits: number }) {
 
     return (
         <div className="flex items-center gap-1.5 mt-0.5">
-            <div
-                className={`h-2 w-2 rounded-full shadow-[0_0_8px_currentColor] transition-colors duration-500 ${credits > 5 ? 'bg-green-500 text-green-500' : credits > 0 ? 'bg-amber-500 text-amber-500' : 'bg-red-500 text-red-500'
-                    }`}
-            ></div>
+        <div className={`w-6 h-6 rounded-full bg-black flex items-center justify-center`}>
+            <Zap
+                className={`w-3.5 h-3.5 fill-current transition-colors duration-500 ${credits > 5 ? 'text-green-400' : credits > 0 ? 'text-amber-400' : 'text-red-400'}`}
+                style={{ filter: credits > 5 ? 'drop-shadow(0 0 2px #4ade80)' : credits > 0 ? 'drop-shadow(0 0 5px #fbbf24)' : 'drop-shadow(0 0 5px #f87171)' }}
+            />
+        </div>
             <motion.span
                 className="text-xs font-semibold tracking-wide text-zinc-300 flex items-center gap-1"
                 initial={{ scale: 1 }}

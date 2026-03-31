@@ -2,6 +2,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSecondaryAdminClient } from '@/utils/supabase/secondary'
 import { revalidatePath } from 'next/cache'
 import { getChargilyClient } from '@/utils/chargily'
 
@@ -26,7 +27,8 @@ export async function addCredits(amount: number) {
     // Record a success notification for the user.
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-        const { error: notifError } = await supabase.from('notifications').insert({
+        const secondary = createSecondaryAdminClient()
+        const { error: notifError } = await secondary.from('notifications').insert({
             user_id: user.id,
             title: 'Credits Added! 🪙',
             message: `Successfully added ${amount} credits to your account. Your creative fuel is ready!`,

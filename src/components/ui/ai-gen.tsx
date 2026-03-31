@@ -66,6 +66,7 @@ interface HistoryItem {
     url: string
     prompt: string
     timestamp: Date
+    sourceTable?: string
 }
 
 interface AIMultiModalGenerationProps {
@@ -112,7 +113,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
         aspectRatio: "4:5",
         aiModel: "midjourney-v5",
         resolution: "1024x1024",
-        prompt: "",
+        prompt: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('prompt') || "" : "",
         negativePrompt: "blurry, low quality, distorted features",
     })
 
@@ -245,6 +246,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                 url: data.url,
                 prompt: settings.prompt || "AI generated content",
                 timestamp: new Date(),
+                sourceTable: 'ai_images'
             }
 
             setGeneratedItems((prev) => [newItem, ...prev])
@@ -276,6 +278,12 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                     toast.error(`History save failed: ${saveResult.error}`);
                 } else {
                     console.log("Image saved successfully to dedicated table!");
+                    // Update the temporary ID with the real database ID
+                    if (saveResult.data && saveResult.data[0]?.id) {
+                        setGeneratedItems(prev => prev.map(item => 
+                            item.id === newItem.id ? { ...item, id: saveResult.data[0].id.toString() } : item
+                        ));
+                    }
                     router.refresh();
                 }
             } catch (saveErr) {
@@ -725,7 +733,8 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                                         if (!confirmed) return
 
                                         try {
-                                            const res = await fetch(`/api/history/delete?id=${item.id}&table=ai_images`, { method: 'DELETE' })
+                                            const table = (item as any).sourceTable || 'ai_images'
+                                            const res = await fetch(`/api/history/delete?id=${item.id}&table=${table}`, { method: 'DELETE' })
                                             if (!res.ok) throw new Error('Failed to delete')
                                             
                                             setGeneratedItems(prev => prev.filter(i => i.id !== item.id))

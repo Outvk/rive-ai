@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Bell, Check, X, BellOff, Info, AlertTriangle, ShieldCheck, Trash2 } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
+import { createSecondaryClient } from '@/utils/supabase/secondary-client'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -40,7 +40,7 @@ export function NotificationBell({ userId }: { userId: string }) {
   const [animateBell, setAnimateBell] = useState(false)
   const [showPulse, setShowPulse] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const supabase = createClient()
+  const supabase = createSecondaryClient()
 
   // 1. Initial Fetch
   const fetchNotifications = React.useCallback(async () => {
@@ -52,6 +52,8 @@ export function NotificationBell({ userId }: { userId: string }) {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(10)
+
+    console.log('NotificationBell - Fetch Result:', { data, error, url: process.env.NEXT_PUBLIC_SUPABASE_SECONDARY_URL })
 
     if (error) {
       console.error('NotificationBell: Fetch error', error)

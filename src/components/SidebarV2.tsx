@@ -44,6 +44,7 @@ import {
     Application
 } from "@carbon/icons-react";
 import { useTheme } from "next-themes";
+import { VenetianMask } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/dashboard/actions";
 import { useAuthLoader } from "@/components/AuthLoader";
@@ -158,7 +159,7 @@ export function SidebarV2({
         },
         {
             id: "explore",
-            icon: <Compass size={20} />,
+            icon: <VenetianMask size={20} />,
             label: "Explore",
             href: "/dashboard/community",
             activeClass: "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
@@ -195,7 +196,7 @@ export function SidebarV2({
                         {
                             title: "Community",
                             items: [
-                                { icon: <Compass size={16} />, label: "Public Feed", href: "/dashboard/community" },
+                                { icon: <VenetianMask size={16} />, label: "Public Feed", href: "/dashboard/community" },
                                 { icon: <Idea size={16} />, label: "Inspiration", href: "/dashboard/community" },
                             ]
                         },
@@ -376,11 +377,10 @@ export function SidebarV2({
                 </div>
             </aside>
 
-            {/* ── DETAIL SIDEBAR ── */}
             <aside
                 className={cn(
                     "flex flex-col gap-4 bg-white dark:bg-black p-4 transition-all duration-500 ease-[cubic-bezier(0.25,1.1,0.4,1)]",
-                    isCollapsed ? "w-0 p-0 opacity-0 overflow-hidden" : "w-64"
+                    isCollapsed ? "w-0 p-0 opacity-0 overflow-hidden" : "w-56"
                 )}
             >
                 <div className="flex items-center justify-between mb-2">
