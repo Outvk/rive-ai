@@ -114,7 +114,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
 );
 PasswordInput.displayName = "PasswordInput";
 
-const Turnstile = ({ onVerify }: { onVerify: (token: string) => void }) => {
+export const Turnstile = ({ onVerify }: { onVerify: (token: string) => void }) => {
     useEffect(() => {
         // @ts-ignore
         window.onTurnstileVerify = (token: string) => {

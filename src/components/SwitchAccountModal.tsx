@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Cross2Icon } from '@radix-ui/react-icons'
-import { AuthFormContainer } from './ui/auth-fuse'
+import { AuthFormContainer, Turnstile } from './ui/auth-fuse'
 import { cn } from '@/lib/utils'
 
 export function SwitchAccountModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
     const [isSignIn, setIsSignIn] = useState(true)
     const [isLoading, setIsLoading] = useState(false)
+    const [turnstileToken, setTurnstileToken] = useState("")
 
     return (
         <AnimatePresence>
@@ -56,7 +57,11 @@ export function SwitchAccountModal({ isOpen, onClose }: { isOpen: boolean, onClo
                                         onToggle={() => setIsSignIn(!isSignIn)} 
                                         isLoading={isLoading} 
                                         setIsLoading={setIsLoading} 
+                                        turnstileToken={turnstileToken}
                                     />
+                                    <div className="mt-6 pt-4 border-t border-white/5">
+                                        <Turnstile onVerify={setTurnstileToken} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
