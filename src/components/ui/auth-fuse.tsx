@@ -114,7 +114,48 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
 );
 PasswordInput.displayName = "PasswordInput";
 
-function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoading: (v: boolean) => void }) {
+const Turnstile = ({ onVerify }: { onVerify: (token: string) => void }) => {
+    useEffect(() => {
+        // @ts-ignore
+        window.onTurnstileVerify = (token: string) => {
+            onVerify(token);
+        };
+
+        const script = document.createElement("script");
+        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        return () => {
+            const existingScript = document.querySelector('script[src*="challenges.cloudflare.com"]');
+            if (existingScript) document.head.removeChild(existingScript);
+            // @ts-ignore
+            delete window.onTurnstileVerify;
+        };
+    }, [onVerify]);
+
+    const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+
+    if (!siteKey) return null;
+
+    return (
+        <div className="relative z-[50] flex justify-center w-full opacity-100 py-2">
+            <div 
+                className="cf-turnstile" 
+                data-sitekey={siteKey}
+                data-theme="dark"
+                data-callback="onTurnstileVerify"
+                style={{ 
+                    transform: 'scale(0.85)', 
+                    transformOrigin: 'top center' 
+                }}
+            />
+        </div>
+    );
+};
+
+function SignInForm({ isLoading, setIsLoading, turnstileToken }: { isLoading: boolean, setIsLoading: (v: boolean) => void, turnstileToken: string }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showLoader } = useAuthLoader();
@@ -122,6 +163,9 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
         event.preventDefault();
         setIsLoading(true);
         const formData = new FormData(event.currentTarget);
+        // Inject the token from state
+        formData.set('cf-turnstile-response', turnstileToken);
+        
         try {
             const res = await loginAction(formData);
             if (res.error) {
@@ -187,7 +231,7 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
                     </div>
                     <PasswordInput id="password" name="password" required autoComplete="current-password" placeholder="Password" />
                 </div>
-                <Button type="submit" variant="outline" className="mt-2" disabled={isLoading}>
+                <Button type="submit" variant="outline" className="mt-2" disabled={isLoading || !turnstileToken}>
                     {isLoading ? <Loader2 className="animate-spin" /> : "Sign In"}
                 </Button>
             </div>
@@ -195,7 +239,7 @@ function SignInForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     );
 }
 
-function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoading: (v: boolean) => void }) {
+function SignUpForm({ isLoading, setIsLoading, turnstileToken }: { isLoading: boolean, setIsLoading: (v: boolean) => void, turnstileToken: string }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showLoader } = useAuthLoader();
@@ -203,6 +247,9 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
         event.preventDefault();
         setIsLoading(true);
         const formData = new FormData(event.currentTarget);
+        // Inject the token from state
+        formData.set('cf-turnstile-response', turnstileToken);
+
         try {
             const res = await signupAction(formData);
             if (res.error) {
@@ -230,7 +277,7 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
                 <div className="grid gap-1"><Label htmlFor="full_name">Full Name</Label><Input id="full_name" name="full_name" type="text" placeholder="John Doe" required autoComplete="name" /></div>
                 <div className="grid gap-2"><Label htmlFor="email">Email</Label><Input id="email" name="email" type="email" placeholder="m@example.com" required autoComplete="email" /></div>
                 <PasswordInput name="password" label="Password" required autoComplete="new-password" placeholder="Password" />
-                <Button type="submit" variant="outline" className="mt-2" disabled={isLoading}>
+                <Button type="submit" variant="outline" className="mt-2" disabled={isLoading || !turnstileToken}>
                     {isLoading ? <Loader2 className="animate-spin" /> : "Sign Up"}
                 </Button>
             </div>
@@ -238,7 +285,7 @@ function SignUpForm({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoad
     );
 }
 
-export function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading }: { isSignIn: boolean; onToggle: () => void; isLoading: boolean; setIsLoading: (v: boolean) => void }) {
+export function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading, turnstileToken }: { isSignIn: boolean; onToggle: () => void; isLoading: boolean; setIsLoading: (v: boolean) => void, turnstileToken: string }) {
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
         try {
@@ -258,7 +305,7 @@ export function AuthFormContainer({ isSignIn, onToggle, isLoading, setIsLoading 
     return (
         <div className="mx-auto grid w-[320px] gap-2">
             <React.Suspense fallback={<div className="flex justify-center p-4"><Loader2 className="animate-spin w-4 h-4 text-white/50" /></div>}>
-                {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} />}
+                {isSignIn ? <SignInForm isLoading={isLoading} setIsLoading={setIsLoading} turnstileToken={turnstileToken} /> : <SignUpForm isLoading={isLoading} setIsLoading={setIsLoading} turnstileToken={turnstileToken} />}
             </React.Suspense>
             <div className="text-center text-xs text-white/40">
                 {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
@@ -328,6 +375,7 @@ interface AuthUIProps {
 export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) {
     const [isSignIn, setIsSignIn] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
+    const [turnstileToken, setTurnstileToken] = useState("");
     const { showLoader } = useAuthLoader();
     const router = useRouter();
     const toggleForm = () => setIsSignIn((prev) => !prev);
@@ -357,31 +405,28 @@ export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) 
             {/* Silk Background */}
             <div className="absolute inset-0 z-0">
                 <Silk
-                    speed={2}
-                    scale={0.5}
-                    noiseIntensity={1.5}
-                    rotation={0.2}
+                    speed={2.5}
+                    scale={0.9}
                 />
-               
             </div>
 
             {/* Main Auth Card */}
-            <div className="relative z-10 w-full max-w-4xl h-[520px] grid md:grid-cols-[1fr_1fr] bg-black/95 backdrop-blur-4xl border border-white/10 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden m-4 group">
+            <div className="relative z-10 w-full max-w-4xl min-h-[520px] grid md:grid-cols-2 bg-black/95 backdrop-blur-4xl border border-white/10 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] overflow-hidden m-4 group">
                 {/* Glow Effect */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/10 to-indigo-500/20 rounded-[2rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000 pointer-events-none" />
 
                 {/* Left Section - Form */}
-                <div className="relative flex flex-col items-center justify-center p-6 md:p-10 border-r border-white/5 bg-black/20">
+                <div className="relative flex flex-col items-center justify-center p-6 md:p-10 border-b md:border-b-0 md:border-r border-white/5 bg-black/20 order-1">
                     <div className="w-full max-w-[280px]">
-                        <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} />
+                        <AuthFormContainer isSignIn={isSignIn} onToggle={toggleForm} isLoading={isLoading} setIsLoading={setIsLoading} turnstileToken={turnstileToken} />
                     </div>
                 </div>
 
                 {/* Right Section - Brand/Logo */}
-                <div className="relative hidden md:flex flex-col items-center justify-center p-10 bg-black">
+                <div className="relative flex flex-col items-center justify-center p-8 md:p-10 bg-black min-h-[300px] md:min-h-0 order-2">
                     <div className="relative w-full flex flex-col items-center text-center">
                         {/* Logo Animation */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[210px] w-full max-w-[220px] flex justify-center perspective-1000 z-0">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[270px] w-full max-w-[220px] flex justify-center perspective-1000 z-0">
                             <Link 
                                 href="/"
                                 onClick={handleLogoClick}
@@ -412,6 +457,11 @@ export function AuthUI({ signInContent = {}, signUpContent = {} }: AuthUIProps) 
                                     <span className="text-[9px] font-bold text-purple-400 uppercase tracking-widest leading-none mb-1">Status</span>
                                     <span className="text-[10px] font-semibold text-zinc-500">Core Active</span>
                                 </div>
+                            </div>
+                            
+                            {/* Cloudflare Verification moved here */}
+                            <div className="pt-6 border-t border-white/5 mt-6 w-full">
+                                <Turnstile onVerify={setTurnstileToken} />
                             </div>
                         </div>
                     </div>

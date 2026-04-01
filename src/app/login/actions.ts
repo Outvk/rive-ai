@@ -17,9 +17,36 @@ const getBaseURL = async () => {
     return `${protocol}://${host}`
 }
 
+async function verifyTurnstile(token: string) {
+    const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
+    if (!secretKey) {
+        console.warn("Cloudflare Turnstile secret key is missing. Skipping verification.");
+        return true;
+    }
+
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(token)}`,
+    });
+
+    const outcome = await response.json();
+    return outcome.success;
+}
+
 // Action to handle existing user login.
 export async function loginAction(formData: FormData) {
     const supabase = await createClient()
+
+    // Cloudflare Turnstile Verification
+    const turnstileToken = formData.get('cf-turnstile-response') as string;
+    const isHuman = await verifyTurnstile(turnstileToken);
+    if (!isHuman) {
+        return { error: "Bot verification failed. Please try again." }
+    }
+
     // Extract credentials from the form submission.
     const data = {
         email: formData.get('email') as string,
@@ -41,6 +68,14 @@ export async function loginAction(formData: FormData) {
 // Action to handle new user registration (Sign Up).
 export async function signupAction(formData: FormData) {
     const supabase = await createClient()
+
+    // Cloudflare Turnstile Verification
+    const turnstileToken = formData.get('cf-turnstile-response') as string;
+    const isHuman = await verifyTurnstile(turnstileToken);
+    if (!isHuman) {
+        return { error: "Bot verification failed. Please try again." }
+    }
+
     const data = {
         email: formData.get('email') as string,
         password: formData.get('password') as string,
@@ -66,7 +101,7 @@ export async function signupAction(formData: FormData) {
 export async function forgotPasswordAction(formData: FormData) {
     const supabase = await createClient()
     const email = formData.get('email') as string
-    
+
     const baseURL = await getBaseURL()
     // Send a reset link to the user's email with a specific redirect back to the profile page.
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
