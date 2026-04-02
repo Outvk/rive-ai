@@ -1,7 +1,4 @@
-"use client"
-
 import React from 'react';
-import CardNav from '@/components/CardNav';
 import FloatingLines from '@/components/FloatingLines';
 import RuixenMoonChat from '@/components/ui/ruixen-moon-chat';
 import ClippingText from '@/components/ui/ClippingText';
@@ -16,20 +13,52 @@ import ShowcaseOutro from '@/components/ui/ShowcaseOutro';
 import GradualBlur from '@/components/ui/GradualBlur';
 import { FlickeringFooter } from '@/components/ui/flickering-footer';
 import '@/components/ui/OfferButton.css';
-import { useAuthLoader } from '@/components/AuthLoader';
-import { useRouter } from 'next/navigation';
+import LandingClientWrapper, { StartJourneyButton } from '@/components/landing/LandingClientComponents';
+import { Metadata } from 'next';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Rive AI',
+  description: 'Create stunning apps & websites by chatting with AI. High-performance creative engines for text, images, and 3D assets.',
+  url: 'https://rive-ai.vercel.app',
+  applicationCategory: 'MultimediaApplication, CreativePlatform, AIApplication',
+  operatingSystem: 'All',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  featureList: [
+    'AI Text Generation',
+    'AI Image Synthesis',
+    'Text-to-Speech Conversion',
+    '3D Asset Generation',
+    'Instant Video Crafting'
+  ],
+}
+
+export const metadata: Metadata = {
+  title: 'Rive AI - The Future of Digital Creation',
+  description: 'Create stunning apps & websites by chatting with AI. High-performance creative engines for text, images, and 3D assets.',
+  openGraph: {
+    title: 'Rive AI - The Future of Digital Creation',
+    description: 'Create stunning apps & websites by chatting with AI.',
+    url: 'https://rive-ai.vercel.app',
+    siteName: 'Rive AI',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+}
 
 export default function LandingPage() {
-  const { showLoader } = useAuthLoader();
-  const router = useRouter();
-
-  const handleStartClick = () => {
-    showLoader("Initializing your creative workspace...");
-    setTimeout(() => {
-      router.push('/login');
-    }, 100);
-  };
-
   const navItems = [
     {
       label: "Company",
@@ -68,6 +97,11 @@ export default function LandingPage() {
 
   return (
     <div className="bg-[#030303] text-zinc-200 font-sans selection:bg-indigo-500/30 flex flex-col isolate relative w-full pt-20">
+      {/* JSON-LD Schema for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Absolute Background - Stays at the top */}
       <div className="absolute inset-0 z-0 h-screen pointer-events-none ">
@@ -87,13 +121,9 @@ export default function LandingPage() {
           linesGradient={["#7405FF", "#15002F", "#C190FF"]}
         />
       </div>
-      {/* Custom Interactive Navigation */}
-      <CardNav
-        items={navItems}
-        ease="expo.inOut"
-        baseColor="rgba(10, 10, 10, 0.75)"
-        menuColor="#fff"
-      />
+
+      {/* Custom Interactive Navigation Wrapper */}
+      <LandingClientWrapper navItems={navItems} />
 
       {/* Main Content Area - AI Chat UI */}
       <main className="flex-1 w-full flex flex-col items-center mt-32 px-4 relative z-10 pointer-events-none">
@@ -112,8 +142,6 @@ export default function LandingPage() {
           <RuixenMoonChat />
         </div>
       </main>
-
-
 
       {/* Dynamic grid reveal effect */}
       <GridScroll />
@@ -139,7 +167,7 @@ export default function LandingPage() {
       {/* Scroll-driven text masking effect */}
       <ClippingText />
 
-      {/* Outro marketing section (previously part of HorizontalShowcase) */}
+      {/* Outro marketing section */}
       <ShowcaseOutro />
 
       {/* CTA Section */}
@@ -150,27 +178,7 @@ export default function LandingPage() {
             Join thousands of developers building the future of the web with Rive AI.
           </p>
           <div className="flex justify-center mt-12">
-            <div className="btn-container" onClick={handleStartClick}>
-              <div className="btn-drawer transition-top">Enjoy</div>
-              <div className="btn-drawer transition-bottom">Your journey</div>
-
-              <button className="btn">
-                <span className="btn-text">Get Started</span>
-              </button>
-
-              {[...Array(4)].map((_, i) => (
-                <svg
-                  key={i}
-                  className="btn-corner"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="-1 1 32 32"
-                >
-                  <path
-                    d="M32,32C14.355,32,0,17.645,0,0h.985c0,17.102,13.913,31.015,31.015,31.015v.985Z"
-                  />
-                </svg>
-              ))}
-            </div>
+             <StartJourneyButton />
           </div>
         </div>
       </div>
