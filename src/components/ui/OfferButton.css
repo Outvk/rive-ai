@@ -1,0 +1,250 @@
+/* From Uiverse.io by dexter-st */ 
+.btn-container {
+  --btn-color: #7405FF; /* Updated to Rive's purple */
+  --corner-color: #0002;
+  --corner-dist: 24px;
+  --corner-multiplier: 1.5;
+  --timing-function: cubic-bezier(0, 0, 0, 2.5);
+  --duration: 250ms;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn {
+  position: relative;
+  min-width: 200px;
+  min-height: calc(var(--corner-dist) * 2.5);
+  border-radius: 20px;
+  border: none;
+  padding: 0.5rem 1.5rem;
+
+  background: linear-gradient(#fff2, #0001), var(--btn-color);
+  box-shadow:
+    1px 1px 2px -1px #fff inset,
+    0 2px 1px #00000010,
+    0 4px 2px #00000010,
+    0 8px 4px #00000010,
+    0 16px 8px #00000010,
+    0 32px 16px #00000010;
+
+  transition:
+    transform var(--duration) var(--timing-function),
+    filter var(--duration) var(--timing-function);
+  -webkit-transition:
+    transform var(--duration) var(--timing-function),
+    -webkit-filter var(--duration) var(--timing-function);
+
+  cursor: pointer;
+}
+
+.btn-drawer {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+
+  min-height: 32px;
+  border-radius: 16px;
+  border: none;
+  padding: 0.25em 1em;
+  font-size: 0.8em;
+  font-weight: 600;
+  font-family: inherit;
+  color: #000c;
+
+  background: linear-gradient(#fff2, #0001), var(--btn-color);
+  background-color: #C190FF; /* Lighter purple */
+  opacity: 0;
+
+  transition:
+    transform calc(0.5 * var(--duration)) ease,
+    filter var(--duration) var(--timing-function),
+    opacity calc(0.5 * var(--duration)) ease;
+  -webkit-transition:
+    transform calc(0.5 * var(--duration)) ease,
+    -webkit-filter var(--duration) var(--timing-function),
+    opacity calc(0.5 * var(--duration)) ease;
+  filter: blur(2px);
+  -webkit-filter: blur(2px);
+}
+
+.transition-top {
+  top: 0;
+  left: 0;
+  border-radius: 12px 12px 0 0;
+  align-items: start;
+}
+.transition-bottom {
+  bottom: 0;
+  right: 0;
+  border-radius: 0 0 12px 12px;
+  align-items: end;
+}
+
+.btn-text {
+  display: inline-block;
+
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+
+  background-image: linear-gradient(#fff, #eee);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 #fff2) drop-shadow(0 -1px 0 #0006);
+  -webkit-filter: drop-shadow(0 1px 0 #fff2) drop-shadow(0 -1px 0 #0006);
+
+  transition:
+    transform var(--duration) var(--timing-function),
+    filter var(--duration) var(--timing-function),
+    color var(--duration) var(--timing-function);
+  -webkit-transition:
+    transform var(--duration) var(--timing-function),
+    -webkit-filter var(--duration) var(--timing-function),
+    color var(--duration) var(--timing-function);
+}
+
+.btn-corner {
+  position: absolute;
+  width: 38px;
+
+  fill: none;
+  stroke: var(--corner-color);
+
+  transition:
+    transform var(--duration) var(--timing-function),
+    filter var(--duration) var(--timing-function);
+  -webkit-transition:
+    transform var(--duration) var(--timing-function),
+    -webkit-filter var(--duration) var(--timing-function);
+}
+
+.btn-corner:nth-of-type(1) {
+  top: 0;
+  left: 0;
+  transform: translate(
+      calc(-1 * var(--corner-dist)),
+      calc(-1 * var(--corner-dist))
+    )
+    rotate(90deg);
+}
+.btn-corner:nth-of-type(2) {
+  top: 0;
+  right: 0;
+  transform: translate(var(--corner-dist), calc(-1 * var(--corner-dist)))
+    rotate(180deg);
+}
+.btn-corner:nth-of-type(3) {
+  bottom: 0;
+  right: 0;
+  transform: translate(var(--corner-dist), var(--corner-dist)) rotate(-90deg);
+}
+.btn-corner:nth-of-type(4) {
+  bottom: 0;
+  left: 0;
+  transform: translate(calc(-1 * var(--corner-dist)), var(--corner-dist))
+    rotate(0deg);
+}
+
+/* Hover & Focus Effects */
+.btn-container:hover .btn,
+.btn-container:focus-within .btn {
+  transform: scale(1.05);
+  filter: drop-shadow(0 16px 16px #0002);
+  -webkit-filter: drop-shadow(0 16px 16px #0002);
+}
+
+.btn-container:hover .transition-top,
+.btn-container:focus-within .transition-top {
+  transform: translateY(-28px) rotateZ(4deg);
+  filter: blur(0px);
+  -webkit-filter: blur(0px);
+  animation: hue-anim 3s infinite linear;
+  -webkit-animation: hue-anim 3s infinite linear;
+  opacity: 1;
+}
+
+.btn-container:hover .transition-bottom,
+.btn-container:focus-within .transition-bottom {
+  transform: translateY(28px) rotateZ(4deg);
+  filter: blur(0px);
+  -webkit-filter: blur(0px);
+  animation: hue-anim 3s infinite linear;
+  -webkit-animation: hue-anim 3s infinite linear;
+  opacity: 1;
+}
+
+.btn-container:hover .btn-text,
+.btn-container:focus-within .btn-text {
+  filter: drop-shadow(0 1px 0 #fff2) drop-shadow(0 -1px 0 #0006)
+    drop-shadow(0px 6px 2px #0003);
+  -webkit-filter: drop-shadow(0 1px 0 #fff2) drop-shadow(0 -1px 0 #0006)
+    drop-shadow(0px 6px 2px #0003);
+  transform: scale(1.05);
+  color: #fff;
+}
+
+.btn-container:hover .btn-corner {
+  --corner-color: rgba(116, 5, 255, 0.4);
+}
+
+.btn-container:hover .btn-corner:first-of-type {
+  transform: translate(
+      calc(-1 * var(--corner-multiplier) * var(--corner-dist)),
+      calc(-1 * var(--corner-multiplier) * var(--corner-dist))
+    )
+    rotate(90deg);
+  filter: drop-shadow(-10px 10px 1px var(--corner-color))
+    drop-shadow(-20px 20px 2px var(--corner-color));
+}
+
+.btn-container:hover .btn-corner:nth-of-type(2) {
+  transform: translate(
+      calc(var(--corner-multiplier) * var(--corner-dist)),
+      calc(-1 * var(--corner-multiplier) * var(--corner-dist))
+    )
+    rotate(180deg);
+  filter: drop-shadow(-10px 10px 1px var(--corner-color))
+    drop-shadow(-20px 20px 2px var(--corner-color));
+}
+
+.btn-container:hover .btn-corner:nth-of-type(3) {
+  transform: translate(
+      calc(var(--corner-multiplier) * var(--corner-dist)),
+      calc(var(--corner-multiplier) * var(--corner-dist))
+    )
+    rotate(-90deg);
+  filter: drop-shadow(-10px 10px 1px var(--corner-color))
+    drop-shadow(-20px 20px 2px var(--corner-color));
+}
+
+.btn-container:hover .btn-corner:nth-of-type(4) {
+  transform: translate(
+      calc(-1 * var(--corner-multiplier) * var(--corner-dist)),
+      calc(var(--corner-multiplier) * var(--corner-dist))
+    )
+    rotate(0deg);
+  filter: drop-shadow(-10px 10px 1px var(--corner-color))
+    drop-shadow(-20px 20px 2px var(--corner-color));
+}
+
+/* Active State */
+.btn-container:active .btn {
+  transform: scale(0.95);
+  filter: drop-shadow(0 10px 4px #0002);
+  -webkit-filter: drop-shadow(0 10px 4px #0002);
+}
+
+.btn-container:active .transition-top,
+.btn-container:active .transition-bottom {
+  transform: translateY(0px) scale(0.5);
+}
+
+@keyframes hue-anim {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(-70deg); }
+}

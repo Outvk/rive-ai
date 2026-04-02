@@ -23,56 +23,60 @@ export default async function DashboardLayout({
     // Fetch user profile for credits
     const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, full_name, credits, role, avatar_url')
         .eq('id', user.id)
         .single()
 
+    // Sync Google Profile Data (Avatar & Name)
+    const googleAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+    const googleName = user?.user_metadata?.full_name || user?.user_metadata?.name;
+
+    let currentProfile = profile;
+    
+    console.log('Avatar Debug:', { 
+        hasGoogleAvatar: !!googleAvatar,
+        googleAvatarUrl: googleAvatar,
+        currentProfileAvatar: currentProfile?.avatar_url,
+        userId: user.id
+    });
+
     // Fail-safe: If the profile doesn't exist, create it immediately.
-    if (!profile) {
-        await supabase.from('profiles').insert({
-            id: user.id,
-            full_name: user.email?.split('@')[0] || 'User',
-            credits: 10,
-            role: 'user'
-        })
+    if (!currentProfile) {
+        const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+                id: user.id,
+                full_name: googleName || user.email?.split('@')[0] || 'User',
+                credits: 10,
+                role: 'user',
+                avatar_url: googleAvatar || null
+            })
+            .select('id, full_name, credits, role, avatar_url')
+            .single()
+
+        if (!insertError) {
+            currentProfile = newProfile;
+        }
+    } else if (googleAvatar && !currentProfile.avatar_url) {
+        // If profile exists but no avatar, sync it from Google automatically
+        const { data: updatedProfile, error: updateError } = await supabase
+            .from('profiles')
+            .update({ avatar_url: googleAvatar })
+            .eq('id', user.id)
+            .select('id, full_name, credits, role, avatar_url')
+            .single()
+
+        if (!updateError) {
+            console.log('Avatar successfully synced to DB');
+            currentProfile = updatedProfile;
+        } else {
+            console.error('Avatar DB sync error:', updateError);
+        }
     }
 
-    const credits = profile?.credits ?? 10
+    const credits = currentProfile?.credits ?? 10
 
-    // Fetch last 10 conversations for the sidebar panel
-    const { data: conversations } = await supabase
-        .from('chat_conversations')
-        .select('id, title, updated_at')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false })
-        .limit(10)
 
-    // fetch last 10 image generations for the sidebar when on image tool
-    const { data: recentImages } = await supabase
-        .from('ai_generations')
-        .select('id, prompt, result, created_at, tool_type')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'image')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-    // fetch last 10 speech generations for the sidebar when on text-to-speech tool
-    const { data: recentSpeech } = await supabase
-        .from('ai_generations')
-        .select('id, prompt, result, created_at, tool_type')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'speech')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-    // fetch last 10 video generations for the sidebar when on video tool
-    const { data: recentVideos } = await supabase
-        .from('ai_generations')
-        .select('id, prompt, result, created_at, tool_type')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'video')
-        .order('created_at', { ascending: false })
-        .limit(10)
 
     return (
         <SidebarProvider>
@@ -80,12 +84,12 @@ export default async function DashboardLayout({
 
                 <DynamicSidebar
                     email={user.email || ''}
-                    fullName={profile?.full_name || 'User'}
-                    avatarUrl={profile?.avatar_url}
-                    conversations={conversations ?? []}
-                    recentImages={recentImages ?? []}
-                    recentSpeech={recentSpeech ?? []}
-                    recentVideos={recentVideos ?? []}
+                    fullName={currentProfile?.full_name || 'User'}
+                    avatarUrl={currentProfile?.avatar_url}
+                    conversations={[]}
+                    recentImages={[]}
+                    recentSpeech={[]}
+                    recentVideos={[]}
                 />
 
                 {/* Main Content Area */}
@@ -93,9 +97,10 @@ export default async function DashboardLayout({
                     <TopNavbar
                         credits={credits}
                         userEmail={user.email || ''}
-                        userInitial={profile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
-                        avatarUrl={profile?.avatar_url}
+                        userInitial={currentProfile?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                        avatarUrl={currentProfile?.avatar_url}
                         userId={user.id}
+                        fullName={currentProfile?.full_name || 'User'}
                     />
 
                     {/* Subtle Background Glows */}

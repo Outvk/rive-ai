@@ -1,10 +1,14 @@
+// Import the Supabase server client for authentication and credit management.
 import { createClient } from '@/utils/supabase/server'
 
+// Set the runtime to 'nodejs' to handle binary data and external API calls efficiently.
 export const runtime = 'nodejs'
 
+// Handle GET requests to fetch the list of available voices from ElevenLabs.
 export async function GET(req: Request) {
     const supabase = await createClient()
 
+    // Ensure the user is authenticated before providing the voice list.
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -13,6 +17,7 @@ export async function GET(req: Request) {
         })
     }
 
+    // Check for the ElevenLabs API key in the environment variables.
     if (!process.env.ELEVENLABS_API_KEY) {
         return new Response(JSON.stringify({ error: 'Missing ELEVENLABS_API_KEY' }), {
             status: 500,
@@ -21,6 +26,7 @@ export async function GET(req: Request) {
     }
 
     try {
+        // Fetch all available voices from the ElevenLabs API.
         const response = await fetch('https://api.elevenlabs.io/v1/voices', {
             headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY! }
         });
@@ -31,7 +37,7 @@ export async function GET(req: Request) {
 
         const data = await response.json();
         
-        // Categorize voices by gender label
+        // Categorize the returned voices into 'male' and 'female' for a better UI experience.
         const female = data.voices
             .filter((v: any) => v.labels?.gender === 'female' || v.name.toLowerCase().includes('female'))
             .map((v: any) => ({
@@ -50,10 +56,12 @@ export async function GET(req: Request) {
                 preview_url: v.preview_url
             }));
 
+        // Return the organized voice lists to the frontend.
         return new Response(JSON.stringify({ male, female }), {
             headers: { 'Content-Type': 'application/json' },
         });
     } catch (err: any) {
+        // Log errors and return a 500 status if the external API call fails.
         console.error('Failed to fetch voices:', err);
         return new Response(JSON.stringify({ error: err.message }), {
             status: 500,
@@ -62,10 +70,11 @@ export async function GET(req: Request) {
     }
 }
 
-// POST - generate speech
+// Handle POST requests to generate speech from text (Text-to-Speech).
 export async function POST(req: Request) {
     const supabase = await createClient()
 
+    // Validate the presence of the API key.
     if (!process.env.ELEVENLABS_API_KEY) {
         return new Response(JSON.stringify({ error: 'Missing ELEVENLABS_API_KEY' }), {
             status: 500,
@@ -73,6 +82,7 @@ export async function POST(req: Request) {
         })
     }
 
+    // Authenticate the user.
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -81,6 +91,7 @@ export async function POST(req: Request) {
         })
     }
 
+    // Deduct 10 credits for using the 'Text to Speech' feature.
     const { data: success, error: rpcError } = await supabase.rpc('deduct_credits', {
         charge_amount: 10,
         tool_name: 'Text to Speech'
@@ -93,6 +104,7 @@ export async function POST(req: Request) {
         })
     }
 
+    // Stop the process if the user doesn't have enough credits.
     if (!success) {
         return new Response(JSON.stringify({ error: 'Insufficient credits' }), {
             status: 402,
@@ -100,6 +112,7 @@ export async function POST(req: Request) {
         })
     }
 
+    // Parse the request body for text, voice ID, and language settings.
     let text: string
     let voiceId: string
     let language: string
@@ -116,6 +129,7 @@ export async function POST(req: Request) {
         })
     }
 
+    // Basic validation to ensure text content exists.
     if (!text || typeof text !== 'string') {
         return new Response(JSON.stringify({ error: 'Missing text' }), {
             status: 400,
@@ -124,6 +138,7 @@ export async function POST(req: Request) {
     }
 
     try {
+        // Send the generation request to ElevenLabs, asking for character/timestamp alignment for potential lip-syncing.
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps`, {
             method: 'POST',
             headers: {
@@ -132,7 +147,7 @@ export async function POST(req: Request) {
             },
             body: JSON.stringify({
                 text,
-                model_id: 'eleven_multilingual_v2', // or eleven_turbo_v2_5 if supported by the endpoint
+                model_id: 'eleven_multilingual_v2', // High-quality multilingual model.
                 language_code: language,
                 voice_settings: {
                     stability: 0.5,
@@ -151,11 +166,10 @@ export async function POST(req: Request) {
 
         const data = await response.json()
 
-        // Helper to process character-level timestamps into word-level
+        // Helper function: Processes the raw character-level timestamps into word-level timestamps for easier UI synchronization.
         const processAlignment = (alignment: any, fullText: string) => {
             if (!alignment) return { words: [] };
 
-            // Check for potential different property names in ElevenLabs response
             const charStartTimes = alignment.char_start_times_ms ||
                 alignment.character_start_times_seconds?.map((s: number) => s * 1000);
             const charDurations = alignment.char_durations_ms ||
@@ -175,9 +189,9 @@ export async function POST(req: Request) {
 
             for (let i = 0; i < characters.length; i++) {
                 const char = characters[i];
-                const startTime = charStartTimes[i] / 1000; // Convert to seconds
+                const startTime = charStartTimes[i] / 1000; 
 
-                // Punctuation characters that usually shouldn't start a word or should be included in previous word
+                // Detect word boundaries (spaces and line breaks).
                 const isWhitespace = char === " " || char === "\n" || char === "\t" || char === "\r";
 
                 if (isWhitespace) {
@@ -185,7 +199,7 @@ export async function POST(req: Request) {
                         words.push({
                             word: currentWord,
                             start_time: wordStartTime,
-                            end_time: startTime // End right at the start of the whitespace
+                            end_time: startTime 
                         });
                         currentWord = "";
                     }
@@ -197,7 +211,7 @@ export async function POST(req: Request) {
                 }
             }
 
-            // Push the last word if it exists
+            // Capture the final word in the sequence.
             if (currentWord.length > 0) {
                 const lastIdx = characters.length - 1;
                 const lastCharEndTime = charDurations ? (charStartTimes[lastIdx] + charDurations[lastIdx]) / 1000 : charStartTimes[lastIdx] / 1000 + 0.1;
@@ -211,8 +225,10 @@ export async function POST(req: Request) {
             return { words };
         };
 
+        // Align the text with the generated audio precisely.
         const processedAlignment = processAlignment(data.alignment || data.normalized_alignment, text);
 
+        // Return the base64 audio and the calculated word alignment data.
         return new Response(JSON.stringify({
             audio: data.audio_base64,
             alignment: processedAlignment
@@ -220,6 +236,7 @@ export async function POST(req: Request) {
             headers: { 'Content-Type': 'application/json' },
         })
     } catch (err) {
+        // Final fallback for unexpected errors.
         console.error('TTS error', err)
         const message = err instanceof Error ? err.message : 'Speech generation failed'
         return new Response(JSON.stringify({ error: message }), {
@@ -227,4 +244,4 @@ export async function POST(req: Request) {
             headers: { 'Content-Type': 'application/json' },
         })
     }
-}
+}

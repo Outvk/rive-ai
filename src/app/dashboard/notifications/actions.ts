@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { createSecondaryAdminClient } from '@/utils/supabase/secondary'
 import { revalidatePath } from 'next/cache'
 
 export async function deleteNotifications(ids: string[]) {
@@ -17,8 +18,10 @@ export async function deleteNotifications(ids: string[]) {
 
     console.log(`User ${user.id} attempting to delete notifications:`, ids)
 
+    const secondary = createSecondaryAdminClient()
+
     // Verify they exist and belong to the user first
-    const { data: check, error: fetchError } = await supabase
+    const { data: check, error: fetchError } = await secondary
         .from('notifications')
         .select('id, user_id')
         .in('id', ids)
@@ -38,7 +41,7 @@ export async function deleteNotifications(ids: string[]) {
     }
 
     // Now delete
-    const { error, count } = await supabase
+    const { error, count } = await secondary
         .from('notifications')
         .delete({ count: 'exact' })
         .in('id', ids)
@@ -56,9 +59,9 @@ export async function deleteNotifications(ids: string[]) {
 }
 
 export async function markNotificationsAsRead(ids: string[]) {
-    const supabase = await createClient()
+    const secondary = createSecondaryAdminClient()
 
-    const { error } = await supabase
+    const { error } = await secondary
         .from('notifications')
         .update({ is_read: true })
         .in('id', ids)
@@ -82,7 +85,9 @@ export async function clearAllNotifications() {
 
     if (!user) return { error: 'Unauthorized' }
 
-    const { count, error } = await supabase
+    const secondary = createSecondaryAdminClient()
+
+    const { count, error } = await secondary
         .from('notifications')
         .delete({ count: 'exact' })
         .eq('user_id', user.id)

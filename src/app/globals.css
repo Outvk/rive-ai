@@ -139,3 +139,20 @@
   animation: bellRing 0.9s both;
   transform-origin: top !important;
 }
+
+/* Google Translate Overrides */
+iframe.goog-te-banner-frame { display: none !important; }
+.VIpgJd-ZVi9od-ORHb-OEVmcd { display: none !important; }
+.goog-te-banner-frame.skiptranslate { display: none !important; }
+html, body {
+  top: 0 !important;
+  position: static !important;
+}
+#goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+.goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+.goog-logo-link { display: none !important; }
+.goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+
+.goog-te-combo {
+  display: none !important;
+}

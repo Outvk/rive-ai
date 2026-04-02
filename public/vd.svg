@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 4160 6240">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+        stroke: #f36e21;
+        stroke-width: 4px;
+      }
+
+      .cls-1, .cls-2 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        fill: #fcb017;
+        stroke: #cba12c;
+      }
+    </style>
+  </defs>
+  <image width="4160" height="6240" xlink:href="vd-1.png"/>
+  <circle class="cls-1" cx="1954.22" cy="3213.66" r="192.72"/>
+  <g>
+    <polygon class="cls-2" points="2031.37 3223.73 2035.04 3236.1 2035.04 3211.35 2031.37 3223.73"/>
+    <polygon class="cls-2" points="2013.79 3219.16 1911.22 3170.82 1911.22 3267.51 2013.79 3219.16"/>
+  </g>
+  <ellipse cx="2036.79" cy="3220.03" rx="24.63" ry="16.51" transform="translate(-1335.41 4993.55) rotate(-85.43)"/>
+</svg>

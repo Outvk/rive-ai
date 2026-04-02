@@ -20,7 +20,7 @@ export default async function TextGeneratorPage({
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, full_name')
         .eq('id', user?.id)
         .single()
 
@@ -56,6 +56,19 @@ export default async function TextGeneratorPage({
         }
     }
 
+    // Fetch last 50 conversations for the internal history drawer
+    const { data: history } = await supabase
+        .from('chat_conversations')
+        .select('id, title, updated_at')
+        .eq('user_id', user?.id)
+        .order('updated_at', { ascending: false })
+        .limit(50)
+
+    const formattedHistory = (history || []).map(c => ({
+        ...c,
+        displayTitle: c.title.split(' ').slice(0, 3).join(' ') + (c.title.split(' ').length > 3 ? '...' : '')
+    }))
+
     return (
         <div className="fade-in w-[calc(100%+80px)] max-w-none -m-10 h-[calc(100vh-4rem)] overflow-hidden">
             <div className="h-full relative">
@@ -65,8 +78,10 @@ export default async function TextGeneratorPage({
                 <TextGeneratorForm
                     key={conversationId || 'new'}
                     initialCredits={credits}
+                    userName={profile?.full_name || 'User'}
                     conversationId={conversationId}
                     initialChatMessages={initialMessages}
+                    initialHistory={formattedHistory}
                 />
             </div>
         </div>

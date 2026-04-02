@@ -1,31 +1,81 @@
-"use client"
-
 import React from 'react';
-import CardNav from '@/components/CardNav';
 import FloatingLines from '@/components/FloatingLines';
 import RuixenMoonChat from '@/components/ui/ruixen-moon-chat';
+import ClippingText from '@/components/ui/ClippingText';
+import GridScroll from '@/components/ui/GridScroll';
+import Comparator from '@/components/ui/Comparator';
+import VideoRevealText from '@/components/ui/VideoRevealText';
+import OnionSkinDepth from '@/components/ui/OnionSkinDepth';
+import ToolsRevealText from '@/components/ui/ToolsRevealText';
 import HorizontalShowcase from '@/components/ui/HorizontalShowcase';
+import CubeGallery from '@/components/ui/CubeGallery';
+import ShowcaseOutro from '@/components/ui/ShowcaseOutro';
 import GradualBlur from '@/components/ui/GradualBlur';
 import { FlickeringFooter } from '@/components/ui/flickering-footer';
-import { useAuthLoader } from '@/components/AuthLoader';
-import { useRouter } from 'next/navigation';
+import '@/components/ui/OfferButton.css';
+import LandingClientWrapper, { StartJourneyButton } from '@/components/landing/LandingClientComponents';
+import { Metadata } from 'next';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Rive AI',
+  description: 'Create stunning apps & websites by chatting with AI. High-performance creative engines for text, images, and 3D assets.',
+  url: 'https://rive-ai.vercel.app',
+  applicationCategory: 'MultimediaApplication, CreativePlatform, AIApplication',
+  operatingSystem: 'All',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  featureList: [
+    'AI Text Generation',
+    'AI Image Synthesis',
+    'Text-to-Speech Conversion',
+    '3D Asset Generation',
+    'Instant Video Crafting'
+  ],
+}
+
+export const metadata: Metadata = {
+  title: 'Rive AI - The Future of Digital Creation',
+  description: 'Create stunning apps & websites by chatting with AI. High-performance creative engines for text, images, and 3D assets.',
+  openGraph: {
+    title: 'Rive AI - The Future of Digital Creation',
+    description: 'Create stunning apps & websites by chatting with AI.',
+    url: 'https://rive-ai.vercel.app',
+    siteName: 'Rive AI',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+}
 
 export default function LandingPage() {
-  const { showLoader } = useAuthLoader();
-  const router = useRouter();
-
-  const handleStartClick = () => {
-    showLoader("Initializing your creative workspace...");
-    setTimeout(() => {
-      router.push('/login');
-    }, 100);
-  };
-
   const navItems = [
     {
-      label: "Product",
-      bgColor: "#111111",
+      label: "Company",
+      bgColor: "#000",
       textColor: "#fff",
+      videoSrc: "/gif/company.mp4",
+      links: [
+        { label: "About Us", href: "/dashboard", ariaLabel: "About us" },
+        { label: "Privacy Policy", href: "/dashboard/privacy", ariaLabel: "Privacy Privacy" },
+        { label: "Terms of Service", href: "/dashboard/terms", ariaLabel: "Terms of Service" }
+      ]
+    },
+    {
+      label: "Playground",
+      bgColor: "#000",
+      textColor: "#fff",
+      videoSrc: "/gif/product.mp4",
       links: [
         { label: "Text Generation", href: "/dashboard/text", ariaLabel: "Text Generator" },
         { label: "Image Generation", href: "/dashboard/image-prompt", ariaLabel: "Image Generator" },
@@ -34,28 +84,24 @@ export default function LandingPage() {
     },
     {
       label: "Developers",
-      bgColor: "#1a1625",
+      bgColor: "#000",
       textColor: "#fff",
+      videoSrc: "/gif/developpers.mp4",
       links: [
         { label: "API Reference", href: "/dashboard/docs", ariaLabel: "API Reference" },
         { label: "SDKs & Tools", href: "/dashboard/docs", ariaLabel: "SDKs" },
         { label: "Pricing", href: "/dashboard/pricing", ariaLabel: "Pricing Plans" },
-      ]
-    },
-    {
-      label: "Company",
-      bgColor: "#1e1e24",
-      textColor: "#fff",
-      links: [
-        { label: "About Us", href: "/dashboard", ariaLabel: "About us" },
-        { label: "Privacy Policy", href: "/dashboard/privacy", ariaLabel: "Privacy Privacy" },
-        { label: "Terms of Service", href: "/dashboard/terms", ariaLabel: "Terms of Service" }
       ]
     }
   ];
 
   return (
     <div className="bg-[#030303] text-zinc-200 font-sans selection:bg-indigo-500/30 flex flex-col isolate relative w-full pt-20">
+      {/* JSON-LD Schema for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Absolute Background - Stays at the top */}
       <div className="absolute inset-0 z-0 h-screen pointer-events-none ">
@@ -75,13 +121,9 @@ export default function LandingPage() {
           linesGradient={["#7405FF", "#15002F", "#C190FF"]}
         />
       </div>
-      {/* Custom Interactive Navigation */}
-      <CardNav
-        items={navItems}
-        ease="expo.inOut"
-        baseColor="rgba(10, 10, 10, 0.6)"
-        menuColor="#fff"
-      />
+
+      {/* Custom Interactive Navigation Wrapper */}
+      <LandingClientWrapper navItems={navItems} />
 
       {/* Main Content Area - AI Chat UI */}
       <main className="flex-1 w-full flex flex-col items-center mt-32 px-4 relative z-10 pointer-events-none">
@@ -101,8 +143,32 @@ export default function LandingPage() {
         </div>
       </main>
 
+      {/* Dynamic grid reveal effect */}
+      <GridScroll />
+
+      {/* CSS Scroll-Driven Comparator */}
+      <Comparator />
+
+      {/* Video Reveal Text */}
+      <VideoRevealText />
+
+      {/* Interactive 3D Stack */}
+      <OnionSkinDepth />
+
+      {/* Tools Reveal Text */}
+      <ToolsRevealText />
+
       {/* Pinned horizontal features showcase */}
       <HorizontalShowcase />
+
+      {/* 3D Cube Gallery with scroll-driven rotation */}
+      <CubeGallery />
+
+      {/* Scroll-driven text masking effect */}
+      <ClippingText />
+
+      {/* Outro marketing section */}
+      <ShowcaseOutro />
 
       {/* CTA Section */}
       <div className="relative z-10 w-full bg-black/60 py-20 px-4 flex flex-col items-center border-t border-white/5">
@@ -111,13 +177,8 @@ export default function LandingPage() {
           <p className="text-zinc-500 mb-8 max-w-lg mx-auto">
             Join thousands of developers building the future of the web with Rive AI.
           </p>
-          <div className="flex justify-center gap-4">
-            <button 
-              onClick={handleStartClick}
-              className="px-8 py-3 rounded-xl bg-[#7405FF] text-white font-semibold hover:bg-[#C190FF] transition-colors"
-            >
-              Get Started
-            </button>
+          <div className="flex justify-center mt-12">
+             <StartJourneyButton />
           </div>
         </div>
       </div>

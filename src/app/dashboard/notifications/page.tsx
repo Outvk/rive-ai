@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createSecondaryAdminClient } from '@/utils/supabase/secondary'
 import { redirect } from 'next/navigation'
 import { Bell } from 'lucide-react'
 import { NotificationClient } from './notification-client'
@@ -15,7 +16,8 @@ export default async function NotificationsPage() {
     }
 
     // Fetch notifications for the current user
-    const { data: notifications } = await supabase
+    const secondary = createSecondaryAdminClient()
+    const { data: notifications } = await secondary
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)

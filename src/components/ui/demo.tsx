@@ -165,6 +165,7 @@ const HalideLanding: React.FC = () => {
           clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
           transition: 0.3s;
           display: inline-flex;
+          border-radius: 12px;
           align-items: center;
           gap: 0.5rem;
           font-size: 0.875rem;
@@ -216,9 +217,7 @@ const HalideLanding: React.FC = () => {
                             <p>[ AI TOOLS ARCHITECTURE ]</p>
                             <p>FOUR POWERFUL AI TOOLS AT YOUR FINGERTIPS</p>
                         </div>
-                        <a href="/" className="cta-button">
-                            HOME PAGE <ArrowRight className="w-4 h-4" />
-                        </a>
+                      
                     </div>
                 </div>
 

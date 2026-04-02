@@ -22,7 +22,7 @@ export default async function VideoGeneratorPage() {
     // Fetch History
     const { data: rawHistory } = await supabase
         .from('ai_generations')
-        .select('*')
+        .select('id, result, prompt, created_at')
         .eq('user_id', user?.id)
         .eq('tool_type', 'video')
         .order('created_at', { ascending: false })

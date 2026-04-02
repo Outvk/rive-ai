@@ -5,6 +5,9 @@ import { saveGeneration } from '@/app/dashboard/text/actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { PaperPlaneIcon, UpdateIcon } from '@radix-ui/react-icons'
+import { Share2, Loader2, Check } from 'lucide-react'
+import { shareToCommunity } from '@/app/dashboard/community/actions'
+import { cn } from '@/lib/utils'
 
 export function ImageGeneratorForm({
     initialCredits = 0,
@@ -19,6 +22,8 @@ export function ImageGeneratorForm({
     const [prompt, setPrompt] = useState(initialPrompt ?? '')
     const [currentCredits, setCurrentCredits] = useState(initialCredits)
     const [isLoading, setIsLoading] = useState(false)
+    const [isSharing, setIsSharing] = useState(false)
+    const [isShared, setIsShared] = useState(false)
     const [imageBase64, setImageBase64] = useState<string | null>(initialImageBase64 ?? null)
 
     useEffect(() => {
@@ -36,6 +41,7 @@ export function ImageGeneratorForm({
 
         setIsLoading(true)
         setImageBase64(null)
+        setIsShared(false)
         try {
             const res = await fetch('/api/image', {
                 method: 'POST',
@@ -68,7 +74,6 @@ export function ImageGeneratorForm({
                         toast.error(`Save failed: ${saveResult.error}`);
                     } else {
                         console.log("V1 Save Success: Added to ai_images dedicated table.");
-                        toast.success("Saved to history");
                         router.refresh();
                     }
                 } catch (saveErr) {
@@ -80,6 +85,29 @@ export function ImageGeneratorForm({
             toast.error('Failed to generate image.')
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const handleShare = async () => {
+        if (!imageBase64 || !prompt) return
+        setIsSharing(true)
+        try {
+            const formData = new FormData()
+            formData.append('prompt', prompt)
+            formData.append('previewUrl', `data:image/png;base64,${imageBase64}`)
+            formData.append('toolType', 'Image')
+
+            const res = await shareToCommunity(formData)
+            if (res.success) {
+                setIsShared(true)
+                toast.success('Shared to community!')
+            } else {
+                toast.error(res.error || 'Failed to share')
+            }
+        } catch (err) {
+            toast.error('Error sharing work')
+        } finally {
+            setIsSharing(false)
         }
     }
 
@@ -96,20 +124,36 @@ export function ImageGeneratorForm({
         <div className="flex flex-col min-h-[80vh] w-full max-w-4xl mx-auto relative px-4 sm:px-6">
 
             {/* Image area — always reserve space so layout doesn't jump */}
-            <div className="mt-10 flex justify-center items-center min-h-[400px] rounded-xl bg-zinc-800/30 border border-zinc-700/40 overflow-hidden">
+            <div className="mt-10 flex justify-center items-center min-h-[400px] rounded-xl bg-zinc-800/30 border border-zinc-700/40 overflow-hidden relative">
                 {isLoading ? (
                     <div className="flex flex-col items-center gap-3 text-zinc-500">
                         <UpdateIcon className="w-8 h-8 animate-spin" />
                         <span className="text-sm">Generating...</span>
                     </div>
                 ) : imageBase64 ? (
-                    <img
-                        src={`data:image/png;base64,${imageBase64}`}
-                        alt="Generated"
-                        onClick={handleImageClick}
-                        className="max-w-full max-h-[600px] object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                        title="Click to open full size"
-                    />
+                    <div className="relative group/img w-full h-full flex items-center justify-center">
+                        <img
+                            src={`data:image/png;base64,${imageBase64}`}
+                            alt="Generated"
+                            onClick={handleImageClick}
+                            className="max-w-full max-h-[600px] object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                            title="Click to open full size"
+                        />
+                        <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleShare(); }}
+                            disabled={isSharing || isShared}
+                            className={cn(
+                                "absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xl backdrop-blur-md border",
+                                isShared 
+                                    ? "bg-green-500/20 border-green-500/40 text-green-400" 
+                                    : "bg-black/60 border-white/10 text-white hover:bg-white hover:text-black opacity-0 group-hover/img:opacity-100"
+                            )}
+                        >
+                            {isSharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : isShared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                            {isShared ? 'Shared' : 'Share to Community'}
+                        </button>
+                    </div>
                 ) : (
                     <span className="text-zinc-600 text-sm">Your image will appear here</span>
                 )}

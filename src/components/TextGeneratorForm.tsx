@@ -16,12 +16,16 @@ import { createClient } from '@/utils/supabase/client'
 
 export function TextGeneratorForm({
     initialCredits = 0,
+    userName = 'User',
     conversationId: propConversationId,
     initialChatMessages = [],
+    initialHistory = [],
 }: {
     initialCredits?: number
+    userName?: string
     conversationId?: string
     initialChatMessages?: UIMessage[]
+    initialHistory?: any[]
 }) {
     const router = useRouter()
     const { sidebarVersion } = useSidebar()
@@ -29,10 +33,10 @@ export function TextGeneratorForm({
     const [isSaving, setIsSaving] = useState(false)
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const [input, setInput] = useState('')
+    const [input, setInput] = useState(() => typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('prompt') || '' : '')
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [convId] = useState<string>(() => propConversationId ?? crypto.randomUUID())
-    const [history, setHistory] = useState<any[]>([])
+    const [history, setHistory] = useState<any[]>(initialHistory)
 
     const fetchHistory = async () => {
         const supabase = createClient()
@@ -57,9 +61,17 @@ export function TextGeneratorForm({
     }
 
     useEffect(() => {
-        fetchHistory()
+        if (initialHistory.length === 0) {
+            fetchHistory()
+        }
+        
+        // Auto-fill prompt if user was redirected from the landing page
+        const pendingPrompt = localStorage.getItem("pendingPrompt");
+        if (pendingPrompt) {
+            setInput(pendingPrompt);
+            localStorage.removeItem("pendingPrompt");
+        }
     }, [])
-
 
     const getMessageContent = (m: any) => {
         if (typeof m.content === 'string') return m.content;
@@ -90,8 +102,7 @@ export function TextGeneratorForm({
             const messageContent = getMessageContent(finalMessage) ||
                 (event.messages && event.messages.length > 0 ? getMessageContent(event.messages[event.messages.length - 1]) : '');
 
-            console.log("FINAL CONTENT:", messageContent);
-            toast.info(`Generated ${messageContent.length} chars`)
+
 
             setCurrentCredits(prev => Math.max(0, prev - 10))
 
@@ -257,6 +268,7 @@ export function TextGeneratorForm({
             <RuixenMoonChat
                 messages={messages}
                 input={input}
+                userName={userName}
                 handleInputChange={(e) => setInput(e.target.value)}
                 handleSubmit={handleFormSubmit}
                 isLoading={isLoading}

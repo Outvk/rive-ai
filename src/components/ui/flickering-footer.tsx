@@ -412,40 +412,18 @@ export const FlickeringFooter = () => {
 
   return (
     <footer id="footer" className="w-full pb-0 bg-[#030303] text-zinc-200 border-t border-white/5 relative z-10">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between p-5 md:p-10 max-w-7xl mx-auto">
-        <div className="flex flex-col items-start justify-start gap-y-5 max-w-xs mx-0">
-      
+      <div className="flex flex-col items-center justify-center p-10 md:p-20 max-w-7xl mx-auto text-center">
+        <div className="flex flex-col items-center justify-center gap-y-6">
+          <p className="text-zinc-500 text-base md:text-lg font-light tracking-wide italic">
+            Any issues? Please feel free to get in touch
+          </p>
           <a 
-            href="https://mail.google.com/mail/u/0/#inbox?compose=new"
-            className="tracking-tight text-zinc-400 font-medium hover:text-[#7405FF] transition-colors flex items-center gap-2"
+            href="https://mail.google.com/mail/u/0/#sent?compose=new"
+            className="tracking-tight text-lg md:text-2xl font-bold text-white hover:text-[#7405FF] transition-all duration-500 flex items-center gap-3"
           >
-            <Mail className="w-4 h-4" />
+            <Mail className="w-5 h-5 md:w-6 md:h-6 text-[#7405FF]" />
             chouainkhezrouni0007@gmail.com
           </a>
-      
-        </div>
-        <div className="pt-10 md:pt-0 md:w-1/2">
-          <div className="flex flex-col items-start justify-start md:flex-row md:items-start md:justify-between gap-y-10 lg:pl-10">
-            {siteConfig.footerLinks.map((column, columnIndex) => (
-              <ul key={columnIndex} className="flex flex-col gap-y-3">
-                <li className="mb-2 text-sm font-semibold text-white">
-                  {column.title}
-                </li>
-                {column.links.map((link) => (
-                  <li
-                    key={link.id}
-                    className="group inline-flex cursor-pointer items-center justify-start gap-2 text-[15px]/snug text-zinc-400 hover:text-white transition-colors"
-                  >
-                    <link.icon className="w-4 h-4 text-zinc-500 group-hover:text-[#7405FF] transition-colors" />
-                    <Link href={link.url}>{link.title}</Link>
-                    <div className="flex size-4 items-center justify-center border border-white/10 rounded translate-x-0 transform opacity-0 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:opacity-100 group-hover:border-violet-500">
-                      <ChevronRightIcon className="h-3 w-3 text-violet-400" />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ))}
-          </div>
         </div>
       </div>
       <div className="w-full h-48 md:h-64 relative mt-12 z-0 border-t border-white/5">

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 81.94 68.87">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        stroke: #231f20;
+        stroke-miterlimit: 10;
+        stroke-width: .5px;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g>
+      <rect class="cls-1" x="8.49" y="14.03" width="64.82" height="40.66" rx="2.6" ry="2.6"/>
+      <image width="298" height="225" transform="translate(12.3) rotate(13.17) scale(.24)" xlink:href="../Documents/Rive/rive-ai/public/carte-bancaire.png"/>
+    </g>
+  </g>
+</svg>

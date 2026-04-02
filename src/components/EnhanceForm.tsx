@@ -101,7 +101,6 @@ export function EnhanceForm({
       if (data.image) {
         setResultBase64(data.image)
         setCurrentCredits(prev => Math.max(0, prev - 10))
-        toast.success(`Image processed! Magic complete. ✨`)
         
         try {
             await fetch('/api/history/save', {
@@ -144,7 +143,7 @@ export function EnhanceForm({
     },
     { 
       id: 'ai-backgrounds', 
-      label: 'AI Backgrounds', 
+      label: 'Background Changer', 
       icon: Sparkles, 
       color: 'violet',
       description: 'Generate stunning professional backgrounds with prompts.'

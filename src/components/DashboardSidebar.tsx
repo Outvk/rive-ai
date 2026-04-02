@@ -19,7 +19,7 @@ import {
     CardStackIcon,
     LockClosedIcon,
 } from '@radix-ui/react-icons'
-import { LayoutList, Bell } from 'lucide-react'
+import { LayoutList, Bell, Compass, VenetianMask } from 'lucide-react'
 import { ClientSidebarProfile } from '@/components/ClientSidebarProfile'
 import { deleteConversation } from '@/app/dashboard/text/actions'
 
@@ -70,7 +70,7 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
     const router = useRouter()
 
     return (
-        <aside className="w-[260px] flex flex-col border-r border-white/10 bg-zinc-900/40 backdrop-blur-2xl">
+        <aside className="w-56 flex flex-col border-r border-white/10 bg-zinc-900/40 backdrop-blur-2xl">
             {/* Logo */}
             <div className="p-6 border-b border-white/5">
                 <Link href="/dashboard">
@@ -93,63 +93,10 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Overview
                     </Link>
 
-                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 mb-4">
+                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 mb-4 text-left">
                         <TextIcon className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                         <span className="text-sm font-semibold text-indigo-300">Text Generator</span>
                     </div>
-
-                    <div className="px-3 mb-2 flex items-center gap-2">
-                        <ChatBubbleIcon className="w-3 h-3 text-zinc-500" />
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                            Recent Conversations
-                        </p>
-                    </div>
-
-                    {conversations.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
-                            <ChatBubbleIcon className="w-6 h-6 text-zinc-700" />
-                            <p className="text-xs text-zinc-600 leading-relaxed max-w-[160px]">
-                                No conversations yet. Start generating!
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-1">
-                            {conversations.map((conv) => {
-                                const isActive = activeCid === conv.id
-                                return (
-                                    <div
-                                        key={conv.id}
-                                        className={`group flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all ${isActive ? 'bg-white/10' : ''}`}
-                                    >
-                                        <Link href={`/dashboard/text?cid=${conv.id}`} className="flex-1">
-                                            <p className="text-xs font-medium text-zinc-300 truncate mb-0.5 group-hover:text-white transition-colors">
-                                                {conv.title.length > 38 ? conv.title.slice(0, 38) + '…' : conv.title}
-                                            </p>
-                                            <p className="text-[10px] text-zinc-700 mt-1">{timeAgo(conv.updated_at)}</p>
-                                        </Link>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation()
-                                                e.preventDefault()
-                                                const confirmed = window.confirm('Delete this conversation?')
-                                                if (!confirmed) return
-                                                await deleteConversation(conv.id)
-                                                if (conv.id === activeCid) {
-                                                    router.push('/dashboard/text')
-                                                } else {
-                                                    router.refresh()
-                                                }
-                                            }}
-                                            className="ml-2 text-zinc-500 hover:text-red-400 focus:outline-none"
-                                            title="Delete conversation"
-                                        >
-                                            ×
-                                        </button>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )}
                 </nav>
 
             ) : isImageGenerator ? (
@@ -162,72 +109,10 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Overview
                     </Link>
 
-                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 mb-4">
+                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 mb-4 text-left">
                         <ImageIcon className="w-4 h-4 text-purple-400 flex-shrink-0" />
                         <span className="text-sm font-semibold text-purple-300">Prompt to Image</span>
                     </div>
-
-                    <div className="px-3 mb-2 flex items-center gap-2">
-                        <ImageIcon className="w-3 h-3 text-zinc-500" />
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Recent Images</p>
-                    </div>
-
-                    {!recentImages || recentImages.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
-                            <ImageIcon className="w-6 h-6 text-zinc-700" />
-                            <p className="text-xs text-zinc-600 leading-relaxed max-w-[160px]">
-                                No images generated yet. Give it a try!
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-1">
-                            {recentImages.map((gen) => (
-                                <div
-                                    key={gen.id}
-                                    className="group px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all relative"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <Link href={`/dashboard/image-prompt?gid=${gen.id}`} className="flex-1 pr-4">
-                                            <p className="text-xs font-medium text-zinc-300 truncate mb-0.5 group-hover:text-white transition-colors">
-                                                {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
-                                            </p>
-                                        </Link>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation()
-                                                e.preventDefault()
-                                                const confirmed = window.confirm('Delete this image?')
-                                                if (!confirmed) return
-
-                                                try {
-                                                    const res = await fetch(`/api/history/delete?id=${gen.id}`, { method: 'DELETE' })
-                                                    if (!res.ok) throw new Error('Failed to delete')
-                                                    router.refresh()
-                                                } catch (err) {
-                                                    console.error('Delete error:', err)
-                                                    alert('Failed to delete image.')
-                                                }
-                                            }}
-                                            className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                                            title="Delete image"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
-                                        </button>
-                                    </div>
-                                    <Link href={`/dashboard/image-prompt?gid=${gen.id}`}>
-                                        <div className="mt-1">
-                                            <img
-                                                src={`data:image/png;base64,${gen.result}`}
-                                                alt="thumb"
-                                                className="w-full h-auto rounded-sm ring-1 ring-white/10"
-                                            />
-                                        </div>
-                                    </Link>
-                                    <p className="text-[10px] text-zinc-700 mt-1">{timeAgo(gen.created_at)}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </nav>
 
             ) : isSpeech ? (
@@ -241,68 +126,10 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Overview
                     </Link>
 
-                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
+                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4 text-left">
                         <SpeakerLoudIcon className="w-4 h-4 text-amber-400 flex-shrink-0" />
                         <span className="text-sm font-semibold text-amber-300">Text to Speech</span>
                     </div>
-
-                    <div className="px-3 mb-2 flex items-center gap-2">
-                        <SpeakerLoudIcon className="w-3 h-3 text-zinc-500" />
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Recent Audio</p>
-                    </div>
-
-                    {!recentSpeech || recentSpeech.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
-                            <SpeakerLoudIcon className="w-6 h-6 text-zinc-700" />
-                            <p className="text-xs text-zinc-600 leading-relaxed max-w-[160px]">
-                                No audio generated yet. Give it a try!
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-1">
-                            {recentSpeech.map((gen) => (
-                                <div
-                                    key={gen.id}
-                                    className="group px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all relative"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1 pr-4">
-                                            <p className="text-xs font-medium text-zinc-300 truncate mb-1.5 group-hover:text-white transition-colors">
-                                                {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation()
-                                                e.preventDefault()
-                                                const confirmed = window.confirm('Delete this audio?')
-                                                if (!confirmed) return
-
-                                                try {
-                                                    const res = await fetch(`/api/history/delete?id=${gen.id}`, { method: 'DELETE' })
-                                                    if (!res.ok) throw new Error('Failed to delete')
-                                                    router.refresh()
-                                                } catch (err) {
-                                                    console.error('Delete error:', err)
-                                                    alert('Failed to delete audio.')
-                                                }
-                                            }}
-                                            className="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                                            title="Delete speech"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
-                                        </button>
-                                    </div>
-                                    <audio
-                                        controls
-                                        className="w-full h-7 mt-1 opacity-80 group-hover:opacity-100 transition-opacity"
-                                        src={`data:audio/mpeg;base64,${gen.result}`}
-                                    />
-                                    <p className="text-[10px] text-zinc-700 mt-1">{timeAgo(gen.created_at)}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </nav>
 
             ) : isVideoGenerator ? (
@@ -316,70 +143,10 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         Overview
                     </Link>
 
-                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 mb-4">
+                    <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 mb-4 text-left">
                         <VideoIcon className="w-4 h-4 text-red-400 flex-shrink-0" />
                         <span className="text-sm font-semibold text-red-300">Video Generator</span>
                     </div>
-
-                    <div className="px-3 mb-2 flex items-center gap-2">
-                        <VideoIcon className="w-3 h-3 text-zinc-500" />
-                        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Recent Videos</p>
-                    </div>
-
-                    {!recentVideos || recentVideos.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center gap-2 py-10 text-center">
-                            <VideoIcon className="w-6 h-6 text-zinc-700" />
-                            <p className="text-xs text-zinc-600 leading-relaxed max-w-[160px]">
-                                No videos generated yet. Give it a try!
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-1">
-                            {recentVideos.map((gen) => (
-                                <div
-                                    key={gen.id}
-                                    className="group flex flex-col gap-1 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-all relative"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <p className="text-xs font-medium text-zinc-300 truncate mb-1 group-hover:text-white transition-colors flex-1 pr-4">
-                                            {gen.prompt.length > 38 ? gen.prompt.slice(0, 38) + '…' : gen.prompt}
-                                        </p>
-                                    </div>
-                                    <div className="mt-1">
-                                        <video
-                                            src={gen.result}
-                                            controls
-                                            className="w-full h-auto rounded-sm bg-black/20"
-                                        />
-                                    </div>
-                                    <div className="flex justify-between items-center mt-1">
-                                        <p className="text-[10px] text-zinc-700">{timeAgo(gen.created_at)}</p>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation()
-                                                e.preventDefault()
-                                                const confirmed = window.confirm('Delete this video?')
-                                                if (!confirmed) return
-
-                                                try {
-                                                    const res = await fetch(`/api/video/delete?id=${gen.id}`, { method: 'DELETE' })
-                                                    if (!res.ok) throw new Error('Failed to delete')
-                                                    router.refresh()
-                                                } catch (err) {
-                                                    console.error('Delete error:', err)
-                                                    alert('Failed to delete video.')
-                                                }
-                                            }}
-                                            className="text-zinc-500 hover:text-red-400 transition-colors"
-                                            title="Delete video"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </nav>
 
             ) : isSettingsMode ? (
@@ -467,6 +234,15 @@ export function DashboardSidebar({ email, fullName, avatarUrl, conversations, re
                         <DashboardIcon className={`w-4 h-4 ${pathname === '/dashboard' ? 'text-indigo-400' : 'text-zinc-400'}`} />
                         Overview
                     </Link>
+
+                    <Link
+                        href="/dashboard/community"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${pathname === '/dashboard/community' ? 'bg-white/10 text-white shadow-sm' : 'hover:bg-white/10 text-zinc-300 hover:text-white'}`}
+                    >
+                        <VenetianMask className={`w-4 h-4 ${pathname === '/dashboard/community' ? 'text-indigo-400' : 'text-zinc-400'}`} />
+                        Explore Community
+                    </Link>
+
 
                     <div className="pt-6 pb-2">
                         <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">AI Tools</p>

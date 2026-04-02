@@ -38,9 +38,13 @@ import {
     Logout,
     Asleep as Moon,
     Light as Sun,
-    Cube
+    Cube,
+    MagicWand,
+    Compass,
+    Application
 } from "@carbon/icons-react";
 import { useTheme } from "next-themes";
+import { VenetianMask } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/app/dashboard/actions";
 import { useAuthLoader } from "@/components/AuthLoader";
@@ -126,6 +130,7 @@ export function SidebarV2({
         else if (pathname.startsWith("/dashboard/profile") ||
             pathname.startsWith("/dashboard/support") ||
             pathname.startsWith("/dashboard/api")) setActiveRail("settings");
+        else if (pathname.startsWith("/dashboard/community")) setActiveRail("explore");
     }, [pathname]);
 
     const toggleExpanded = (itemKey: string) => {
@@ -153,6 +158,13 @@ export function SidebarV2({
             activeClass: "bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]"
         },
         {
+            id: "explore",
+            icon: <VenetianMask size={20} />,
+            label: "Explore",
+            href: "/dashboard/community",
+            activeClass: "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
+        },
+        {
             id: "account",
             icon: <Money size={20} />,
             label: "Account",
@@ -177,6 +189,26 @@ export function SidebarV2({
 
     const getSubContent = () => {
         switch (activeRail) {
+            case "explore":
+                return {
+                    title: "Rive Discovery",
+                    sections: [
+                        {
+                            title: "Community",
+                            items: [
+                                { icon: <VenetianMask size={16} />, label: "Public Feed", href: "/dashboard/community" },
+                                { icon: <Idea size={16} />, label: "Inspiration", href: "/dashboard/community" },
+                            ]
+                        },
+                        {
+                            title: "Templates",
+                            items: [
+                                { icon: <Application size={16} />, label: "Tool Templates", href: "/dashboard/community" },
+                                { icon: <Flash size={16} />, label: "Quick Start", href: "/dashboard/community" },
+                            ]
+                        }
+                    ]
+                };
             case "home":
                 return {
                     title: "Dashboard",
@@ -199,7 +231,7 @@ export function SidebarV2({
                             items: [
                                 { icon: <Chat size={16} />, label: "Text Generator", href: "/dashboard/text" },
                                 { icon: <ImageIcon size={16} />, label: "Prompt to Image", href: "/dashboard/image-prompt" },
-                                { icon: <ModelBuilder size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
+                                { icon: <MagicWand size={16} />, label: "AI Enhance", href: "/dashboard/enhance" },
                                 { icon: <VolumeUp size={16} />, label: "Audio Editor", href: "/dashboard/text-to-speech" },
                                 { icon: <VideoIcon size={16} />, label: "Video Generator", href: "/dashboard/video" },
                                 { icon: <Cube size={16} />, label: "3D Generator", href: "/dashboard/3d" },
@@ -321,17 +353,6 @@ export function SidebarV2({
                 ))}
 
                 <div className="mt-auto flex flex-col gap-3 items-center">
-                    <button
-                        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                        className="group relative p-2.5 rounded-xl text-zinc-400 dark:text-zinc-500 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-400/5 transition-all"
-                    >
-                        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-                        {/* Tooltip */}
-                        <div className="absolute left-full ml-4 px-2 py-1.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 text-amber-500 dark:text-amber-400 text-[10px] font-bold uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0 pointer-events-none z-[100] shadow-xl whitespace-nowrap">
-                            Switch to {theme === "dark" ? "Light" : "Dark"} Mode
-                            <div className="absolute left-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-white dark:bg-zinc-900 border-l border-b border-zinc-200 dark:border-white/10 rotate-45"></div>
-                        </div>
-                    </button>
 
                     <button
                         onClick={handleLogout}
@@ -356,11 +377,10 @@ export function SidebarV2({
                 </div>
             </aside>
 
-            {/* ── DETAIL SIDEBAR ── */}
             <aside
                 className={cn(
                     "flex flex-col gap-4 bg-white dark:bg-black p-4 transition-all duration-500 ease-[cubic-bezier(0.25,1.1,0.4,1)]",
-                    isCollapsed ? "w-0 p-0 opacity-0 overflow-hidden" : "w-64"
+                    isCollapsed ? "w-0 p-0 opacity-0 overflow-hidden" : "w-56"
                 )}
             >
                 <div className="flex items-center justify-between mb-2">

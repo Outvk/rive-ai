@@ -4,10 +4,12 @@ import React, { useEffect, useState, useRef } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { PaperPlaneIcon, UpdateIcon, VideoIcon, ImageIcon as RadixImageIcon } from '@radix-ui/react-icons'
-import { ArrowLeft, Clock, History, Search, Download, Video as LucideVideoIcon, Image as LucideImageIcon, RatioIcon as AspectRatio, Palette, Wand2 } from 'lucide-react'
+import { ArrowLeft, Clock, History, Search, Download, Video as LucideVideoIcon, Image as LucideImageIcon, RatioIcon as AspectRatio, Palette, Wand2, Share2, Loader2, Check } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import { shareToCommunity } from '@/app/dashboard/community/actions'
+import { cn } from '@/lib/utils'
 
 type Props = {
   initialCredits?: number
@@ -17,9 +19,11 @@ type Props = {
 export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: Props) {
   const router = useRouter()
 
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState(() => typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('prompt') || '' : '')
   const [currentCredits, setCurrentCredits] = useState(initialCredits)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+  const [isShared, setIsShared] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [mode, setMode] = useState<'text' | 'image'>('text')
   const [imageBase64, setImageBase64] = useState<string | null>(null)
@@ -74,7 +78,6 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
           setIsLoading(false)
           setStatus('')
           router.refresh()
-          toast.success('Video generated!')
         } else if (data.status === 'moderated') {
           setIsLoading(false)
           setStatus('')
@@ -125,6 +128,7 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
 
     setIsLoading(true)
     setVideoUrl(null)
+    setIsShared(false)
     setStatus('Starting generation...')
 
     try {
@@ -161,7 +165,6 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
         setHistory(prev => [newItem, ...prev])
 
         router.refresh()
-        toast.success('Video generated!')
       } else {
         throw new Error('No video output returned.')
       }
@@ -169,6 +172,29 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
       setIsLoading(false)
       setStatus('')
       toast.error(err instanceof Error ? err.message : 'Failed to generate video.')
+    }
+  }
+
+  const handleShare = async () => {
+    if (!videoUrl || !prompt) return
+    setIsSharing(true)
+    try {
+        const formData = new FormData()
+        formData.append('prompt', prompt)
+        formData.append('previewUrl', videoUrl)
+        formData.append('toolType', 'Video')
+
+        const res = await shareToCommunity(formData)
+        if (res.success) {
+            setIsShared(true)
+            toast.success('Shared to community!')
+        } else {
+            toast.error(res.error || 'Failed to share')
+        }
+    } catch (err) {
+        toast.error('Error sharing work')
+    } finally {
+        setIsSharing(false)
     }
   }
 
@@ -439,13 +465,29 @@ export function VideoGeneratorForm({ initialCredits = 0, initialHistory = [] }: 
                             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.8)]" />
                             <span className="text-sm font-semibold text-zinc-200">Generation Complete</span>
                         </div>
-                        <button
-                        type="button"
-                        onClick={() => setVideoUrl(null)}
-                        className="text-xs text-zinc-500 hover:text-red-400 transition hover:bg-red-400/10 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-400/20"
-                        >
-                        Clear
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={handleShare}
+                                disabled={isSharing || isShared}
+                                className={cn(
+                                    "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                                    isShared 
+                                        ? "bg-green-500/20 border-green-500/40 text-green-400" 
+                                        : "bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:text-white"
+                                )}
+                            >
+                                {isSharing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : isShared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+                                {isShared ? 'Shared' : 'Share'}
+                            </button>
+                            <button
+                            type="button"
+                            onClick={() => setVideoUrl(null)}
+                            className="text-xs text-zinc-500 hover:text-red-400 transition hover:bg-red-400/10 px-3 py-1.5 rounded-lg border border-transparent hover:border-red-400/20"
+                            >
+                            Clear
+                            </button>
+                        </div>
                     </div>
 
                     <div className={`relative ${previewRatioClass} bg-zinc-900/50 rounded-xl overflow-hidden border border-zinc-800 flex items-center justify-center shadow-2xl group`}>

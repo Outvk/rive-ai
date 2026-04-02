@@ -1,0 +1,164 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400&display=swap");
+
+.cube-gallery-root {
+  --font-display: "Bebas Neue", sans-serif;
+  --font-mono: "DM Mono", monospace;
+  --hairline: 0.0625rem;
+  --ui-inset: 2rem;
+  --bg: #a724ff;
+  --fg: #ede8df;
+  --muted: #ff9bee;
+  --accent: #a47aff;
+  --card-bg: rgba(10, 10, 10, 0.85);
+  --card-border: rgba(234, 131, 255, 0.203);
+  --z-ui: 100;
+
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  position: relative;
+  width: 100%;
+  /* This ensures all children are in the same stacking context/grid */
+  display: grid;
+  grid-template-areas: "gallery";
+}
+
+.cube-gallery-root[data-theme="light"] {
+  --bg: #f0ece3;
+  --fg: #0d0d14;
+  --muted: #9a9aaa;
+  --accent: #3a6e00;
+  --card-bg: rgba(240, 236, 227, 0.9);
+  --card-border: rgba(58, 110, 0, 0.2);
+}
+
+#scene {
+  grid-area: gallery;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1100px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#cube {
+  --s: min(65vw, 65vh, 480px);
+  width: var(--s);
+  height: var(--s);
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background: #14100d;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 40px;
+}
+
+.face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.face-ph {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.75rem;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: rgba(108, 108, 108, 0.6);
+}
+
+/* Face transforms */
+.face[data-face="front"] { transform: translateZ(calc(var(--s) / 2)); }
+.face[data-face="back"] { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
+.face[data-face="right"] { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); }
+.face[data-face="left"] { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
+.face[data-face="top"] { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
+.face[data-face="bottom"] { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); }
+
+#scroll_container {
+  grid-area: gallery;
+  position: relative;
+  z-index: 20;
+}
+
+.cube-gallery-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 7%;
+}
+
+.text-card {
+  max-width: 350px;
+  padding: 1.5rem 1.5rem;
+  border-radius: 20px;
+  background: var(--card-bg);
+  border: var(--hairline) solid var(--card-border);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.text-card.right {
+  margin-left: auto;
+}
+
+.tag { color: var(--accent); font-size: 0.7rem; letter-spacing: 0.2em; margin-bottom: 0.75rem; }
+h1, h2 { font-family: var(--font-display); color: #d3bbff; font-size: 4rem; line-height: 0.9; margin-bottom: 1rem; }
+.body-text { font-size: 0.85rem; line-height: 1.6; color: var(--fg); opacity: 0.7; }
+.cta { 
+    margin-top: 1.25rem; 
+    display: inline-block; 
+    border-radius: 10px;
+    border: 1px solid var(--accent); 
+    color: var(--accent); 
+    padding: 0.8rem 1.5rem; 
+    text-transform: uppercase; 
+    font-size: 0.7rem; 
+    letter-spacing: 0.2em;
+}
+
+/* Fixed HUD elements inside the sticky frame */
+.gallery-ui {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    grid-area: gallery;
+    z-index: 50;
+    pointer-events: none;
+}
+
+#hud { position: absolute; top: var(--ui-inset); right: var(--ui-inset); text-align: right; }
+#scene_strip { position: absolute; left: calc(var(--ui-inset) / 2); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1rem; pointer-events: auto; }
+.scene-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); cursor: pointer; transition: 0.3s; }
+.scene-dot.active { background: var(--accent); transform: scale(2); }
+#face_caption { position: absolute; bottom: var(--ui-inset); left: 50%; transform: translateX(-50%); text-align: center; }
+
+#theme_toggle {
+    position: absolute;
+    bottom: var(--ui-inset);
+    left: var(--ui-inset);
+    pointer-events: auto;
+    background: var(--muted);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

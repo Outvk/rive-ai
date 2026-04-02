@@ -24,10 +24,10 @@ export default async function EnhancePage() {
         // Fetch history
         const { data: images, error: historyError } = await supabase
             .from('ai_images')
-            .select('*')
+            .select('id, image_url, prompt, created_at, settings')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
-            .limit(20)
+            .limit(10)
 
         if (images) {
             history = images

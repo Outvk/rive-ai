@@ -58,7 +58,8 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.183.2",
-    "three-stdlib": "^2.36.1"
+    "three-stdlib": "^2.36.1",
+    "tweakpane": "^4.0.5"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",

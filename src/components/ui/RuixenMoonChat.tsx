@@ -77,6 +77,7 @@ interface RuixenMoonChatProps {
     onDeleteConversation?: (id: string, e: React.MouseEvent) => void;
     onSelectConversation?: (id: string) => void;
     currentConversationId?: string;
+    userName?: string;
 }
 
 // Helper to identify and render color previews in text
@@ -121,8 +122,19 @@ export default function RuixenMoonChat({
     history = [],
     onDeleteConversation,
     onSelectConversation,
-    currentConversationId
+    currentConversationId,
+    userName = "User"
 }: RuixenMoonChatProps) {
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return "Bonjour";
+        if (hour >= 12 && hour < 20) return "Bienvenue";
+        return "Bonsoir";
+    };
+
+    const greeting = getGreeting();
+    const displayName = userName.split(' ')[0]; // Just the first name for a friendly vibe
+
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 48,
         maxHeight: 200,
@@ -338,7 +350,7 @@ export default function RuixenMoonChat({
                                     transition={{ duration: 0.8 }}
                                 >
                                     <h1 style={{ fontFamily: '"Noto Serif",sans-serif', color: "#ddddddff" , fontWeight: '500',fontSize: '2.6rem'}} className="text-4xl font-black text-white mb-4 tracking-tighter font-noto">
-                                        Bonsoir river ✧
+                                        {greeting} {displayName} ✧
                                     </h1>
                                     <p className="text-zinc-400 text-xl max-w-sm font-light leading-relaxed font-outfit">
                                         How can I help you elevate your creativity today?

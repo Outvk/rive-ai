@@ -66,6 +66,7 @@ interface HistoryItem {
     url: string
     prompt: string
     timestamp: Date
+    sourceTable?: string
 }
 
 interface AIMultiModalGenerationProps {
@@ -105,14 +106,14 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
     }, [initialHistory])
 
     const [settings, setSettings] = useState<GenerationSettings>({
-        style: "artistic",
+        style: "professional",
         backgroundColor: "studio",
         lighting: "studio",
-        pose: "profile",
+        pose: "auto",
         aspectRatio: "4:5",
-        aiModel: "stable-diffusion-xl",
+        aiModel: "midjourney-v5",
         resolution: "1024x1024",
-        prompt: "",
+        prompt: typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('prompt') || "" : "",
         negativePrompt: "blurry, low quality, distorted features",
     })
 
@@ -245,6 +246,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                 url: data.url,
                 prompt: settings.prompt || "AI generated content",
                 timestamp: new Date(),
+                sourceTable: 'ai_images'
             }
 
             setGeneratedItems((prev) => [newItem, ...prev])
@@ -276,7 +278,12 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                     toast.error(`History save failed: ${saveResult.error}`);
                 } else {
                     console.log("Image saved successfully to dedicated table!");
-                    toast.success("Saved to history");
+                    // Update the temporary ID with the real database ID
+                    if (saveResult.data && saveResult.data[0]?.id) {
+                        setGeneratedItems(prev => prev.map(item => 
+                            item.id === newItem.id ? { ...item, id: saveResult.data[0].id.toString() } : item
+                        ));
+                    }
                     router.refresh();
                 }
             } catch (saveErr) {
@@ -539,6 +546,7 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-200">
+                            <SelectItem value="auto" className="text-xs focus:bg-zinc-800">Auto (Follow Prompt)</SelectItem>
                             <SelectItem value="headshot" className="text-xs focus:bg-zinc-800">Headshot</SelectItem>
                             <SelectItem value="half-body" className="text-xs focus:bg-zinc-800">Half Body</SelectItem>
                             <SelectItem value="full-body" className="text-xs focus:bg-zinc-800">Full Body</SelectItem>
@@ -725,7 +733,8 @@ function AIMultiModalGeneration({ initialHistory = [], initialCredits = 10 }: AI
                                         if (!confirmed) return
 
                                         try {
-                                            const res = await fetch(`/api/history/delete?id=${item.id}&table=ai_images`, { method: 'DELETE' })
+                                            const table = (item as any).sourceTable || 'ai_images'
+                                            const res = await fetch(`/api/history/delete?id=${item.id}&table=${table}`, { method: 'DELETE' })
                                             if (!res.ok) throw new Error('Failed to delete')
                                             
                                             setGeneratedItems(prev => prev.filter(i => i.id !== item.id))

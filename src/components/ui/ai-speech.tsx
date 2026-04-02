@@ -21,7 +21,8 @@ import {
     Search,
     Download,
     Trash2,
-    Check
+    Check,
+    Share2
 } from "lucide-react"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -32,6 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { shareToCommunity } from "@/app/dashboard/community/actions"
 
 type Voice = {
     id: string
@@ -74,6 +76,8 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
     const [showHistory, setShowHistory] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [isSharing, setIsSharing] = useState(false)
+    const [isShared, setIsShared] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const [currentCredits, setCurrentCredits] = useState(initialCredits)
     const [text, setText] = useState('')
@@ -185,6 +189,7 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
         setIsLoading(true)
         setError(null)
         setAudioBase64(null)
+        setIsShared(false)
         setShowHistory(false)
         setSelectedItemId(null)
 
@@ -218,7 +223,6 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                 setHistory(prev => [newItem, ...prev])
 
                 await saveGeneration(text.trim(), data.audio, 'speech', { alignment: data.alignment })
-                toast.success("Speech generated successfully!")
                 router.refresh()
             }
         } catch (err: any) {
@@ -230,10 +234,33 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
         }
     }
 
+    const handleShare = async () => {
+        if (!audioBase64 || !text) return
+        setIsSharing(true)
+        try {
+            const formData = new FormData()
+            formData.append('prompt', text)
+            formData.append('previewUrl', audioBase64.startsWith('data:') ? audioBase64 : `data:audio/mpeg;base64,${audioBase64}`)
+            formData.append('toolType', 'Audio')
+
+            const res = await shareToCommunity(formData)
+            if (res.success) {
+                setIsShared(true)
+                toast.success('Shared to community!')
+            } else {
+                toast.error(res.error || 'Failed to share')
+            }
+        } catch (err) {
+            toast.error('Error sharing work')
+        } finally {
+            setIsSharing(false)
+        }
+    }
+
     const handleDownload = () => {
         if (!audioBase64) return
         const link = document.createElement('a')
-        link.href = `data:audio/mpeg;base64,${audioBase64}`
+        link.href = audioBase64.startsWith('data:') ? audioBase64 : `data:audio/mpeg;base64,${audioBase64}`
         link.download = `speech-${Date.now()}.mp3`
         document.body.appendChild(link)
         link.click()
@@ -246,6 +273,7 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
         setAlignment(item.alignment || null)
         setSelectedItemId(item.id)
         setShowHistory(false)
+        setIsShared(false)
         setActiveWordIndex(-1)
     }
 
@@ -700,7 +728,7 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                                         {/* Real Hidden Audio Element for Logic */}
                                         <audio
                                             ref={audioRef}
-                                            src={`data:audio/mpeg;base64,${audioBase64}`}
+                                            src={audioBase64 ? (audioBase64.startsWith('data:') ? audioBase64 : `data:audio/mpeg;base64,${audioBase64}`) : undefined}
                                             onPlay={() => setIsPlaying(true)}
                                             onPause={() => setIsPlaying(false)}
                                             onEnded={() => {
@@ -721,6 +749,21 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                                             className="hidden"
                                         />
                                     </div>
+                                    
+                                    {/* Community Share Button */}
+                                    <button
+                                        onClick={handleShare}
+                                        disabled={isSharing || isShared}
+                                        className={cn(
+                                            "flex items-center gap-2 px-6 py-2.5 rounded-2xl text-xs font-bold transition-all border shadow-xl backdrop-blur-md",
+                                            isShared 
+                                                ? "bg-green-500/20 border-green-500/40 text-green-400" 
+                                                : "bg-zinc-900/80 border-white/10 text-white hover:bg-white hover:text-black"
+                                        )}
+                                    >
+                                        {isSharing ? <Loader2 className="w-4 h-4 animate-spin" /> : isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                                        {isShared ? 'Shared with Community' : 'Share result to Community'}
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -800,43 +843,16 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                 .track-title {
                     font-size: 1.25em;
                     font-weight: 700;
+                    margin: 0;
                     white-space: nowrap;
-                    text-overflow: ellipsis;
                     overflow: hidden;
-                    color: #fff;
+                    text-overflow: ellipsis;
                 }
 
                 .artist-name {
                     font-size: 0.9em;
                     color: #a1a1aa;
-                    margin-top: 4px;
-                    font-weight: 500;
-                }
-
-                .volume-bars {
-                    display: flex;
-                    align-items: flex-end;
-                    gap: 3px;
-                    width: auto;
-                    height: 32px;
-                }
-
-                .volume-bars .bar {
-                    width: 3px;
-                    background: linear-gradient(180deg, #f59e0b, #d97706);
-                    border-radius: 2px;
-                    animation: bounce 0.8s infinite ease-in-out;
-                    animation-delay: var(--delay);
-                    animation-play-state: paused;
-                }
-
-                .playing .volume-bars .bar {
-                    animation-play-state: running;
-                }
-
-                @keyframes bounce {
-                    0%, 100% { height: 6px; }
-                    50% { height: 26px; }
+                    margin-top: 2px;
                 }
 
                 .playback-controls {
@@ -848,24 +864,23 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                 .time-info {
                     display: flex;
                     justify-content: space-between;
-                    font-size: 0.8em;
+                    font-size: 0.75em;
+                    font-family: monospace;
                     color: #71717a;
-                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 }
 
                 .progress-bar-container {
                     width: 100%;
                     height: 6px;
-                    background-color: rgba(255, 255, 255, 0.05);
+                    background: #27272a;
                     border-radius: 3px;
-                    position: relative;
                     cursor: pointer;
-                    overflow: hidden;
+                    position: relative;
                 }
 
                 .progress-fill {
                     height: 100%;
-                    background: linear-gradient(90deg, #f59e0b, #d97706);
+                    background: #f59e0b;
                     border-radius: 3px;
                     transition: width 0.1s linear;
                 }
@@ -874,48 +889,38 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    gap: 12px;
                     margin-top: 8px;
                 }
 
                 .control-button {
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 50%;
-                    border: none;
                     background: none;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
+                    border: none;
+                    color: white;
                     cursor: pointer;
-                    transition: all 0.2s;
-                    color: #fff;
+                    padding: 8px;
+                    border-radius: 50%;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
 
                 .control-button:hover {
                     background: rgba(255, 255, 255, 0.1);
-                    transform: scale(1.05);
-                }
-
-                .main-control-btns {
-                    flex: 1;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 24px;
+                    color: #f59e0b;
                 }
 
                 .play-pause-button {
-                    width: 60px;
-                    height: 60px;
-                    background: #fff !important;
-                    color: #000 !important;
-                    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+                    background: white;
+                    color: black;
+                    width: 64px;
+                    height: 64px;
                 }
 
                 .play-pause-button:hover {
-                    transform: scale(1.1);
-                    background: #f4f4f5 !important;
+                    background: #f59e0b;
+                    color: black;
+                    transform: scale(1.05);
                 }
 
                 .secondary-btn {
@@ -923,7 +928,39 @@ export function AISpeechGeneration({ initialHistory = [], initialCredits = 10 }:
                 }
 
                 .secondary-btn:hover {
-                    color: #f59e0b;
+                    color: white;
+                }
+
+                .main-control-btns {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                /* Volume/Visualizer bars */
+                .volume-bars {
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                    height: 20px;
+                }
+
+                .playing .bar {
+                    animation: music-bar 1s ease-in-out infinite;
+                    animation-delay: var(--delay);
+                }
+
+                .bar {
+                    width: 3px;
+                    height: 100%;
+                    background: #f59e0b;
+                    border-radius: 2px;
+                    opacity: 0.3;
+                }
+
+                @keyframes music-bar {
+                    0%, 100% { height: 4px; opacity: 0.3; }
+                    50% { height: 20px; opacity: 1; }
                 }
             `}</style>
         </div>
